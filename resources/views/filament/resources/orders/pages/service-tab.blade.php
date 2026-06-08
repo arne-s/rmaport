@@ -43,20 +43,6 @@
                 </tr>
                 </thead>
                 <tbody>
-                @php
-                    $pickedProducts = $record->getPurchasedPickedProducts()?->get() ?? collect();
-                @endphp
-                @forelse($pickedProducts as $orderProduct)
-                    <tr>
-                        <td>{{ (int) ($orderProduct->qty ?? 0) }}x</td>
-                        <td>{{ $orderProduct->product?->uid ?? '-' }}</td>
-                        <td>{{ $orderProduct->product?->name ?? $orderProduct->value ?? '-' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="3" class="assembly-products-table__empty">Geen artikelen.</td>
-                    </tr>
-                @endforelse
                 </tbody>
             </table>
         </div>
