@@ -4,21 +4,13 @@ namespace App\Services;
 
 use App\Enums\OrderGeneralStatus;
 use App\Enums\OrderStatus;
-use App\Enums\ProductType;
-use App\Enums\PurchaseOrderStatus;
-use App\Enums\ReleaseOrderStatus;
-use App\Filament\Resources\PurchaseOrderResource;
-use App\Filament\Resources\ReleaseOrders\ReleaseOrderResource;
 use App\Models\Order\DepositInvoice;
 use App\Models\Order\Invoice;
 use App\Models\Order\Main;
 use App\Models\Order\Order;
 use App\Models\Order\Quote;
-use App\Models\PurchaseOrder;
-use App\Models\ReleaseOrder;
 use App\Models\StatusChange;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class ChecklistService
 {
@@ -55,16 +47,6 @@ class ChecklistService
             ->latest('created_at')
             ->first();
 
-        $purchaseOrders = $main->purchaseOrders()
-            ->where('status', '!=', PurchaseOrderStatus::Initial->value)
-            ->latest('created_at')
-            ->get();
-
-        $releaseOrders = $main->releaseOrders()
-            ->where('status', '!=', ReleaseOrderStatus::Initial->value)
-            ->latest('created_at')
-            ->get();
-
         /** @var StatusChange|null $readyForDeliveryStatusChange */
         $readyForDeliveryStatusChange = $this->latestStatusChangeTo($main, OrderStatus::ReadyForPickup);
         /** @var StatusChange|null $orderApprovedStatusChange */
@@ -73,13 +55,6 @@ class ChecklistService
         $readyForAssemblyStatusChange = $this->latestStatusChangeTo($main, OrderStatus::ReadyForAssembly);
         $checklist = is_array($main->checklist) ? $main->checklist : [];
         [$finalInspectionDateRaw, $finalInspectionSignedByName] = $this->parseFinalInspectionRow($checklist);
-
-        /** @var PurchaseOrder|null $latestPurchaseOrder */
-        $latestPurchaseOrder = $purchaseOrders->first();
-        /** @var PurchaseOrder|null $frameProductPurchaseOrder */
-        $frameProductPurchaseOrder = $this->resolveFrameProductPurchaseOrder($main);
-        /** @var ReleaseOrder|null $latestReleaseOrder */
-        $latestReleaseOrder = $releaseOrders->first();
         /** @var DepositInvoice|null $depositInvoice */
         $depositInvoice = $latestOrderConfirmation?->depositInvoice;
         /** @var Invoice|null $finalInvoice */
@@ -92,11 +67,6 @@ class ChecklistService
             'summaryRows' => $this->buildSummaryRows(
                 $approvedQuote,
                 $latestOrderConfirmation,
-                $latestPurchaseOrder,
-                $purchaseOrders,
-                $frameProductPurchaseOrder,
-                $latestReleaseOrder,
-                $releaseOrders,
                 $orderApprovedStatusChange,
                 $readyForAssemblyStatusChange,
                 $readyForDeliveryStatusChange,
@@ -143,17 +113,6 @@ class ChecklistService
             ->first();
     }
 
-    protected function resolveFrameProductPurchaseOrder(Main $main): ?PurchaseOrder
-    {
-        return $main->getOrderForPurchase()?->orderProducts()
-            ->whereHas('product', fn ($query) => $query->where('type', ProductType::Frame->value))
-            ->whereNotNull('purchase_order_id')
-            ->with('purchaseOrder')
-            ->latest('updated_at')
-            ->first()
-            ?->purchaseOrder;
-    }
-
     /**
      * Row `activity` values are Dutch copy for the Filament UI; service API stays English.
      *
@@ -172,11 +131,6 @@ class ChecklistService
     protected function buildSummaryRows(
         ?Quote $approvedQuote,
         ?Order $latestOrderConfirmation,
-        ?PurchaseOrder $latestPurchaseOrder,
-        EloquentCollection $purchaseOrders,
-        ?PurchaseOrder $frameProductPurchaseOrder,
-        ?ReleaseOrder $latestReleaseOrder,
-        EloquentCollection $releaseOrders,
         ?StatusChange $orderApprovedStatusChange,
         ?StatusChange $readyForAssemblyStatusChange,
         ?StatusChange $readyForDeliveryStatusChange,
@@ -185,15 +139,7 @@ class ChecklistService
         ?Invoice $finalInvoice,
         ?DepositInvoice $depositInvoice,
     ): array {
-        $displayPurchaseOrders = $purchaseOrders->reverse()->values();
-        $displayPurchaseOrdersForParts = $frameProductPurchaseOrder === null
-            ? $displayPurchaseOrders
-            : $displayPurchaseOrders->reject(
-                fn (PurchaseOrder $purchaseOrder): bool => $purchaseOrder->is($frameProductPurchaseOrder)
-            )->values();
-        $displayReleaseOrders = $releaseOrders->reverse()->values();
-
-        return array_merge([
+        return [
             [
                 'activity' => 'Offerte',
                 'initials' => $this->userDisplayName($approvedQuote?->author),
@@ -212,15 +158,6 @@ class ChecklistService
                 'numberUrl' => null,
                 'modalPayload' => $this->documentModalPayload('order', $latestOrderConfirmation?->id),
             ],
-            [
-                'activity' => 'Bestelling stoel (frame)',
-                'initials' => $this->userDisplayName($frameProductPurchaseOrder?->author),
-                'date' => $frameProductPurchaseOrder?->getSentAt()?->format('d-m-Y') ?? '-',
-                'dateTooltip' => $frameProductPurchaseOrder?->getSentAt()?->format('d-m-Y H:i') ?? '',
-                'number' => $frameProductPurchaseOrder?->getReferenceNumber() ?? '-',
-                'numberUrl' => $this->purchaseOrderViewUrl($frameProductPurchaseOrder),
-            ],
-        ], $this->buildPurchaseOrderRows($displayPurchaseOrdersForParts), $this->buildReleaseOrderRows($displayReleaseOrders), [
             [
                 'activity' => 'Afleverklaar WP',
                 'initials' => $this->userDisplayName($readyForDeliveryStatusChange?->changedBy),
@@ -263,7 +200,7 @@ class ChecklistService
                 'numberUrl' => null,
                 'modalPayload' => $this->documentModalPayload('invoice', $finalInvoice?->id),
             ],
-        ]);
+        ];
     }
 
     /**
@@ -282,86 +219,6 @@ class ChecklistService
         };
     }
 
-    /**
-     * @return list<array{activity: string, initials: string, date: string, dateTooltip: string, number: string, numberUrl: ?string, showActivity?: bool, activityRowspan?: int}>
-     */
-    protected function buildPurchaseOrderRows(EloquentCollection $purchaseOrders): array
-    {
-        $rows = $purchaseOrders
-            ->map(function (PurchaseOrder $purchaseOrder): array {
-                return [
-                    'activity' => 'Bestelling onderdelen',
-                    'initials' => $this->userDisplayName($purchaseOrder->author),
-                    'date' => $purchaseOrder->getSentAt()?->format('d-m-Y') ?? '-',
-                    'dateTooltip' => $purchaseOrder->getSentAt()?->format('d-m-Y H:i') ?? '',
-                    'number' => $purchaseOrder->getReferenceNumber() ?? '-',
-                    'numberUrl' => $this->purchaseOrderViewUrl($purchaseOrder),
-                    'showActivity' => false,
-                    'activityRowspan' => 1,
-                ];
-            })
-            ->values()
-            ->all();
-
-        if ($rows === []) {
-            return [[
-                'activity' => 'Bestelling onderdelen',
-                'initials' => '',
-                'date' => '-',
-                'dateTooltip' => '',
-                'number' => '-',
-                'numberUrl' => null,
-                'showActivity' => true,
-                'activityRowspan' => 1,
-            ]];
-        }
-
-        $rows[0]['showActivity'] = true;
-        $rows[0]['activityRowspan'] = count($rows);
-
-        return $rows;
-    }
-
-    /**
-     * @return list<array{activity: string, initials: string, date: string, dateTooltip: string, number: string, numberUrl: ?string, showActivity?: bool, activityRowspan?: int}>
-     */
-    protected function buildReleaseOrderRows(EloquentCollection $releaseOrders): array
-    {
-        $rows = $releaseOrders
-            ->map(function (ReleaseOrder $releaseOrder): array {
-                return [
-                    'activity' => 'Afroep onderdelen',
-                    'initials' => $this->userDisplayName($releaseOrder->author),
-                    'date' => $releaseOrder->getSentAt()?->format('d-m-Y') ?? '-',
-                    'dateTooltip' => $releaseOrder->getSentAt()?->format('d-m-Y H:i') ?? '',
-                    'number' => $releaseOrder->getReferenceNumber() ?? '-',
-                    'numberUrl' => $this->releaseOrderViewUrl($releaseOrder),
-                    'showActivity' => false,
-                    'activityRowspan' => 1,
-                ];
-            })
-            ->values()
-            ->all();
-
-        if ($rows === []) {
-            return [[
-                'activity' => 'Afroep onderdelen',
-                'initials' => '',
-                'date' => '-',
-                'dateTooltip' => '',
-                'number' => '-',
-                'numberUrl' => null,
-                'showActivity' => true,
-                'activityRowspan' => 1,
-            ]];
-        }
-
-        $rows[0]['showActivity'] = true;
-        $rows[0]['activityRowspan'] = count($rows);
-
-        return $rows;
-    }
-
     protected function userDisplayName(?object $user): string
     {
         if ($user === null) {
@@ -369,23 +226,5 @@ class ChecklistService
         }
 
         return trim((string) $user->getName());
-    }
-
-    protected function purchaseOrderViewUrl(?PurchaseOrder $purchaseOrder): ?string
-    {
-        if ($purchaseOrder === null) {
-            return null;
-        }
-
-        return PurchaseOrderResource::getUrl('view', ['record' => $purchaseOrder]);
-    }
-
-    protected function releaseOrderViewUrl(?ReleaseOrder $releaseOrder): ?string
-    {
-        if ($releaseOrder === null) {
-            return null;
-        }
-
-        return ReleaseOrderResource::getUrl('view', ['record' => $releaseOrder]);
     }
 }

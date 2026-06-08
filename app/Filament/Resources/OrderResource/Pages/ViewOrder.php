@@ -2,9 +2,6 @@
 
 namespace App\Filament\Resources\OrderResource\Pages;
 
-use App\Enums\AppointmentType;
-use App\Exceptions\SerialNumberAlreadyInUseException;
-use App\Models\SerialNumber;
 use App\Enums\FulfillmentType;
 use App\Enums\OrderGeneralStatus;
 use App\Enums\OrderProductStatus;
@@ -13,9 +10,7 @@ use App\Models\Order\BaseOrder;
 use App\Models\Order\Main;
 use App\Models\Order\Order;
 use App\Enums\OrderStatus;
-use App\Models\Order\StockOrder;
 use App\Filament\Resources\Mains\MainResource as MainsResource;
-use App\Filament\Resources\OrderResource\Actions\NewAppointmentAction;
 use App\Filament\Resources\OrderResource\Actions\RegisterPostNLShipmentAction;
 use App\Filament\Resources\OrderResource\Actions\SendPackingSlipAction;
 use App\Filament\Resources\OrderResource\Actions\SendOrderEmailAction;
@@ -24,7 +19,6 @@ use App\Enums\CustomerType;
 use App\Models\Customer;
 use App\Models\OrderProduct;
 use App\Services\InventoryService;
-use App\Services\SerialNumberService;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Action;
@@ -33,7 +27,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
@@ -79,25 +72,12 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
 
     public ?float $totalAmountPurchase = null;
 
-    /** Filled by nested `AppointmentCalendarPicker` via Livewire events (not form state). */
-    public ?string $appointmentPickerDatetime = null;
-
-    public ?int $appointmentPickerDurationMinutes = null;
-
-    /** @var array<int, OrderProduct|null> Cache for getLinkedStockOrderProduct by order product id */
-    protected array $linkedStockOrderProductCache = [];
-
-    /** @var array<int, StockOrder|null> Cache for getStockOrderForQuote by quote id */
-    protected array $stockOrderForQuoteCache = [];
-
     /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> Used by mail modal document upload. */
     public array $documentFiles = [];
 
     public ?OrderProduct $confirmOrderProductRecord = null;
 
     public ?string $orderSubtype = null;
-
-    public string $orderSerialNumber = '';
 
     public string $orderReference = '';
 
@@ -115,19 +95,12 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
     /** Chair color (request / assembly): stored in `additional.chair_color` when set or different from frame product default. */
     public string $orderChairColor = '';
 
-    /** Group scope for delivered->picked confirm modal: 'purchase_order' or 'release_order'. */
-    public ?string $deliveredPickScopeType = null;
-
-    /** Group id for delivered->picked confirm modal (purchase_order_id or release_order_id). */
-    public ?int $deliveredPickScopeId = null;
-
     protected function isNonFilamentModalActive(): bool
     {
         return $this->showPickCompleteReadyForAssemblyModal
             || $this->showPassingCompleteConfirm
             || $this->showFittingCancelledConfirm
-            || $this->showOrderApprovedConfirm
-            || $this->deliveredPickScopeType !== null;
+            || $this->showOrderApprovedConfirm;
     }
 
     public function shouldPollOrderStatus(): bool
@@ -145,30 +118,6 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
         }
 
         return true;
-    }
-
-    /**
-     * @return array{success: bool, distance_km?: float, duration_minutes?: int, duration_label?: string, travel_time?: string, error?: string}
-     */
-    public function calculateAppointmentTravelTime(string $from, string $to): array
-    {
-        return NewAppointmentAction::calculateTravelBetweenAddresses($from, $to);
-    }
-
-    #[On('appointment-picker-datetime-updated')]
-    #[Renderless]
-    public function onAppointmentPickerDatetimeUpdated(string $datetime, mixed $durationMinutes): void
-    {
-        $this->appointmentPickerDatetime = $datetime;
-        $this->appointmentPickerDurationMinutes = (int) $durationMinutes;
-    }
-
-    #[On('appointment-picker-cleared')]
-    #[Renderless]
-    public function onAppointmentPickerCleared(): void
-    {
-        $this->appointmentPickerDatetime = null;
-        $this->appointmentPickerDurationMinutes = null;
     }
 
     public function mount(string|int $record): void
@@ -191,7 +140,6 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
         $this->record = $resolvedMain;
         abort_unless(static::getResource()::canView($this->getRecord()), 403);
         $this->orderSubtype = $resolvedMain->subtype?->value ?? '';
-        $this->orderSerialNumber = $resolvedMain->getSerialNumberRecord()?->getSerialNumber() ?? '';
         $this->orderReference = $resolvedMain->reference ?? '';
         $this->referenceInternal = $resolvedMain->reference_internal ?? '';
         $this->assemblyNotes = (string) data_get($resolvedMain->getAdditional() ?? [], 'assembly_notes', '');
@@ -328,8 +276,6 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
      */
     public function saveOrderDetails(bool $showSavedToast = false): void
     {
-        $this->saveSerialNumber();
-
         if ($this->applyOrderStatusChange()) {
             return; // on error, stop saving
         }
@@ -372,25 +318,6 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
                 ->success()
                 ->send();
         }
-    }
-
-    public function saveSerialNumber(): void
-    {
-        try {
-            app(SerialNumberService::class)->syncFromMainLastOrder($this->record, (string)$this->orderSerialNumber);
-        } catch (SerialNumberAlreadyInUseException $e) {
-            $this->record->refresh();
-            $this->orderSerialNumber = $this->record->getSerialNumberRecord()?->getSerialNumber() ?? '';
-            Notification::make()
-                ->title($e->getMessage())
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        $this->record->refresh();
-        $this->orderSerialNumber = $this->record->getSerialNumberRecord()?->getSerialNumber() ?? '';
     }
 
     /**
@@ -460,16 +387,6 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
         $saved = data_get($record->getAdditional() ?? [], 'chair_color');
         if (is_string($saved) && $saved !== '') {
             return $saved;
-        }
-
-        if (in_array($record->subtype?->value, ['part', 'service'], true)) {
-            $linkedSnValue = $record->getFittingNote()['linked_serial_number'] ?? null;
-            if ($linkedSnValue) {
-                $color = SerialNumber::query()->where('serial_number', $linkedSnValue)->value('color');
-                if (is_string($color) && $color !== '') {
-                    return $color;
-                }
-            }
         }
 
         $frame = $record->getOrderForPurchase()?->frameProduct;
@@ -720,136 +637,6 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
         $this->dispatch('close-modal', id: 'order_picked_confirm');
     }
 
-    #[On('confirmOrderDeliveredPick')]
-    public function confirmOrderDeliveredPick(bool $confirm): void
-    {
-        $mainStatusBeforePick = $this->record->getOrderStatus()?->value;
-
-        if ($confirm) {
-            $source = $this->record->getOrderForPurchase();
-            if ($source !== null) {
-                $lines = $source->orderProducts()
-                    ->whereHas('product', fn(Builder $q): Builder => $q->where('type', '!=', 'service'))
-                    ->get();
-
-                foreach ($lines as $line) {
-                    if (!$this->matchesDeliveredPickScope($line)) {
-                        continue;
-                    }
-
-                    $current = $line->getStatus();
-                    if ($current === OrderProductStatus::PickedReceived || $current === OrderProductStatus::PickedStock) {
-                        continue;
-                    }
-
-                    if ($current !== OrderProductStatus::Delivered) {
-                        continue;
-                    }
-
-                    $target = $line->getFulfillmentType() === FulfillmentType::MakeToStock
-                        ? OrderProductStatus::PickedStock
-                        : OrderProductStatus::PickedReceived;
-
-                    $line->setStatus($target);
-                    $line->save();
-                }
-
-                $this->record->applyDerivedOrderStatusFromOrderProducts(
-                    fn(OrderProduct $orderProduct): ?OrderProductStatus => $orderProduct->getStatus()
-                );
-            }
-        }
-
-        $this->deliveredPickScopeType = null;
-        $this->deliveredPickScopeId = null;
-        $this->dispatch('close-modal', id: 'order_delivered_pick_confirm');
-        $this->record->refresh();
-        $this->orderStatusFromDb = $this->record->getOrderStatus()?->value;
-        $this->orderStatus = $this->orderStatusFromDb;
-        $this->normalizeOrderViewTabForCurrentRecord();
-
-        if ($confirm) {
-            $this->redirectToStatusTabIfNeeded(force: true, orderStatusBeforeUpdate: $mainStatusBeforePick);
-        }
-
-        $this->dispatch('$refresh');
-    }
-
-    #[On('orderProductStatusChangedFromProductsTab')]
-    public function onOrderProductStatusChangedFromProductsTab(int $orderProductId, ?string $status = null): void
-    {
-        $statusEnum = $status !== null ? OrderProductStatus::tryFrom($status) : null;
-        if ($statusEnum !== null && $statusEnum !== OrderProductStatus::Delivered) {
-            return;
-        }
-
-        $orderProduct = OrderProduct::query()->find($orderProductId);
-        if (!$orderProduct instanceof OrderProduct) {
-            return;
-        }
-
-        if ($orderProduct->getStatus() !== OrderProductStatus::Delivered) {
-            return;
-        }
-
-        $this->openDeliveredPickConfirmForOrderProductScope($orderProduct);
-    }
-
-    protected function openDeliveredPickConfirmForOrderProductScope(OrderProduct $orderProduct): void
-    {
-        $source = $this->record->getOrderForPurchase();
-        if ($source === null) {
-            return;
-        }
-
-        $type = null;
-        $id = null;
-        if ($orderProduct->purchase_order_id !== null) {
-            $type = 'purchase_order';
-            $id = (int)$orderProduct->purchase_order_id;
-        } elseif ($orderProduct->release_order_id !== null) {
-            $type = 'release_order';
-            $id = (int)$orderProduct->release_order_id;
-        }
-
-        if ($type === null || $id === null) {
-            return;
-        }
-
-        $scopedLines = $source->orderProducts()
-            ->whereHas('product', fn(Builder $q): Builder => $q->where('type', '!=', 'service'))
-            ->when($type === 'purchase_order', fn(Builder $q): Builder => $q->where('purchase_order_id', $id))
-            ->when($type === 'release_order', fn(Builder $q): Builder => $q->where('release_order_id', $id))
-            ->get();
-
-        if ($scopedLines->isEmpty()) {
-            return;
-        }
-
-        $allDelivered = $scopedLines->every(fn(OrderProduct $line): bool => $line->getStatus() === OrderProductStatus::Delivered);
-        if (!$allDelivered) {
-            return;
-        }
-
-        $this->deliveredPickScopeType = $type;
-        $this->deliveredPickScopeId = $id;
-        $this->dispatch('open-modal', id: 'order_delivered_pick_confirm');
-    }
-
-    protected function matchesDeliveredPickScope(OrderProduct $line): bool
-    {
-        if ($this->deliveredPickScopeType === 'purchase_order' && $this->deliveredPickScopeId !== null) {
-            return (int)$line->purchase_order_id === $this->deliveredPickScopeId;
-        }
-
-        if ($this->deliveredPickScopeType === 'release_order' && $this->deliveredPickScopeId !== null) {
-            return (int)$line->release_order_id === $this->deliveredPickScopeId;
-        }
-
-        return false;
-    }
-
-
     protected function getHeaderActions(): array
     {
         return array_values(array_filter(array_merge(
@@ -929,66 +716,6 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
         }
 
         return $options;
-    }
-
-    public function newAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeFor($this, AppointmentType::Fitting);
-    }
-
-    public function viewFittingAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeViewForFitting($this);
-    }
-
-    public function editFittingAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeEditForFitting($this);
-    }
-
-    public function cancelFittingAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeCancelForFitting($this);
-    }
-
-    public function newDeliveryAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeFor($this, AppointmentType::Delivery);
-    }
-
-    public function viewDeliveryAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeViewForDelivery($this);
-    }
-
-    public function editDeliveryAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeEditForDelivery($this);
-    }
-
-    public function cancelDeliveryAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeCancelForDelivery($this);
-    }
-
-    public function viewServiceAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeViewForService($this);
-    }
-
-    public function editServiceAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeEditForService($this);
-    }
-
-    public function cancelServiceAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeCancelForService($this);
-    }
-
-    public function newServiceAppointmentAction(): Action
-    {
-        return NewAppointmentAction::makeFor($this, AppointmentType::Service);
     }
 
     /**

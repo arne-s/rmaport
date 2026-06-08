@@ -957,7 +957,7 @@ class Quote extends BaseOrder
 
         $url = route('approve-quote', ['uuid' => $approval->uuid], absolute: true);
 
-        return '<a href="' . e($url) . '" style="display:inline-block;padding:12px 24px;background:#3a3a3a;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">Offerte bekijken en goedkeuren</a>';
+        return '<a href="' . e($url) . '" style="display:inline-block;padding:12px 24px;background:#032d5c;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">Offerte bekijken en goedkeuren</a>';
     }
 
     public function getPublicDirectDownloadUrl(): string
@@ -981,7 +981,7 @@ class Quote extends BaseOrder
             return '';
         }
 
-        return '<a href="' . e($url) . '" style="display:inline-block;padding:12px 24px;background:#3a3a3a;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">Offerte downloaden</a>';
+        return '<a href="' . e($url) . '" style="display:inline-block;padding:12px 24px;background:#032d5c;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">Offerte downloaden</a>';
     }
 
     public function getUidLabel(): string

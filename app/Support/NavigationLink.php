@@ -36,32 +36,6 @@ class NavigationLink
         );
     }
 
-    public static function purchaseOrder(?int $purchaseOrderId, ?string $label, string $fallback = '-'): HtmlString|string
-    {
-        if ($purchaseOrderId === null) {
-            return $fallback;
-        }
-
-        return self::render(
-            route('filament.app.resources.purchase-orders.view', ['record' => $purchaseOrderId]),
-            $label,
-            $fallback,
-        );
-    }
-
-    public static function releaseOrder(?int $releaseOrderId, ?string $label, string $fallback = '-'): HtmlString|string
-    {
-        if ($releaseOrderId === null) {
-            return $fallback;
-        }
-
-        return self::render(
-            route('filament.app.resources.release-orders.view', ['record' => $releaseOrderId]),
-            $label,
-            $fallback,
-        );
-    }
-
     public static function orderEdit(?int $orderId, ?string $label, string $fallback = '-'): HtmlString|string
     {
         if ($orderId === null) {

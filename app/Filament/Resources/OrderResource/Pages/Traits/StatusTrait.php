@@ -2,9 +2,6 @@
 
 namespace App\Filament\Resources\OrderResource\Pages\Traits;
 
-use App\Actions\CancelFittingAppointmentAction;
-use App\Actions\NotifyAdvisorFittingCancelledAction;
-use App\Actions\SendFittingCancelledMailAction;
 use App\Enums\OrderGeneralStatus;
 use App\Enums\OrderProductStatus;
 use App\Enums\OrderStatus;
@@ -248,13 +245,8 @@ trait StatusTrait
         $this->record->setCancelComment($reason);
         $this->record->saveQuietly();
 
-        app(CancelFittingAppointmentAction::class)->execute($this->record);
-
         $this->record->changeOrderStatus(OrderStatus::FittingCancelled);
         $this->record->changeOrderStatus(OrderStatus::Cancelled);
-
-        app(SendFittingCancelledMailAction::class)->execute($this->record, $reason);
-        app(NotifyAdvisorFittingCancelledAction::class)->execute($this->record, $reason);
 
         $this->closeFittingCancelledConfirm();
         $this->record->refresh();
@@ -323,8 +315,6 @@ trait StatusTrait
      */
     protected function applyAssembledCompleteStatusChange(): bool
     {
-        $this->saveSerialNumber();
-
         if (! $this->saveDeliveryFields()) {
             $this->pendingDealerShippingResync = false;
             $this->orderStatus = $this->orderStatusFromDb;

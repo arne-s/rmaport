@@ -78,7 +78,6 @@ class CompanyDocumentsWidget extends TableWidget
         return [
             OrderType::Quote->value,
             OrderType::Order->value,
-            OrderType::StockOrder->value,
         ];
     }
 
@@ -132,7 +131,7 @@ class CompanyDocumentsWidget extends TableWidget
                     OrderType::CreditInvoice->value,
                 ])
                 ->selectRaw(
-                    "CONCAT('order-', orders.id) as id, 'order' as source_type, orders.id as source_id, orders.sent_at, orders.type, orders.caption, orders.uid, orders.rev, orders.subtype, orders.main_id, main_orders.uid as main_uid, main_orders.reference_internal as main_reference_internal, NULL as company_id, orders.customer_id, NULL as company_name, orders.status, orders.is_cancelled, NULL as file_name, (SELECT serial_number FROM serial_numbers WHERE serial_numbers.order_id = orders.id LIMIT 1) as serial_number_value, orders.created_at"
+                    "CONCAT('order-', orders.id) as id, 'order' as source_type, orders.id as source_id, orders.sent_at, orders.type, orders.caption, orders.uid, orders.rev, orders.subtype, orders.main_id, main_orders.uid as main_uid, main_orders.reference_internal as main_reference_internal, NULL as company_id, orders.customer_id, NULL as company_name, orders.status, orders.is_cancelled, NULL as file_name, NULL as serial_number_value, orders.created_at"
                 );
 
             $deliveryMediaQuery = $this->getCustomerDeliveryDocumentsForUnion($customerId);
@@ -173,7 +172,7 @@ class CompanyDocumentsWidget extends TableWidget
         };
 
         $ordersQuery->selectRaw(
-            "CONCAT('order-', orders.id) as id, 'order' as source_type, orders.id as source_id, orders.sent_at, orders.type, orders.caption, orders.uid, orders.rev, orders.subtype, orders.main_id, main_orders.uid as main_uid, main_orders.reference_internal as main_reference_internal, orders.company_id, orders.customer_id, companies.name as company_name, orders.status, orders.is_cancelled, NULL as file_name, (SELECT serial_number FROM serial_numbers WHERE serial_numbers.order_id = orders.id LIMIT 1) as serial_number_value, orders.created_at"
+            "CONCAT('order-', orders.id) as id, 'order' as source_type, orders.id as source_id, orders.sent_at, orders.type, orders.caption, orders.uid, orders.rev, orders.subtype, orders.main_id, main_orders.uid as main_uid, main_orders.reference_internal as main_reference_internal, orders.company_id, orders.customer_id, companies.name as company_name, orders.status, orders.is_cancelled, NULL as file_name, NULL as serial_number_value, orders.created_at"
         );
 
         // For Shipping and AllGlobal scopes, add packing slips via UNION
@@ -250,7 +249,6 @@ class CompanyDocumentsWidget extends TableWidget
 
         // Join with orders to get order data (subtype, company_id, customer_id)
         // Join with main_orders to get main.uid
-        // Use subquery for serial_number to avoid duplicate rows
         // GROUP BY media fields to ensure one row per packing slip even if multiple orders exist for the main
         return Media::query()
             ->where('media.model_type', $morphType)
@@ -283,7 +281,7 @@ class CompanyDocumentsWidget extends TableWidget
                 NULL as status,
                 NULL as is_cancelled,
                 media.file_name,
-                (SELECT serial_number FROM serial_numbers sn INNER JOIN orders o2 ON sn.order_id = o2.id WHERE o2.main_id = media.model_id AND o2.type = 'order' LIMIT 1) as serial_number_value,
+                NULL as serial_number_value,
                 media.created_at"
             );
     }
@@ -372,7 +370,7 @@ class CompanyDocumentsWidget extends TableWidget
                 NULL as status,
                 NULL as is_cancelled,
                 media.file_name,
-                (SELECT serial_number FROM serial_numbers sn INNER JOIN orders o2 ON sn.order_id = o2.id WHERE o2.main_id = media.model_id AND o2.type = 'order' LIMIT 1) as serial_number_value,
+                NULL as serial_number_value,
                 media.created_at"
             );
     }
@@ -433,7 +431,7 @@ class CompanyDocumentsWidget extends TableWidget
                 NULL as status,
                 NULL as is_cancelled,
                 media.file_name,
-                (SELECT serial_number FROM serial_numbers sn INNER JOIN orders o2 ON sn.order_id = o2.id INNER JOIN delivery_notes dn2 ON dn2.order_id = o2.id WHERE dn2.id = media.model_id AND o2.type = 'order' LIMIT 1) as serial_number_value,
+                NULL as serial_number_value,
                 media.created_at"
             );
     }
@@ -665,18 +663,6 @@ class CompanyDocumentsWidget extends TableWidget
                     ->formatStateUsing(fn ($state): string => filled((string) $state) ? (string) $state : '-')
                     ->searchable(['main_reference_internal'])
                     ->sortable(['main_reference_internal'])
-                    ->disabledClick(),
-
-                TextColumn::make('serial_number_value')
-                    ->label('Serienummer')
-                    ->formatStateUsing(function ($state, $record) {
-                        $type = $record->type?->value ?? $record->type;
-                        if ($type === OrderType::Order->value || in_array($type, ['packing_slip', 'postnl_label', 'postnl_retour_label', 'delivery_note'], true)) {
-                            return $state ?: '-';
-                        }
-                        return '-';
-                    })
-                    ->searchable(['serial_number_value'])
                     ->disabledClick(),
 
                 TextColumn::make('company_name')

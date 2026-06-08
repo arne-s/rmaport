@@ -8,7 +8,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call(DealerExpectedDeliveryEmailTemplateSeeder::class);
         $this->call(SettingsSeeder::class);
     }
 }

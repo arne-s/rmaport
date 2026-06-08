@@ -8,8 +8,6 @@ use App\Models\Order\Invoice;
 use App\Models\Order\Main;
 use App\Models\Order\Quote;
 use App\Models\OrderProduct;
-use App\Models\PurchaseOrder;
-use App\Models\ReleaseOrder;
 
 class ResolvesMainIdFromMailData
 {
@@ -45,22 +43,6 @@ class ResolvesMainIdFromMailData
 
             if ($mainId !== null) {
                 return $mainId;
-            }
-        }
-
-        if (isset($data['purchaseOrder']) && $data['purchaseOrder'] instanceof PurchaseOrder) {
-            $mainId = self::resolveFromPurchaseOrder($data['purchaseOrder']);
-
-            if ($mainId !== null) {
-                return $mainId;
-            }
-        }
-
-        if (isset($data['releaseOrder']) && $data['releaseOrder'] instanceof ReleaseOrder) {
-            $mainId = $data['releaseOrder']->main_id ?? $data['releaseOrder']->main?->getId();
-
-            if ($mainId !== null) {
-                return (int) $mainId;
             }
         }
 
@@ -113,27 +95,6 @@ class ResolvesMainIdFromMailData
         }
 
         return $invoice->order?->getMain()?->getId();
-    }
-
-    protected static function resolveFromPurchaseOrder(PurchaseOrder $purchaseOrder): ?int
-    {
-        if ($purchaseOrder->main_id !== null) {
-            return (int) $purchaseOrder->main_id;
-        }
-
-        $main = $purchaseOrder->main;
-
-        if ($main instanceof Main) {
-            return $main->getId();
-        }
-
-        $order = $purchaseOrder->order;
-
-        if ($order instanceof BaseOrder) {
-            return self::resolveFromOrder($order);
-        }
-
-        return null;
     }
 
     protected static function resolveFromOrderProduct(OrderProduct $orderProduct): ?int

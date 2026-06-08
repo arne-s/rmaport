@@ -2,12 +2,7 @@
 
 namespace App\Models\Concerns;
 
-use App\Enums\PurchaseOrderType;
-use App\Models\Customer;
 use App\Models\Country;
-use App\Models\Order\StockOrder;
-use App\Models\PurchaseOrder;
-use App\Models\ReleaseOrder;
 
 trait FormatsDeliveryAddressLine
 {
@@ -87,42 +82,7 @@ trait FormatsDeliveryAddressLine
 
     protected function resolveShippingNameForFormattedLine(string $shippingName): string
     {
-        if ($shippingName !== '') {
-            return $shippingName;
-        }
-
-        if ($this instanceof PurchaseOrder) {
-            $fromCustomer = trim((string) ($this->order?->customer?->getName() ?? ''));
-            if ($fromCustomer !== '') {
-                return $fromCustomer;
-            }
-
-            if ($this->getType() === PurchaseOrderType::Stock) {
-                return trim((string) (Customer::getRdMobilityCustomer()?->getName() ?? ''));
-            }
-
-            return '';
-        }
-
-        if ($this instanceof StockOrder) {
-            $dealer = trim((string) ($this->billingCustomer?->getName() ?? ''));
-            if ($dealer !== '') {
-                return $dealer;
-            }
-
-            return trim((string) (Customer::getRdMobilityCustomer()?->getName() ?? ''));
-        }
-
-        if ($this instanceof ReleaseOrder) {
-            $fromDealer = trim((string) ($this->dealer?->getName() ?? ''));
-            if ($fromDealer !== '') {
-                return $fromDealer;
-            }
-
-            return trim((string) ($this->order?->customer?->getName() ?? ''));
-        }
-
-        return '';
+        return $shippingName;
     }
 
     protected function formatDutchPostcodeForDisplay(string $postcode): string

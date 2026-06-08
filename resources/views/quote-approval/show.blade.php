@@ -22,7 +22,7 @@
         .quote-approval-page .quote-approval-submit.fi-ac-btn-action[type="submit"] {
             padding: 7px 30px !important;
             color: #fff !important;
-            background-color: #3b3b3b !important;
+            background-color: #032d5c !important;
             font-weight: 700;
             border: none !important;
             border-radius: 4px !important;

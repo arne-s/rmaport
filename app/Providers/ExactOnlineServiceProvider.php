@@ -8,8 +8,6 @@ use App\Services\Exact\Documents\ExactDocumentImportService;
 use App\Services\Exact\Documents\ExactDocuments;
 use App\Services\Exact\Products\ExactProductImportService;
 use App\Services\Exact\Products\ExactProducts;
-use App\Services\Exact\Suppliers\ExactSupplierImportService;
-use App\Services\Exact\Suppliers\ExactSuppliers;
 use App\Services\ExactOnlineService;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,17 +30,6 @@ class ExactOnlineServiceProvider extends ServiceProvider
         $this->app->singleton(ExactProductImportService::class, function ($app) {
             return new ExactProductImportService(
                 $app->make(ExactProducts::class),
-                $app->make(ExactOnlineService::class),
-            );
-        });
-
-        $this->app->singleton(ExactSuppliers::class, function ($app) {
-            return new ExactSuppliers($app->make(ExactOnlineService::class));
-        });
-
-        $this->app->singleton(ExactSupplierImportService::class, function ($app) {
-            return new ExactSupplierImportService(
-                $app->make(ExactSuppliers::class),
                 $app->make(ExactOnlineService::class),
             );
         });

@@ -11,13 +11,13 @@ use App\Models\Order\Order;
 
 /**
  * Default To for packing-slip mail: shipping-address e-mail on the invoice customer
- * ({@see Order::$billingCustomer}), same pattern as {@see \App\Filament\Resources\ReleaseOrders\Support\ReleaseOrderMailRecipients}.
+ * ({@see Order::$billingCustomer}).
  */
 final class PackingSlipMailRecipients
 {
     public const string RECIPIENT_KEY = 'packing_slip_delivery';
 
-    public const string INFO_CC_EMAIL = 'info@rdmobility.com';
+    public const string INFO_CC_EMAIL = 'info@autovision.nl';
 
     /**
      * @return array{email: string, display_name: string}|null

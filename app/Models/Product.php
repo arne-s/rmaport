@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\OrderType;
 use App\Enums\ProductType;
 use App\Support\Pricing\ProductPricingCalculator;
 use App\Support\ProductSelectSearchConstraints;
@@ -17,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
@@ -69,7 +67,6 @@ use Throwable;
  * @property-read \App\Models\ProductStock|null $stock
  * @property-read Collection<int, \App\Models\StockMovement> $stockMovements
  * @property-read int|null $stock_movements_count
- * @property-read \App\Models\Supplier|null $supplier
  * @method static Builder<static>|Product active()
  * @method static Builder<static>|Product selectableForOrderOrQuote()
  * @method static Builder<static>|Product newModelQuery()
@@ -251,11 +248,6 @@ class Product extends Model implements HasMedia
         return $this->belongsTo(ExactVATCode::class, 'exact_purchase_vat_code_id');
     }
 
-    public function supplier(): BelongsTo
-    {
-        return $this->belongsTo(Supplier::class);
-    }
-
     /**
      * Order/quote lines: require a supplier except for service products.
      *
@@ -286,8 +278,7 @@ class Product extends Model implements HasMedia
                     ->orWhere('name', 'like', $term)
                     ->orWhere('supplier_product_uid', 'like', $term)
                     ->orWhere('supplier_product_name', 'like', $term)
-                    ->orWhere('description', 'like', $term)
-                    ->orWhereHas('supplier', fn (Builder $supplierQuery): Builder => $supplierQuery->where('name', 'like', $term));
+                    ->orWhere('description', 'like', $term);
             });
         }
 
@@ -317,7 +308,7 @@ class Product extends Model implements HasMedia
     {
         $constraints ??= new ProductSelectSearchConstraints();
 
-        $query = static::query()->with('supplier');
+        $query = static::query();
 
         if ($constraints->supplierId !== null) {
             $query->where('supplier_id', $constraints->supplierId);
@@ -392,7 +383,7 @@ class Product extends Model implements HasMedia
             return '';
         }
 
-        $product = static::query()->withTrashed()->with('supplier')->find((int) $value);
+        $product = static::query()->withTrashed()->find((int) $value);
 
         return $product instanceof Product ? $product->getSelectOptionLabel() : '';
     }
@@ -500,9 +491,7 @@ class Product extends Model implements HasMedia
      */
     public function getSelectOptionLabel(): string
     {
-        $supplier = $this->supplier?->name ?? 'Zonder leverancier';
-
-        return $this->getUid().' | '.$this->getName().' | '.$supplier;
+        return $this->getUid().' | '.$this->getName();
     }
 
     /**
@@ -691,14 +680,6 @@ class Product extends Model implements HasMedia
     public function getMediaCount(): ?int
     {
         return $this->media_count;
-    }
-
-    /**
-     * @return Supplier|null
-     */
-    public function getSupplier(): ?Supplier
-    {
-        return $this->supplier;
     }
 
     /**
@@ -1011,43 +992,12 @@ class Product extends Model implements HasMedia
 
     public function requiresProductBuilder(): bool
     {
-        if ($this->supplier) {
-            if ($this->getItemOptions() || $this->useProductBuilder()) {
-                if ($this->supplier->getIsProductBuilderRequired()) {
-                    return true;
-                }
-            }
-        }
-
         return false;
     }
 
     public function getAverageLeadTimeSeconds(): ?int
     {
-        $avgSeconds = DB::table('order_products')
-            ->leftJoin('purchase_orders', 'purchase_orders.id', '=', 'order_products.purchase_order_id')
-            ->leftJoin('orders as stock_orders', function ($join): void {
-                $join->on('stock_orders.id', '=', 'order_products.order_id')
-                    ->where('stock_orders.type', '=', OrderType::StockOrder->value);
-            })
-            ->where('order_products.product_id', '=', $this->id)
-            ->whereNull('order_products.release_order_id')
-            ->whereNotNull('order_products.delivered_at')
-            ->where(function ($query): void {
-                $query
-                    ->whereNotNull('order_products.purchase_order_id')
-                    ->orWhereNotNull('stock_orders.id');
-            })
-            ->whereRaw('COALESCE(purchase_orders.sent_at, stock_orders.sent_at) IS NOT NULL')
-            ->whereRaw('order_products.delivered_at >= COALESCE(purchase_orders.sent_at, stock_orders.sent_at)')
-            ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, COALESCE(purchase_orders.sent_at, stock_orders.sent_at), order_products.delivered_at)) as avg_seconds')
-            ->value('avg_seconds');
-
-        if ($avgSeconds === null) {
-            return null;
-        }
-
-        return (int) round((float) $avgSeconds);
+        return null;
     }
 
     public function getAverageLeadTimeHuman(): string

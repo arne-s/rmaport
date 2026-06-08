@@ -67,7 +67,7 @@
                 --primary-color-2: #91C020;
                 --primary-color-3: #91C020;
                 --primary-color-4: #91C020;
-                --text-color: #3b3b3b;
+                --text-color: #032d5c;
                 --tw-ring-color: #91C020;
             }
         </style>

@@ -8,9 +8,6 @@
         return rtrim(strtok($url, '?'), '/') === $topMenuUrl ? 'pageActive' : '';
     };
 
-    $topMenuPlanningActive = request()->routeIs(
-        'filament.app.pages.calendar.*',
-    );
     $topMenuRelatiesActive = request()->routeIs(
         'filament.app.resources.customers.*',
     );
@@ -20,33 +17,20 @@
         'filament.app.resources.quotes.*',
         'filament.app.resources.orders.*',
     );
-    $topMenuInkoopActive = request()->routeIs(
-        'filament.app.resources.purchase-orders.*',
-        'filament.app.resources.purchase-order-confirmations.*',
-        'filament.app.resources.stock-orders.*',
-        'filament.app.resources.suppliers.*',
-    );
     $topMenuArtikelenActive = request()->routeIs(
         'filament.app.resources.products.*',
-        'filament.app.resources.bill-of-materials.*',
     );
     $topMenuFinancieelActive = request()->routeIs(
         'filament.app.resources.invoices.*',
         'filament.app.resources.credit-invoices.*',
         'filament.app.resources.recurring-invoices.*',
-        'filament.app.resources.purchase-order-invoices.*',
     );
     $topMenuReportingActive = request()->routeIs(
         'filament.app.resources.reporting.*',
         'filament.app.resources.margin-overview.*',
         'filament.app.resources.note-reporting.*',
-        'filament.app.resources.main-reporting.*',
-        'filament.app.resources.unit-orders.*',
-        'filament.app.resources.unit-invoicing.*',
         'filament.app.resources.product-revenue.*',
-        'filament.app.resources.supplier-revenue.*',
         'filament.app.resources.product-stock.*',
-        'filament.app.resources.serial-numbers.*',
     );
     $topMenuAdminActive = request()->routeIs(
         'filament.app.resources.manager.*',
@@ -149,9 +133,6 @@
     </div>
 
     <livewire:global-edit-note />
-    @can('manage sales')
-        <livewire:global-planning-calendar />
-    @endcan
     @can('create main orders')
         <livewire:global-create-main />
     @endcan
@@ -166,55 +147,6 @@
                         <span class="menuItemText" data-text="Dashboard">Dashboard</span>
                     </a>
                 </div>
-
-                @can('manage sales')
-                <div class="menuItem">
-                    <a class="menuItemLink parent {{ $topMenuPlanningActive ? 'pageActive' : '' }}">
-                        <span class="menuItemText" data-text="Planning">Planning</span>
-                    </a>
-
-                    <div class="subMenu-new">
-                        <div class="subMenuInner one-row">
-                            <button
-                                type="button"
-                                x-on:click.prevent="window.Livewire.dispatch('open-dashboard-planning-my')"
-                                class="subMenuItem w-full text-left {{ $topMenuLinkActive(route('filament.app.pages.calendar.my')) }}"
-                            >
-                                <div class="mainItem no-link">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/calendar-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Mijn agenda</span>
-                                    </div>
-                                </div>
-                            </button>
-                            <button
-                                type="button"
-                                x-on:click.prevent="window.Livewire.dispatch('open-dashboard-planning-general')"
-                                class="subMenuItem w-full text-left {{ $topMenuLinkActive(route('filament.app.pages.calendar.general')) }}"
-                            >
-                                <div class="mainItem no-link">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/clipboard-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Passing/Aflever agenda</span>
-                                    </div>
-                                </div>
-                            </button>
-                            <button
-                                type="button"
-                                x-on:click.prevent="window.Livewire.dispatch('open-dashboard-planning-mechanic')"
-                                class="subMenuItem w-full text-left {{ $topMenuLinkActive(route('filament.app.pages.calendar.mechanic')) }}"
-                            >
-                                <div class="mainItem no-link">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/hammer-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Werkplaats agenda</span>
-                                    </div>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                @endcan
 
                 @can('manage customers')
                 <div class="menuItem">
@@ -240,55 +172,6 @@
                                     </div>
                                 </div>
                             </a>
-
-                            @can('create main orders')
-                            <div class="subMenuItem">
-                                <div class="mainItem">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/clipboard.png') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Passing</span>
-                                    </div>
-                                </div>
-
-                                <div class="mainItemAllLinks">
-                                    <a class="subMenuItemLink {{ $topMenuLinkActive(route('filament.app.resources.production.fitting')) }}" href="{{ route('filament.app.resources.production.fitting') }}">
-                                        <span class="menuItemText" data-text="Overzicht">Overzicht</span>
-                                    </a>
-                                    <a
-                                        class="subMenuItemLink"
-                                        href="#"
-                                        x-on:click.prevent="Livewire.dispatch('open-create-main-dashboard-passing')"
-                                    >
-                                        <span class="menuItemText" data-text="Passing aanmaken">Passing aanmaken</span>
-                                    </a>
-                                </div>
-                            </div>
-                            @endcan
-
-                            <div class="subMenuItem">
-                                <div class="mainItem">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/file-lines-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Offertes</span>
-                                    </div>
-                                </div>
-
-                                <div class="mainItemAllLinks">
-                                    <a class="subMenuItemLink {{ $topMenuLinkActive(route('filament.app.resources.quotes.index')) }}" href="{{ route('filament.app.resources.quotes.index') }}">
-                                        <span class="menuItemText" data-text="Overzicht">Overzicht</span>
-                                    </a>
-                                    @can('create main orders')
-                                    <a
-                                        class="subMenuItemLink"
-                                        href="#"
-                                        x-on:click.prevent="Livewire.dispatch('open-create-main-quote')"
-                                    >
-                                        <span class="menuItemText" data-text="Offerte aanmaken">Offerte aanmaken</span>
-                                    </a>
-                                    @endcan
-                                </div>
-                            </div>
-
                             <div class="subMenuItem">
                                 <div class="mainItem">
                                     <div class="mainItem-info">
@@ -317,66 +200,6 @@
                 </div>
                 @endcan
 
-                @can('manage purchases')
-                <div class="menuItem">
-                    <a class="menuItemLink parent {{ $topMenuInkoopActive ? 'pageActive' : '' }}">
-                        <span class="menuItemText" data-text="Inkoop">Inkoop</span>
-                    </a>
-
-                    <div class="subMenu-new">
-                        <div class="subMenuInner submenuitem">
-                            <a href="{{ route('filament.app.resources.purchase-orders.ordered') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.purchase-orders.ordered')) }}">
-                                <div class="mainItem no-link">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/truck-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name"><strong>Inkoopproces</strong></span>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <div class="subMenuItem">
-                                <div class="mainItem">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/box-open-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Inkooporders</span>
-                                    </div>
-                                </div>
-
-                                <div class="mainItemAllLinks">
-                                    <a class="subMenuItemLink {{ $topMenuLinkActive(route('filament.app.resources.purchase-orders.index')) }}" href="{{ route('filament.app.resources.purchase-orders.index') }}">
-                                        <span class="menuItemText" data-text="Overzicht">Overzicht</span>
-                                    </a>
-                                    <a class="subMenuItemLink {{ $topMenuLinkActive(route('filament.app.resources.stock-orders.create')) }}" href="{{ route('filament.app.resources.stock-orders.create') }}">
-                                        <span class="menuItemText" data-text="Inkooporder aanmaken">Inkooporder aanmaken</span>
-                                    </a>
-                                    <a class="subMenuItemLink {{ $topMenuLinkActive(route('filament.app.resources.stock-orders.index')) }}" href="{{ route('filament.app.resources.stock-orders.index') }}">
-                                        <span class="menuItemText" data-text="Concepten">Concepten</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <a href="{{ route('filament.app.resources.purchase-order-confirmations.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.purchase-order-confirmations.index')) }}">
-                                <div class="mainItem no-link">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/file-lines-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Inkoopbevestigingen</span>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <a href="{{ route('filament.app.resources.suppliers.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.suppliers.index')) }}">
-                                <div class="mainItem no-link">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/store-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Leveranciers</span>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                @endcan
-
                 @can('manage products')
                 <div class="menuItem">
                     <a class="menuItemLink parent {{ $topMenuArtikelenActive ? 'pageActive' : '' }}">
@@ -393,16 +216,6 @@
                                     </div>
                                 </div>
                             </a>
-
-                            <a href="{{ route('filament.app.resources.bill-of-materials.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.bill-of-materials.index')) }}">
-                                <div class="mainItem no-link">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/clipboard.png') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Stuklijsten</span>
-                                    </div>
-                                </div>
-                            </a>
-
 
                         </div>
                     </div>
@@ -458,15 +271,6 @@
                                     <div class="mainItem-info">
                                         <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/receipt-solid.svg') }}" alt="menu-icon">
                                         <span class="mainItem-name">Creditfacturen</span>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <a href="{{ route('filament.app.resources.purchase-order-invoices.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.purchase-order-invoices.index')) }}">
-                                <div class="mainItem no-link">
-                                    <div class="mainItem-info">
-                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/receipt-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Inkoopfacturen</span>
                                     </div>
                                 </div>
                             </a>

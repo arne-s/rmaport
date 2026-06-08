@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\OrderResource\Support;
 
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Models\Order\BaseOrder;
 
 /**
@@ -120,7 +120,7 @@ final class OrderCustomerMailRecipients
                 continue;
             }
 
-            $emails = array_merge($emails, ApprovePurchaseOrderEmailAction::resolveRecipients([$key]));
+            $emails = array_merge($emails, EmailRecipientResolver::resolveRecipients([$key]));
         }
 
         return array_values(array_unique(array_filter($emails, fn ($v): bool => is_string($v) && $v !== '')));

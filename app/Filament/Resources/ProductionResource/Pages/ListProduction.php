@@ -39,11 +39,6 @@ class ListProduction extends ListRecords
         return ProductionOverviewQueries::ordered();
     }
 
-    protected function getTableQueryPurchased(): Builder
-    {
-        return ProductionOverviewQueries::purchased();
-    }
-
     protected function getTableQueryAssembled(): Builder
     {
         return ProductionOverviewQueries::assembled();
@@ -62,10 +57,9 @@ class ListProduction extends ListRecords
     protected function getTableQueryProcessed(): Builder
     {
         $ordered = OrderStatus::orderStatusColumnValuesForPhase(OrderStatus::Order);
-        $purchased = OrderStatus::orderStatusColumnValuesForPhase(OrderStatus::Purchase);
 
         return ProductionResource::getEloquentQuery()
-            ->whereIn('order_status', array_values(array_unique(array_merge($ordered, $purchased))))
+            ->whereIn('order_status', $ordered)
             ->where('type', 'order');
     }
 
@@ -97,7 +91,6 @@ class ListProduction extends ListRecords
                 OrderProductStatus::Fitting,
                 OrderProductStatus::Quote,
                 OrderProductStatus::Ordered,
-                OrderProductStatus::Purchased,
                 OrderProductStatus::Assembled,
                 OrderStatus::Delivered,
             ] as $i => $status
@@ -116,10 +109,6 @@ class ListProduction extends ListRecords
             }
             if ($status->value === 'ordered') {
                 $count = $this->getTableQueryOrdered();
-            }
-            if ($status->value === 'purchased') {
-                $label = 'Inkoop';
-                $count = $this->getTableQueryPurchased();
             }
             if ($status->value === 'assembled') {
                 $count = $this->getTableQueryAssembled();

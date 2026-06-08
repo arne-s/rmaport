@@ -14,7 +14,7 @@
             <img
                 class="checklistTab__logo"
                 src="{{ asset('img/logo.svg') }}"
-                alt="RD Mobility"
+                alt="Autovision"
             >
         </div>
 

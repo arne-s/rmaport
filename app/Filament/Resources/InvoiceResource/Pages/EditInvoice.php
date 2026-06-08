@@ -4,7 +4,6 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Actions\SendInvoiceMailAction;
 use App\Enums\OrderGeneralStatus;
-use App\Filament\Actions\ImportBomAction;
 use App\Filament\Forms\Components\ProductSelect;
 use App\Filament\Support\OrderProductRepeaterAddAction;
 use App\Enums\PaymentTerms;
@@ -66,7 +65,6 @@ class EditInvoice extends EditRecord
 
     protected $listeners = [
         'addOrderProduct' => 'addOrderProduct',
-        'loadBomProducts' => 'loadBomProducts',
     ];
 
     /** @var Collection<int, array>|null */
@@ -602,17 +600,6 @@ class EditInvoice extends EditRecord
         $this->dispatch('update-totals');
     }
 
-    public function loadBomProducts(?array $orderProducts): void
-    {
-        if (! is_array($orderProducts)) {
-            return;
-        }
-        foreach ($orderProducts as $orderProductId) {
-            $this->addOrderProduct(['orderProductId' => $orderProductId]);
-        }
-        $this->dispatch('update-totals');
-    }
-
     public function loadOrderProduct(Get $get, Set $set): void
     {
         $product = Product::query()->find($get('product_id'));
@@ -869,9 +856,6 @@ class EditInvoice extends EditRecord
                             ->default([])
                             ->minItems(1)
                             ->extraAttributes(['class' => 'orderProductsRepeater'])
-                            ->hintAction(
-                                ImportBomAction::make('import_bom')
-                            )
                             ->table([
                                 TableColumn::make('Aantal'),
                                 TableColumn::make('Eenheid'),

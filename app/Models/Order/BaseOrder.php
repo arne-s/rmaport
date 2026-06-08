@@ -10,7 +10,6 @@ use App\Enums\AddressType;
 use App\Enums\CustomerAddressType;
 use App\Enums\CustomerType;
 use App\Enums\InvoiceCaption;
-use App\Enums\AppointmentType;
 use App\Enums\FulfillmentType;
 use App\Enums\OrderGeneralStatus;
 use App\Casts\OrderStatusCast;
@@ -20,7 +19,6 @@ use App\Enums\OrderType;
 use App\Enums\PaymentTerms;
 use App\Enums\PaymentMethodType;
 use App\Enums\ProductType;
-use App\Enums\PurchaseOrderStatus;
 use App\Enums\ValidityPeriod;
 use App\Exceptions\OrderNotDuplicatedException;
 use App\Models\Address;
@@ -29,16 +27,12 @@ use App\Models\ExactPaymentCondition;
 use App\Models\Setting;
 use App\Support\InvoiceReminderSettings;
 use App\Models\Document;
-use App\Models\Appointment;
 use App\Models\OrderProduct;
 use App\Models\OrderStatusChange;
 use App\Models\Product;
 use App\Models\OrderEvent;
 use App\Models\PaymentLink;
-use App\Models\PurchaseOrder;
 use App\Models\RecurringInvoice;
-use App\Models\SerialNumber;
-use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Concerns\HasRecordLock;
 use App\Traits\Order\DecoratorTrait;
@@ -160,11 +154,8 @@ use Throwable;
  * @property-read Collection<int, OrderProduct> $orderProducts
  * @property-read int|null $order_products_count
  * @property-read int|null $order_products_without_custom_products_count
- * @property-read Collection<int, PurchaseOrder> $purchaseOrders
- * @property-read int|null $purchase_orders_count
  * @property-read Collection<int, OrderStatusChange> $statusChanges
  * @property-read int|null $status_changes_count
- * @property-read Supplier|null $supplier
  * @method static Builder<static>|BaseOrder newModelQuery()
  * @method static Builder<static>|BaseOrder newQuery()
  * @method static Builder<static>|BaseOrder query()
@@ -212,7 +203,6 @@ use Throwable;
  * @method static Builder<static>|BaseOrder whereRev($value)
  * @method static Builder<static>|BaseOrder whereDeliveryNote($value)
  * @method static Builder<static>|BaseOrder whereSentAt($value)
- * @method static Builder<static>|BaseOrder whereSerialNumberId($value)
  * @method static Builder<static>|BaseOrder whereStatus($value)
  * @method static Builder<static>|BaseOrder whereSubtype($value)
  * @method static Builder<static>|BaseOrder whereSupplierId($value)
@@ -503,31 +493,7 @@ class BaseOrder extends Model implements HasMedia
 
     public function getLatestExpectedDeliveryDateAttribute()
     {
-        // List the statuses where the order is not ready for delivery
-        // So any order that is not fully confirmed
-        $notReadyStatuses = [
-            OrderStatus::PartiallyPurchased,
-            OrderStatus::Purchased,
-        ];
-
-        if (in_array($this->order_status, $notReadyStatuses)) {
-            return null;
-        }
-
-        return $this->purchaseOrders()
-            ->whereHas('confirmations', function ($query) {
-                $query->whereNotNull('expected_delivery_date');
-            })
-            ->with(['confirmations' => function ($query) {
-                $query->orderByDesc('expected_delivery_date');
-            }])
-            ->get()
-            ->sortByDesc(fn($purchaseOrder) => optional($purchaseOrder->confirmation)->expected_delivery_date)
-            ->first()
-            ?->confirmations()
-            ->latest('created_at')
-            ->first()
-            ->expected_delivery_date;
+        return null;
     }
 
 
@@ -577,11 +543,6 @@ class BaseOrder extends Model implements HasMedia
         return $this->belongsTo(User::class, 'author_id')->withTrashed();
     }
 
-    public function serialNumber(): HasOne
-    {
-        return $this->hasOne(SerialNumber::class, 'order_id', 'id');
-    }
-
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
@@ -613,28 +574,6 @@ class BaseOrder extends Model implements HasMedia
 //
 //        return $this;
 //    }
-
-    public function appointments(): HasMany
-    {
-        return $this->hasMany(Appointment::class, 'order_id');
-    }
-
-    public function getAppointments(AppointmentType $type): Collection
-    {
-        return $this->appointments()->where('type', $type)
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->get();
-    }
-
-    public function shouldNotifyAdvisor(AppointmentType $type): bool
-    {
-        return (bool)($this->appointments()
-            ->where('type', $type)
-            ->where('is_active', true)
-            ->latest()
-            ->value('notify_advisor') ?? true);
-    }
 
     public function main(): BelongsTo
     {
@@ -686,11 +625,6 @@ class BaseOrder extends Model implements HasMedia
         return $this->type === OrderType::Main;
     }
 
-    public function purchaseOrders()
-    {
-        return $this->hasMany(PurchaseOrder::class, 'order_id', 'id');
-    }
-
     public function depositInvoice()
     {
         return $this->belongsTo(DepositInvoice::class, 'deposit_invoice_id');
@@ -712,11 +646,6 @@ class BaseOrder extends Model implements HasMedia
     public function recurringInvoice(): BelongsTo
     {
         return $this->belongsTo(RecurringInvoice::class, 'recurring_order_id');
-    }
-
-    public function supplier(): BelongsTo
-    {
-        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
     public function orderEvents(): HasMany
@@ -747,7 +676,6 @@ class BaseOrder extends Model implements HasMedia
             OrderType::Quote => Quote::withoutGlobalScopes()->findOrFail($id),
             OrderType::Order => Order::withoutGlobalScopes()->findOrFail($id),
             OrderType::Main => Main::withoutGlobalScopes()->findOrFail($id),
-            OrderType::StockOrder => StockOrder::withoutGlobalScopes()->findOrFail($id),
             OrderType::Invoice => Invoice::withoutGlobalScopes()->findOrFail($id),
             OrderType::DepositInvoice => DepositInvoice::withoutGlobalScopes()->findOrFail($id),
             OrderType::CreditInvoice => CreditInvoice::withoutGlobalScopes()->findOrFail($id),
@@ -807,12 +735,12 @@ class BaseOrder extends Model implements HasMedia
         return $this;
     }
 
-    public function getStatus(): OrderGeneralStatus|PurchaseOrderStatus|null
+    public function getStatus(): ?OrderGeneralStatus
     {
         return $this->status;
     }
 
-    public function setStatus(OrderGeneralStatus|PurchaseOrderStatus|string $value): self
+    public function setStatus(OrderGeneralStatus|string $value): self
     {
         $this->status = $value;
         return $this;
@@ -2293,16 +2221,9 @@ class BaseOrder extends Model implements HasMedia
             }
         }
 
-        // Set status of order and purchase orders to cancelled
         $this->setOrderStatus(OrderStatus::Cancelled);
         $this->setIsCancelled(true);
         $this->save();
-
-        $this->purchaseOrders->each(function ($purchaseOrder) {
-            $purchaseOrder->status = PurchaseOrderStatus::Cancelled;
-            $purchaseOrder->is_cancelled = true;
-            $purchaseOrder->save();
-        });
 
         return true;
     }
@@ -2397,7 +2318,7 @@ class BaseOrder extends Model implements HasMedia
 
     /**
      * Generate a unique UID for this order. UIDs are unique per order type
-     * (Fitting, Quote, Order, StockOrder); the scheme follows this order's type.
+     * (Fitting, Quote, Order); the scheme follows this order's type.
      *
      * @throws Exception
      */
@@ -2469,25 +2390,6 @@ class BaseOrder extends Model implements HasMedia
                 $width = max($minWidth, strlen((string)$next));
 
                 return str_pad((string)$next, $width, '0', STR_PAD_LEFT);
-
-            case OrderType::StockOrder:
-                $year = date('Y');
-                $prefix = 'MTS-' . $year . '-';
-                $pattern = $prefix . '%';
-
-                $maxNr = (int)StockOrder::withoutGlobalScopes()
-                    ->where('type', OrderType::StockOrder)
-                    ->whereNotNull('uid')
-                    ->where('uid', 'like', $pattern)
-                    ->whereNot('uid', 'like', 'TEST-%')
-                    ->selectRaw("COALESCE(MAX(CAST(SUBSTRING_INDEX(uid, '-', -1) AS UNSIGNED)), 0) as max_nr")
-                    ->value('max_nr');
-
-                if ($this->getIsTest()) {
-                    return 'TEST-MTS-' . $year . '-' . str_pad((string)($maxNr + 1), 4, '0', STR_PAD_LEFT);
-                }
-
-                return $prefix . str_pad((string)($maxNr + 1), 4, '0', STR_PAD_LEFT);
         }
 
         return null;
@@ -3403,26 +3305,6 @@ class BaseOrder extends Model implements HasMedia
         $this->order_products_without_custom_products_count = $order_products_without_custom_products_count;
     }
 
-    public function getPurchaseOrders(): Collection
-    {
-        return $this->purchaseOrders;
-    }
-
-    public function setPurchaseOrders(Collection $purchaseOrders): void
-    {
-        $this->purchaseOrders = $purchaseOrders;
-    }
-
-    public function getPurchaseOrdersCount(): ?int
-    {
-        return $this->purchase_orders_count;
-    }
-
-    public function setPurchaseOrdersCount(?int $purchase_orders_count): void
-    {
-        $this->purchase_orders_count = $purchase_orders_count;
-    }
-
     public function getStatusChanges(): Collection
     {
         return $this->statusChanges;
@@ -3442,16 +3324,5 @@ class BaseOrder extends Model implements HasMedia
     {
         $this->status_changes_count = $status_changes_count;
     }
-
-    public function getSupplier(): ?Supplier
-    {
-        return $this->supplier;
-    }
-
-    public function setSupplier(?Supplier $supplier): void
-    {
-        $this->supplier = $supplier;
-    }
-
 
 }

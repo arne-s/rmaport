@@ -4,7 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Actions;
 
 use App\Actions\SendInvoiceMailAction;
 use App\Filament\Resources\OrderResource\Support\OrderCustomerMailRecipients;
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Helpers\EmailHelper;
 use App\Mail\CustomInvoiceMail;
 use App\Models\Order\BaseOrder;
@@ -232,7 +232,7 @@ class SubmitInvoiceEmailAction extends Action
     private static function getRecipientOptions($livewire): array
     {
         $record = $livewire->record;
-        $options = ApprovePurchaseOrderEmailAction::getRecipientOptions();
+        $options = EmailRecipientResolver::getRecipientOptions();
 
         if ($record instanceof Invoice) {
             $customerLabel = OrderCustomerMailRecipients::customerRecipientOptionLabel($record, $livewire);
@@ -276,7 +276,7 @@ class SubmitInvoiceEmailAction extends Action
                 continue;
             }
 
-            $emails = array_merge($emails, ApprovePurchaseOrderEmailAction::resolveRecipients([$key]));
+            $emails = array_merge($emails, EmailRecipientResolver::resolveRecipients([$key]));
         }
 
         return array_values(array_unique($emails));

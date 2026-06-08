@@ -8,15 +8,13 @@ use App\Models\Order\BaseOrder;
 use App\Models\Order\Invoice;
 use App\Models\Order\Main;
 use App\Models\Order\Quote;
-use App\Models\PurchaseOrder;
-use App\Models\ReleaseOrder;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class OrderMailEventLogger
 {
-    public function logSent(BaseOrder|Quote|PurchaseOrder|ReleaseOrder|Main $context, string $mailableClass, array $to, array $cc = [], array $bcc = [], ?string $subject = null): void
+    public function logSent(BaseOrder|Quote|Main $context, string $mailableClass, array $to, array $cc = [], array $bcc = [], ?string $subject = null): void
     {
         $templateName = $this->resolveTemplateName($mailableClass, $subject);
         $toRecipients = $this->normalizeRecipients($to);
@@ -65,7 +63,7 @@ class OrderMailEventLogger
     }
 
     public function logScheduled(
-        BaseOrder|Quote|PurchaseOrder|ReleaseOrder|Main|Invoice $context,
+        BaseOrder|Quote|Main|Invoice $context,
         string $mailableClass,
         int $delaySeconds,
         ?Carbon $scheduledAt = null,
@@ -200,17 +198,13 @@ class OrderMailEventLogger
         }, $normalized));
     }
 
-    protected function resolveMain(BaseOrder|Quote|PurchaseOrder|ReleaseOrder|Main $context): ?Main
+    protected function resolveMain(BaseOrder|Quote|Main $context): ?Main
     {
         if ($context instanceof Main) {
             return $context;
         }
 
         if ($context instanceof Quote) {
-            return $context->main;
-        }
-
-        if ($context instanceof PurchaseOrder || $context instanceof ReleaseOrder) {
             return $context->main;
         }
 

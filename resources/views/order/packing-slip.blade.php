@@ -2,14 +2,14 @@
     use App\Models\Customer;
     use App\Support\PackingSlipChecklist;
 
-    $rdCustomer = Customer::getRdMobilityCustomer();
-    $rdAddr = $rdCustomer?->billingAddress;
-    $companyPhone = $rdCustomer?->getPhoneNumber();
-    $companyVat = $rdCustomer?->getVat();
-    $companyEmail = $rdCustomer?->getEmail();
-    $companyKvk = $rdCustomer?->getKvk();
-    $companyIban = $rdCustomer?->getIban();
-    $companyBic = $rdCustomer?->getBic();
+    $avCustomer = Customer::getRdMobilityCustomer();
+    $avAddr = $avCustomer?->billingAddress;
+    $companyPhone = $avCustomer?->getPhoneNumber();
+    $companyVat = $avCustomer?->getVat();
+    $companyEmail = $avCustomer?->getEmail();
+    $companyKvk = $avCustomer?->getKvk();
+    $companyIban = $avCustomer?->getIban();
+    $companyBic = $avCustomer?->getBic();
     $companyWebsite = 'https://www.rdmobility.com';
 
     $recipientAddress = $main->resolvePackingSlipRecipientAddress();
@@ -77,7 +77,7 @@
                 $leftCols = [
                     'Ordernummer' => $order->getUidFormatted() ?: '-',
                     'Uw referentie' => $packingSlip->reference ?: '-',
-                    'Serienummer' => $main->getSerialNumberRecord()?->getSerialNumber() ?: '-',
+                    'Serienummer' => $main->getSerialNumber() ?: '-',
                 ];
 
                 if ($leveringsadresMeta !== '') {
@@ -100,15 +100,15 @@
             <div class="company-info"
                  style="text-align: left; line-height: 28px; display: inline-block; min-width: 260px;">
                 <div>
-                    <strong style="font-size: 16px;">{{ $rdCustomer?->getName() }}</strong>
+                    <strong style="font-size: 16px;">{{ $avCustomer?->getName() }}</strong>
                 </div>
-                @if ($rdCustomer)
+                @if ($avCustomer)
                     <div style="padding: 0; font-size: 16px;">
-                        @if ($rdAddr)
-                            {{ $rdAddr->getStreet() }} {{ $rdAddr->getHouseNumber() }}{{ $rdAddr->getHouseNumberAddition() ? ' ' . $rdAddr->getHouseNumberAddition() : '' }}
+                        @if ($avAddr)
+                            {{ $avAddr->getStreet() }} {{ $avAddr->getHouseNumber() }}{{ $avAddr->getHouseNumberAddition() ? ' ' . $avAddr->getHouseNumberAddition() : '' }}
                             <br/>
-                            {{ $rdAddr->getPostcode() }} {{ $rdAddr->getCity() }}<br/>
-                            {{ $rdAddr->country?->name ?? '' }}<br/><br/>
+                            {{ $avAddr->getPostcode() }} {{ $avAddr->getCity() }}<br/>
+                            {{ $avAddr->country?->name ?? '' }}<br/><br/>
                         @endif
                     </div>
 

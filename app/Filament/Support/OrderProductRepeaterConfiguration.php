@@ -3,7 +3,6 @@
 namespace App\Filament\Support;
 
 use App\Filament\Resources\RecurringInvoices\Pages\EditRecurringInvoice;
-use App\Models\BillOfMaterialProduct;
 use App\Models\OrderProduct;
 use App\Models\RecurringInvoiceLine;
 use Filament\Actions\Action;
@@ -145,7 +144,6 @@ final class OrderProductRepeaterConfiguration
             if ($record !== null && method_exists($record, 'unsetRelation')) {
                 $record->unsetRelation('orderProducts');
                 $record->unsetRelation('lines');
-                $record->unsetRelation('billOfMaterialProducts');
             }
         }
     }
@@ -156,10 +154,6 @@ final class OrderProductRepeaterConfiguration
 
         if ($livewire instanceof EditRecurringInvoice) {
             return RecurringInvoiceLine::query()->find($id);
-        }
-
-        if ($component->getStatePath() === 'billOfMaterialProducts') {
-            return BillOfMaterialProduct::query()->find($id);
         }
 
         return OrderProduct::query()->find($id);

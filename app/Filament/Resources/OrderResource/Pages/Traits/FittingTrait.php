@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\OrderResource\Pages\Traits;
 
-use App\Models\SerialNumber;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Validator;
 
@@ -62,29 +61,6 @@ trait FittingTrait
         }
     }
 
-    /**
-     * Serial number options for fitting note "Previous chair make/model".
-     *
-     * @return array<int, string>
-     */
-    public function getFittingNoteSerialNumberOptions(): array
-    {
-        $record = $this->record ?? null;
-        if (!$record || !$record->customer_id) {
-            return [];
-        }
-
-        return SerialNumber::query()
-            ->where('owner_id', $record->customer_id)
-            ->whereHas('order', function ($query): void {
-                $query->where('type', 'order');
-            })
-            ->orderBy('updated_at', 'desc')
-            ->get()
-            ->mapWithKeys(fn(SerialNumber $sn) => [$sn->id => $sn->serial_number . ' | ' . $sn->getFrameName()])
-            ->all();
-    }
-
     public function saveFittingFields(): bool
     {
         if ($this->record === null) {
@@ -123,7 +99,6 @@ trait FittingTrait
             'body_length'         => trim($this->fittingNoteBodyLength) !== '' ? trim($this->fittingNoteBodyLength) : null,
             'body_weight'         => trim($this->fittingNoteBodyWeight) !== '' ? trim($this->fittingNoteBodyWeight) : null,
             'handicap'            => $this->fittingNoteHandicap !== '' ? $this->fittingNoteHandicap : null,
-            'previous_unit'       => !$isPreviousUnitCustom && $this->fittingNotePreviousUnit !== '' ? (int)$this->fittingNotePreviousUnit : null,
             'previous_unit_custom' => $isPreviousUnitCustom && $this->fittingNotePreviousUnitCustom !== '' ? $this->fittingNotePreviousUnitCustom : null,
             'previous_unit_note'  => $isPreviousUnitCustom && $this->fittingNotePreviousUnitNote !== '' ? $this->fittingNotePreviousUnitNote : null,
             'general_notes'       => $this->fittingNoteGeneralNotes !== '' ? $this->fittingNoteGeneralNotes : null,

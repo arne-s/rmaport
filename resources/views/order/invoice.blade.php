@@ -3,8 +3,8 @@
     use App\Models\Customer;
     use App\Models\ExactPaymentCondition;
 
-    $rdCustomer = Customer::getRdMobilityCustomer();
-    $rdAddr = $rdCustomer?->billingAddress;
+    $avCustomer = Customer::getRdMobilityCustomer();
+    $avAddr = $avCustomer?->billingAddress;
     $customer = $order->customer;
     $parentOrder = $order->order;
     $main = $order->main ?? $parentOrder?->main;
@@ -150,51 +150,51 @@
         <div style="float: right">
             <div class="company-info"
                  style="text-align: left; line-height: 22px; display: inline-block; min-width: 260px; font-size: 12px; line-height: 20px;">
-                <div><strong style="font-size: 13px; line-height: 20px">{{ $rdCustomer?->getName() }}</strong></div>
-                @if ($rdAddr)
+                <div><strong style="font-size: 13px; line-height: 20px">{{ $avCustomer?->getName() }}</strong></div>
+                @if ($avAddr)
                     <div style="padding-bottom: 6px; font-size: 13px; line-height: 20px;">
-                        {{ $rdAddr->getStreet() }} {{ $rdAddr->getHouseNumber() }}{{ $rdAddr->getHouseNumberAddition() ? ' ' . $rdAddr->getHouseNumberAddition() : '' }}
+                        {{ $avAddr->getStreet() }} {{ $avAddr->getHouseNumber() }}{{ $avAddr->getHouseNumberAddition() ? ' ' . $avAddr->getHouseNumberAddition() : '' }}
                         <br/>
-                        {{ $rdAddr->getPostcode() }} {{ $rdAddr->getCity() }}<br/>
-                        {{ $rdAddr->country?->name }}
+                        {{ $avAddr->getPostcode() }} {{ $avAddr->getCity() }}<br/>
+                        {{ $avAddr->country?->name }}
                     </div>
                 @endif
-                @if ($rdCustomer)
+                @if ($avCustomer)
                     <table style="border-collapse: collapse; font-size: 13px" class="company-info">
-                        @if ($rdCustomer->getPhoneNumber())
+                        @if ($avCustomer->getPhoneNumber())
                             <tr>
                                 <td style="padding: 0 8px 0 0; white-space: nowrap;">Tel:</td>
-                                <td style="padding: 0;">{{ $rdCustomer->getPhoneNumber() }}</td>
+                                <td style="padding: 0;">{{ $avCustomer->getPhoneNumber() }}</td>
                             </tr>
                         @endif
                         <tr>
                             <td style="padding: 0 8px 0 0; white-space: nowrap;">Email:</td>
-                            <td style="padding: 0;">info@rdmobility.com</td>
+                            <td style="padding: 0;">info@autovision.nl</td>
                         </tr>
                         <tr>
                             <td style="padding: 0 8px 6px 0; white-space: nowrap;">Website:</td>
                             <td style="padding: 0 0 6px 0;">www.rdmobility.com</td>
                         </tr>
-                        @if ($rdCustomer->getVat())
+                        @if ($avCustomer->getVat())
                             <tr>
                                 <td style="padding: 0 8px 0 0; white-space: nowrap;">BTW:</td>
-                                <td style="padding: 0;">{{ $rdCustomer->getVat() }}</td>
+                                <td style="padding: 0;">{{ $avCustomer->getVat() }}</td>
                             </tr>
                         @endif
-                        @if ($rdCustomer->getIban())
+                        @if ($avCustomer->getIban())
                             <tr>
                                 <td style="padding: 0 8px 0 0; white-space: nowrap;">IBAN:</td>
-                                <td style="padding: 0;">{{ $rdCustomer->getIban() }}</td>
+                                <td style="padding: 0;">{{ $avCustomer->getIban() }}</td>
                             </tr>
                         @endif
                         <tr>
                             <td style="padding: 0 8px 0 0; white-space: nowrap;">BIC:</td>
                             <td style="padding: 0;">INGBNL2A</td>
                         </tr>
-                        @if ($rdCustomer->getKvk())
+                        @if ($avCustomer->getKvk())
                             <tr>
                                 <td style="padding: 0 8px 0 0; white-space: nowrap;">KvK:</td>
-                                <td style="padding: 0;">{{ $rdCustomer->getKvk() }}</td>
+                                <td style="padding: 0;">{{ $avCustomer->getKvk() }}</td>
                             </tr>
                         @endif
                         <tr>
@@ -404,7 +404,7 @@
                 @php
                     $invoiceNumberForPayment = '<span style="text-decoration: underline; font-weight: normal">' . ($order->getUidFormatted() ?: '-') . '</span>';
                     $ibanBlock = ' op: <br/>IBAN '
-                        . ($rdCustomer?->getIban() ?? '-') . ' ten name van ' . ($rdCustomer?->getName() ?? 'RD Mobility B.V.') . ' te ' . ($rdAddr?->getCity() ?? 'Delft') . '.';
+                        . ($avCustomer?->getIban() ?? '-') . ' ten name van ' . ($avCustomer?->getName() ?? 'RD Mobility B.V.') . ' te ' . ($avAddr?->getCity() ?? 'Delft') . '.';
 
                     if ($paymentConditionApplies) {
                         $commentBlock = 'Gelieve het factuurbedrag met Wero online te betalen of over te maken vóór <strong style="display: inline">' . $expiresAtDisplay . '</strong> o.v.v. van factuurnummer ' . $invoiceNumberForPayment . $ibanBlock

@@ -38,11 +38,11 @@ return [
     |--------------------------------------------------------------------------
     */
     'sender' => [
-        'company'     => env('POSTNL_SENDER_COMPANY', 'RD Mobility B.V.'),
-        'street'      => env('POSTNL_SENDER_STREET', 'Schieweg'),
-        'house_nr'    => env('POSTNL_SENDER_HOUSENR', '87'),
-        'postcode'    => env('POSTNL_SENDER_POSTCODE', '2627AT'),
-        'city'        => env('POSTNL_SENDER_CITY', 'DELFT'),
+        'company'     => env('POSTNL_SENDER_COMPANY', 'Autovision B.V.'),
+        'street'      => env('POSTNL_SENDER_STREET', 'Burgemeester Engelbertsstraat'),
+        'house_nr'    => env('POSTNL_SENDER_HOUSENR', '92'),
+        'postcode'    => env('POSTNL_SENDER_POSTCODE', '2042KP'),
+        'city'        => env('POSTNL_SENDER_CITY', 'Zandvoort'),
         'country'     => 'NL',
     ],
 

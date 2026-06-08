@@ -246,11 +246,6 @@ class Customer extends Model implements HasMedia
         return $this->shippingAddress ?? $this->billingAddress ?? $this->address;
     }
 
-    public function serialNumbers()
-    {
-        return $this->hasMany(SerialNumber::class, 'owner_id');
-    }
-
     public function getShippingAddress(): ?Address
     {
         return $this->getPhysicalDeliveryAddress();

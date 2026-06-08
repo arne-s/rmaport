@@ -5,7 +5,6 @@ namespace App\Filament\Tables\Columns;
 use App\Enums\OrderGeneralStatus;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
-use App\Enums\PurchaseOrderStatus;
 use App\Models\Order\BaseOrder;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Carbon;
@@ -57,7 +56,7 @@ class DocumentStatusColumn extends TextColumn
         if (empty($status)) {
             return '';
         }
-        if ($status instanceof OrderStatus || $status instanceof OrderGeneralStatus || $status instanceof PurchaseOrderStatus) {
+        if ($status instanceof OrderStatus || $status instanceof OrderGeneralStatus) {
             return $status->getLabel() ?? '';
         }
 
@@ -67,9 +66,9 @@ class DocumentStatusColumn extends TextColumn
     /**
      * Get the order status.
      *
-     * @return string|OrderStatus|OrderGeneralStatus|PurchaseOrderStatus|null
+     * @return string|OrderStatus|OrderGeneralStatus|null
      */
-    public function getOrderStatus(): string|OrderStatus|OrderGeneralStatus|PurchaseOrderStatus|null
+    public function getOrderStatus(): string|OrderStatus|OrderGeneralStatus|null
     {
         $orderType = $this->getOrderType();
 

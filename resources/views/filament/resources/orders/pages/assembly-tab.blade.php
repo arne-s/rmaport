@@ -18,8 +18,8 @@
     $fittingAttendees = $fittingNote['attendees'] ?? '-';
     $bodyLength = $fittingNote['body_length'] ?? '-';
     $bodyWeight = $fittingNote['body_weight'] ?? '-';
-    $fittingAt = $record->getActiveFittingAppointment()?->datetime?->format('d-m-Y') ?? '-';
-    $deliveryWeek = $record->getSerialNumberRecord()?->delivered_at?->format('W');
+    $fittingAt = '-';
+    $deliveryWeek = null;
     $pickedProducts = $record->getPurchasedPickedProducts()?->get() ?? collect();
     $isServiceOrder = $record->getSubtype() === OrderSubtype::Service;
 @endphp
@@ -102,24 +102,6 @@
             </div>
             <div class="note fitting-passing-form mt-4">
                 <div class="fitting-note-fields-col">
-                    <div class="fitting-note-field-row">
-                        <div class="fitting-note-field-label-col">
-                            <label for="orderSerialNumberAssembly" class="fi-fo-field-label-ctn">
-                                <span class="fi-fo-field-label-content text-sm font-medium">Serienummer</span>
-                            </label>
-                        </div>
-                        <div class="fitting-note-field-content-col">
-                            <div class="fi-input-wrp">
-                                <input
-                                    id="orderSerialNumberAssembly"
-                                    wire:model.defer="orderSerialNumber"
-                                    type="text"
-                                    maxlength="255"
-                                    class="fi-input block w-full"
-                                />
-                            </div>
-                        </div>
-                    </div>
                     <div class="fitting-note-field-row">
                         <div class="fitting-note-field-label-col">
                             <label for="checklistAxleSize" class="fi-fo-field-label-ctn">

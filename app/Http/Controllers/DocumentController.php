@@ -15,11 +15,6 @@ use App\Models\Order\DepositInvoice;
 use App\Models\Order\Invoice;
 use App\Models\Order\Order;
 use App\Models\Order\Quote;
-use App\Models\Order\StockOrder;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderConfirmation;
-use App\Models\PurchaseOrderInvoice;
-use App\Models\ReleaseOrder;
 use App\Models\Product;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Exception;
@@ -314,223 +309,6 @@ class DocumentController extends Controller
         return $pdf->download('Marges ' . $order->getUidFormatted() . '.pdf');
     }
 
-    public function purchaseOrderConfirmation(int|string $id)
-    {
-        $this->ensurePanelUserCanAccessDocuments();
-
-        $confirmation = PurchaseOrderConfirmation::findOrFail($id);
-        if (empty($confirmation->id) || empty($confirmation?->pdf_path))
-            return abort(404);
-
-        $filePath = storage_path('app/public/' . $confirmation->pdf_path);
-
-        if (!file_exists($filePath)) {
-            return abort(404, 'File not found.');
-        }
-
-        return response()->file($filePath);
-    }
-
-    public function purchaseOrderConfirmationDownload(int|string $orderId)
-    {
-        $this->ensurePanelUserCanAccessDocuments();
-
-        $confirmation = PurchaseOrderConfirmation::findOrFail($orderId);
-        if (empty($confirmation->id) || empty($confirmation?->pdf_path)) {
-            return abort(404);
-        }
-
-        $filePath = storage_path('app/public/' . $confirmation->pdf_path);
-        if (!file_exists($filePath)) {
-            return abort(404, 'File not found.');
-        }
-        $fileName = pathinfo($confirmation->pdf_path, PATHINFO_BASENAME);
-
-        return response()->download($filePath, $fileName);
-    }
-
-    public function purchaseOrderConfirmationModal(int|string $id)
-    {
-        $this->ensurePanelUserCanAccessDocuments();
-
-        $purchaseOrder = PurchaseOrder::findOrFail($id);
-        if (empty($purchaseOrder->id)) {
-            return abort(404);
-        }
-
-        return view('filament.components.purchase-order-confirmation-modal', [
-            'id' => $purchaseOrder->id,
-        ]);
-    }
-
-    /**
-     * HTML document for iframe preview (same template as PDF).
-     */
-    public function purchaseOrderDocumentPreview(PurchaseOrder $purchaseOrder): ViewContract
-    {
-        abort_unless(Gate::allows('export-order'), 403, 'Unauthorized action.');
-
-        $purchaseOrder->loadMissing(['orderProducts', 'supplier']);
-
-        return view('order.purchase_order', [
-            'order' => $purchaseOrder,
-            'products' => $purchaseOrder->orderProducts,
-            'isPreview' => true,
-        ]);
-    }
-
-    /**
-     * Generate purchase order PDF on the fly and return as download (for preview modal).
-     */
-    public function purchaseOrderPreviewDownload(PurchaseOrder $purchaseOrder)
-    {
-        abort_unless(Gate::allows('export-order'), 403, 'Unauthorized action.');
-
-        $purchaseOrder->loadMissing(['orderProducts', 'supplier']);
-        $html = view('order.purchase_order', [
-            'order' => $purchaseOrder,
-            'products' => $purchaseOrder->orderProducts,
-            'isPreview' => true,
-        ])->render();
-
-        $pdf = PDF::loadHTML($html)
-            ->setOption('margin-top', 10)
-            ->setOption('margin-bottom', 10)
-            ->setOption('margin-left', 0)
-            ->setOption('margin-right', 0);
-
-        $pdfOutput = $pdf->output();
-        if ($pdfOutput === null || $pdfOutput === '') {
-            abort(500, 'Kon PDF niet genereren.');
-        }
-
-        $filename = 'Inkooporder_' . $purchaseOrder->getReferenceNumber() . '.pdf';
-
-        return response()->streamDownload(
-            fn () => print($pdfOutput),
-            $filename,
-            [
-                'Content-Type' => 'application/pdf',
-            ],
-            'attachment'
-        );
-    }
-
-    /**
-     * Generate stock order PDF on the fly and return as download (for preview modal).
-     */
-    public function stockOrderPreviewDownload(StockOrder $stockOrder)
-    {
-        abort_unless(Gate::allows('export-order'), 403, 'Unauthorized action.');
-
-        $stockOrder->loadMissing(['supplier']);
-        $html = view('order.stock_order', [
-            'order' => $stockOrder,
-            'products' => $stockOrder->getDocumentOrderProducts(),
-            'isPreview' => true,
-        ])->render();
-
-        $pdf = PDF::loadHTML($html)
-            ->setOption('margin-top', 10)
-            ->setOption('margin-bottom', 10)
-            ->setOption('margin-left', 0)
-            ->setOption('margin-right', 0);
-
-        $pdfOutput = $pdf->output();
-        if ($pdfOutput === null || $pdfOutput === '') {
-            abort(500, 'Kon PDF niet genereren.');
-        }
-
-        $ref = $stockOrder->getUidFormatted() ?: (string) $stockOrder->getId();
-        $filename = 'Voorraadorder_' . $ref . '.pdf';
-
-        return response()->streamDownload(
-            fn () => print($pdfOutput),
-            $filename,
-            [
-                'Content-Type' => 'application/pdf',
-            ],
-            'attachment'
-        );
-    }
-
-    /**
-     * Generate release order (afroepbon) PDF on the fly (preview modal download).
-     */
-    public function releaseOrderPreviewDownload(ReleaseOrder $releaseOrder)
-    {
-        abort_unless(Gate::allows('export-order'), 403, 'Unauthorized action.');
-
-        $html = view('order.release_order', [
-            ...$releaseOrder->getDocumentViewData(),
-            'isPreview' => true,
-        ])->render();
-
-        $pdf = PDF::loadHTML($html)
-            ->setOption('margin-top', 10)
-            ->setOption('margin-bottom', 10)
-            ->setOption('margin-left', 0)
-            ->setOption('margin-right', 0);
-
-        $pdfOutput = $pdf->output();
-        if ($pdfOutput === null || $pdfOutput === '') {
-            abort(500, 'Kon PDF niet genereren.');
-        }
-
-        $filename = 'Afroepbon_' . $releaseOrder->getReferenceNumber() . '.pdf';
-
-        return response()->streamDownload(
-            fn () => print($pdfOutput),
-            $filename,
-            [
-                'Content-Type' => 'application/pdf',
-            ],
-            'attachment'
-        );
-    }
-
-    public function purchaseOrderInvoice(int|string $id)
-    {
-        abort_unless(auth()->user()?->can('manage financials') ?? false, 403, 'Unauthorized action.');
-
-        $invoice = PurchaseOrderInvoice::findOrFail($id);
-        $media = $this->resolveMediaForPurchaseOrderInvoice($invoice);
-
-        if (! PurchaseOrderInvoice::isPreviewableDocumentMedia($media)) {
-            abort(404, 'PDF niet gevonden of ongeldig voor deze inkoopfactuur.');
-        }
-
-        $path = $media->getPath();
-
-        return response()->file($path, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . addslashes($media->file_name) . '"',
-        ]);
-    }
-
-    public function purchaseOrderInvoiceDownload(int|string $invoiceId)
-    {
-        abort_unless(auth()->user()?->can('manage financials') ?? false, 403, 'Unauthorized action.');
-
-        $invoice = PurchaseOrderInvoice::findOrFail($invoiceId);
-        $media = $this->resolveMediaForPurchaseOrderInvoice($invoice);
-
-        if (! PurchaseOrderInvoice::isPreviewableDocumentMedia($media)) {
-            abort(404, 'PDF niet gevonden of ongeldig voor deze inkoopfactuur.');
-        }
-
-        return response()->download($media->getPath(), $media->file_name);
-    }
-
-    /**
-     * PDF bij een inkoopfactuur: voorkeur media met custom property {@see purchase_order_invoice_id},
-     * anders match op factuurnummer of inkooporder-referentie in bestandsnaam.
-     */
-    private function resolveMediaForPurchaseOrderInvoice(PurchaseOrderInvoice $invoice): ?Media
-    {
-        return $invoice->resolveLinkedMedia();
-    }
-
     /**
      * Stream a media file for inline preview (e.g. images in modal).
      * Allowed: media on {@see BaseOrder} (orders/fittings) or {@see Note} (note attachments).
@@ -550,14 +328,12 @@ class DocumentController extends Controller
         $collectionName = $media->collection_name;
 
         $isOrderMedia = is_string($modelType) && is_a($modelType, BaseOrder::class, true);
-        $isPurchaseOrderDocument = $modelType === PurchaseOrder::class && $collectionName === 'documents';
-        $isReleaseOrderDocument = $modelType === ReleaseOrder::class && $collectionName === 'documents';
         $isProductDocument = $modelType === Product::class && $collectionName === 'documents';
         $isNoteAttachment = $modelType === Note::class && $collectionName === 'attachments';
         $isPackingSlip = is_string($modelType) && is_a($modelType, BaseOrder::class, true) && $collectionName === 'delivery_documents';
         $isDeliveryNotePdf = $modelType === DeliveryNote::class && $collectionName === 'pdf';
 
-        if (! $isOrderMedia && ! $isPurchaseOrderDocument && ! $isReleaseOrderDocument && ! $isProductDocument && ! $isNoteAttachment && ! $isPackingSlip && ! $isDeliveryNotePdf) {
+        if (! $isOrderMedia && ! $isProductDocument && ! $isNoteAttachment && ! $isPackingSlip && ! $isDeliveryNotePdf) {
             abort(404);
         }
 
@@ -640,9 +416,8 @@ class DocumentController extends Controller
 
         $isPackingSlip = is_string($modelType) && is_a($modelType, BaseOrder::class, true) && $collectionName === 'delivery_documents';
         $isDeliveryNotePdf = $modelType === DeliveryNote::class && $collectionName === 'pdf';
-        $isPurchaseOrderDocument = $modelType === PurchaseOrder::class && $collectionName === 'documents';
 
-        abort_unless($isPackingSlip || $isDeliveryNotePdf || $isPurchaseOrderDocument, 404);
+        abort_unless($isPackingSlip || $isDeliveryNotePdf, 404);
 
         $path = $media->getPath();
         abort_unless(file_exists($path), 404);
@@ -674,14 +449,5 @@ class DocumentController extends Controller
         abort_unless($media, 404, 'PDF niet gevonden voor deze factuur.');
 
         return response()->download($media->getPath(), $media->file_name);
-    }
-
-    protected function ensurePanelUserCanAccessDocuments(): void
-    {
-        abort_unless(
-            auth()->check() && auth()->user()->can('access filament panel'),
-            403,
-            'Unauthorized action.',
-        );
     }
 }

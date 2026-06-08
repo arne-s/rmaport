@@ -23,7 +23,7 @@ return new class extends Migration
                 ->nullOnDelete();
         });
 
-        $rdCustomerId = DB::table('customers')
+        $avCustomerId = DB::table('customers')
             ->where('type', 'rd')
             ->value('id');
 
@@ -40,12 +40,12 @@ return new class extends Migration
                 $billingKey,
                 $order->customer_id,
                 $order->company_id,
-                $rdCustomerId
+                $avCustomerId
             );
 
             $shippingCustomerId = match (true) {
                 $shippingKey === 'custom'            => null,
-                $shippingKey === 'rd'                => $rdCustomerId,
+                $shippingKey === 'rd'                => $avCustomerId,
                 str_starts_with((string) $shippingKey, 'company-') => $this->dealerCustomerIdFromKey($shippingKey),
                 default                              => $order->customer_id,
             };
@@ -111,10 +111,10 @@ return new class extends Migration
         ?string $billingKey,
         ?int $customerId,
         ?int $companyId,
-        ?int $rdCustomerId
+        ?int $avCustomerId
     ): ?int {
         if ($billingKey === 'rd') {
-            return $rdCustomerId;
+            return $avCustomerId;
         }
 
         if (str_starts_with((string) $billingKey, 'company-')) {

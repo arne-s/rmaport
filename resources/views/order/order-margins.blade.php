@@ -1,6 +1,6 @@
 @props(['order', 'companyView' => false])
 @php
-    $rdCustomer = App\Models\Customer::getRdMobilityCustomer();
+    $avCustomer = App\Models\Customer::getRdMobilityCustomer();
 @endphp
 
 @extends('order.order_layout')

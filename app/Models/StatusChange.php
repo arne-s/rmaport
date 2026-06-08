@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Models\Order\BaseOrder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StatusChange extends Model
 {
@@ -21,7 +20,7 @@ class StatusChange extends Model
                 return;
             }
 
-            // Later: order_id → BaseOrder, purchase_order_id → PurchaseOrder, enz.
+            // Later: order_id → BaseOrder, enz.
         });
     }
 
@@ -31,8 +30,6 @@ class StatusChange extends Model
         'changed_by',
         'meta',
         'order_id',
-        'purchase_order_id',
-        'release_order_id',
         'order_product_id',
     ];
 
@@ -51,16 +48,6 @@ class StatusChange extends Model
     public function order()
     {
         return $this->belongsTo(BaseOrder::class);
-    }
-
-    public function purchaseOrder()
-    {
-        return $this->belongsTo(PurchaseOrder::class);
-    }
-
-    public function releaseOrder(): BelongsTo
-    {
-        return $this->belongsTo(ReleaseOrder::class);
     }
 
     public function orderProduct()
@@ -126,29 +113,6 @@ class StatusChange extends Model
     public function setOrderId(?int $order_id)
     {
         $this->order_id = $order_id;
-        return $this;
-    }
-
-    public function getPurchaseOrderId(): ?int
-    {
-        return $this->purchase_order_id;
-    }
-
-    public function setPurchaseOrderId(?int $purchase_order_id)
-    {
-        $this->purchase_order_id = $purchase_order_id;
-        return $this;
-    }
-
-    public function getReleaseOrderId(): ?int
-    {
-        return $this->release_order_id;
-    }
-
-    public function setReleaseOrderId(?int $release_order_id)
-    {
-        $this->release_order_id = $release_order_id;
-
         return $this;
     }
 

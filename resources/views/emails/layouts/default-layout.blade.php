@@ -13,7 +13,7 @@
                 @if (!$hideLogo)
                     <tr>
                         <td align="center" height="100">
-                            <img src="{{ url('img/mail/logo2.png') }}" alt="RD Mobility" width="280" height="82">
+                            <img src="{{ url('img/logo-small.png') }}" alt="Autovision" width="280">
                         </td>
                     </tr>
                 @endif
@@ -24,7 +24,7 @@
                 </tr>
                 <tr>
                     <td align="center" style="color: #C1C1C1; font-size: 11px; padding-top: 30px">
-                        &copy; {{ date('Y') }} rdmobility.com
+                        &copy; {{ date('Y') }} autovision.nl
                     </td>
                 </tr>
             </table>

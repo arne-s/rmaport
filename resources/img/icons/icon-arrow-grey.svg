@@ -10,7 +10,7 @@
   </defs>
   <g id="Group_4077" data-name="Group 4077" transform="translate(148 6) rotate(90)">
     <g transform="matrix(0, -1, 1, 0, -6, 148)" filter="url(#Ellipse_16)">
-      <ellipse id="Ellipse_16-2" data-name="Ellipse 16" cx="69.501" cy="69.5" rx="69.501" ry="69.5" transform="translate(148 6) rotate(90)" fill="#3b3b3b"/>
+      <ellipse id="Ellipse_16-2" data-name="Ellipse 16" cx="69.501" cy="69.5" rx="69.501" ry="69.5" transform="translate(148 6) rotate(90)" fill="#032d5c"/>
     </g>
     <path id="Icon_ionic-ios-arrow-back" data-name="Icon ionic-ios-arrow-back" d="M8.627,25.021,27.567,6.1A3.577,3.577,0,1,0,22.5,1.045L1.042,22.488a3.57,3.57,0,0,0-.1,4.932L22.485,49.013a3.577,3.577,0,0,0,5.067-5.052Z" transform="translate(50.489 44.473)" fill="#fff"/>
   </g>

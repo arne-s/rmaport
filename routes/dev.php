@@ -5,8 +5,6 @@ use App\Http\Controllers\DocumentController;
 use App\Models\Document;
 use App\Models\Order\BaseOrder;
 use App\Models\Order\Order;
-use App\Models\PurchaseOrder;
-use App\Models\ReleaseOrder;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Facades\Route;
 
@@ -22,39 +20,6 @@ $resolveDevInvoice = function (int|string $id): BaseOrder {
     return $invoice;
 };
 
-// Tijdelijk: inkooporder-template bekijken (bijv. /dev/purchase-order/49)
-Route::get('/dev/purchase-order/{id}', function ($id) {
-    $order = PurchaseOrder::findOrFail($id);
-    return view('order.purchase_order', [
-        'order' => $order,
-        'products' => $order->orderProducts,
-    ]);
-})->name('dev.purchase_order');
-
-Route::get('/dev/release-order/{id}', function ($id) {
-    $order = ReleaseOrder::query()->with(['dealer', 'main'])->findOrFail($id);
-    $products = $order->orderProducts()
-        ->with(['product'])
-        ->get();
-    $specsFromQuote = [];
-    $quote = $order->main?->getNewestApprovedQuote();
-    if ($quote !== null) {
-        foreach ($quote->orderProducts()->get() as $op) {
-            $spec = $op->getAttributeSummaryBasic();
-            if ($spec === null || $spec === '') {
-                $summary = $op->getAttributeSummary();
-                $spec = is_array($summary) ? arrayToTextareaString($summary) : '';
-            }
-            $specsFromQuote[$op->product_id] = $spec;
-        }
-    }
-
-    return view('order.release_order', [
-        'order' => $order,
-        'products' => $products,
-        'specsFromQuote' => $specsFromQuote,
-    ]);
-})->name('dev.release_order');
 Route::get('/ordertest-dealer/{id}', function ($id) {
     $order = Order::find($id);
     return view('order.company-order', [

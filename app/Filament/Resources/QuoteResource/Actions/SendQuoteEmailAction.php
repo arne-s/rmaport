@@ -5,7 +5,7 @@ namespace App\Filament\Resources\QuoteResource\Actions;
 use App\Enums\CustomerType;
 use App\Enums\OrderGeneralStatus;
 use App\Filament\Resources\OrderResource\Support\OrderCustomerMailRecipients;
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Models\Customer;
 use App\Models\EmailTemplate;
 use App\Models\Order\Quote;
@@ -241,10 +241,10 @@ class SendQuoteEmailAction extends Action
     {
         $quote = $livewire->record;
         if (!$quote instanceof Quote) {
-            return ApprovePurchaseOrderEmailAction::getRecipientOptions();
+            return EmailRecipientResolver::getRecipientOptions();
         }
 
-        $options = ApprovePurchaseOrderEmailAction::getRecipientOptions();
+        $options = EmailRecipientResolver::getRecipientOptions();
         if ($quote->customer !== null) {
             $customerEmail = self::getCustomerEmail($quote, $livewire);
             $options['customer'] = 'Klant: ' . $quote->getCustomerAddressDisplayName() . ' <' . ($customerEmail ?: '—') . '>';
@@ -305,7 +305,7 @@ class SendQuoteEmailAction extends Action
                 continue;
             }
 
-            $emails = array_merge($emails, ApprovePurchaseOrderEmailAction::resolveRecipients([$key]));
+            $emails = array_merge($emails, EmailRecipientResolver::resolveRecipients([$key]));
         }
 
         return array_values(array_unique($emails));

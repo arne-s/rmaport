@@ -1,25 +1,15 @@
 @php
-    use App\Enums\OrderStatus;
     use App\Enums\OrderSubtype;
-    use App\Enums\ReleaseOrderStatus;
     use App\Filament\Resources\OrderResource\Pages\ViewOrder;
     use App\Filament\Resources\OrderResource\Widgets\CanceledProductsTableWidget;
     use App\Filament\Resources\OrderResource\Widgets\OpenProductsTableWidget;
-    use App\Filament\Resources\OrderResource\Widgets\PickedProductsTableWidget;
-    use App\Filament\Resources\OrderResource\Widgets\PurchasedProductsTableWidget;
-    use App\Filament\Resources\OrderResource\Widgets\ReleasedProductsTableWidget;
     use App\Models\Order\Main;
-    use App\Models\ReleaseOrder;
-    use Illuminate\Support\Collection;
 
     /** @var Main $record */
     /** @var ViewOrder $this */
 
     $openCount = $record->getPurchaseOpenProducts()?->count() ?? 0;
-    $purchasedCount = $record->getPurchasedProducts()?->count() ?? 0;
-    $releasedCount = $record->getReleasedProducts()?->count() ?? 0;
     $canceledCount = $record->getCanceledProducts()?->count() ?? 0;
-    $pickedCount = $record->getPurchasedPickedProducts()?->count() ?? 0;
 
     $adminCheck = $record->getAdministrationCheck();
     $advisorCheck = $record->getAdvisorCheck();
@@ -65,98 +55,13 @@
         </section>
     @endif
 
-    <section id="card-logistics" class="card">
-        <div class="flex justify-between items-start">
-            <h3 class="card__title">Logistiek</h3>
-        </div>
-
-
-        <div class="logistics">
-            <div class="logistics__head">
-                <div>Inkooporder</div>
-                <div>Datum</div>
-                <div>Leverancier</div>
-                <div class="right">Leverweek</div>
-            </div>
-
-            @php
-                $purchaseOrders = $record?->purchaseOrders;
-            @endphp
-            @foreach ($purchaseOrders as $purchaseOrder)
-                @if ($purchaseOrder->getStatus()?->value !== 'initial' && !empty($purchaseOrder->getStatus()))
-                    <div class="logistics__row">
-                        <div>
-                            @can('manage purchases')
-                            <a href="{{ route('filament.app.resources.purchase-orders.view', ['record' => $purchaseOrder->id]) }}" class="main-request-number-link hover:underline">
-                                {{ $purchaseOrder->reference_number }}
-                            </a>
-                            @else
-                            {{ $purchaseOrder->reference_number }}
-                            @endcan
-                        </div>
-
-                        <div class="date"> {{ $purchaseOrder->getSentAt()?->format('d-m-Y') }}</div>
-
-                        <div class="supplier">
-                            {{ $purchaseOrder->supplier?->getName() }}
-                        </div>
-
-
-                        @php
-                            $latestDeliveryDate = $purchaseOrder->getLatestExpectedDeliveryDateAttribute();
-                        @endphp
-                        <div class="right">
-                            @if (!empty($latestDeliveryDate))
-                                Week {{ $latestDeliveryDate?->format('W') }}
-                            @else
-                                -
-                            @endif
-                        </div>
-                    </div>
-                @endif
-            @endforeach
-
-            @php
-                /** @var Collection<int, ReleaseOrder> $releaseOrders */
-                $releaseOrders = $record?->releaseOrders ?? collect();
-                $visibleReleaseOrders = $releaseOrders->filter(
-                    fn (ReleaseOrder $ro): bool => $ro->getStatus() !== ReleaseOrderStatus::Initial
-                );
-            @endphp
-            @foreach ($visibleReleaseOrders as $releaseOrder)
-                <div class="logistics__row">
-                    <div>
-                        @can('manage purchases')
-                        <a href="{{ route('filament.app.resources.release-orders.view', ['record' => $releaseOrder->id]) }}" class="main-request-number-link hover:underline">
-                            {{ $releaseOrder->reference_number }}
-                        </a>
-                        @else
-                        {{ $releaseOrder->reference_number }}
-                        @endcan
-                    </div>
-
-                    <div class="date"> {{ $releaseOrder->getSentAt()?->format('d-m-Y') }}</div>
-
-
-                    <div class="dealer">
-                        {{ $releaseOrder->dealer?->getName() }}
-                    </div>
-
-
-                    <div class="right">-</div>
-                </div>
-            @endforeach
-
-        </div>
-    </section>
-
     <section
         id="products-section"
         class="card w-full"
         x-data="{
             storageKey: @js($productSubtabStorageKey),
             activeProductTab: 'open',
-            allowedTabs: ['open', 'purchased', 'released', 'picked', 'canceled'],
+            allowedTabs: ['open', 'canceled'],
             init() {
                 try {
                     const stored = sessionStorage.getItem(this.storageKey);
@@ -191,30 +96,6 @@
                 <button
                     type="button"
                     class="products-tab-btn py-2 px-1 border-b-2 font-medium text-sm transition-colors"
-                    :class="activeProductTab === 'purchased' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
-                    x-on:click="selectProductSubtab('purchased')"
-                >
-                    Ingekocht ({{ $purchasedCount }})
-                </button>
-                <button
-                    type="button"
-                    class="products-tab-btn py-2 px-1 border-b-2 font-medium text-sm transition-colors"
-                    :class="activeProductTab === 'released' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
-                    x-on:click="selectProductSubtab('released')"
-                >
-                    Afgeroepen ({{ $releasedCount }})
-                </button>
-                <button
-                    type="button"
-                    class="products-tab-btn py-2 px-1 border-b-2 font-medium text-sm transition-colors"
-                    :class="activeProductTab === 'picked' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
-                    x-on:click="selectProductSubtab('picked')"
-                >
-                    {{ $record->getSubtype() === \App\Enums\OrderSubtype::Part ? 'Gepickt / verzonden' : 'Gepickt' }} ({{ $pickedCount }})
-                </button>
-                <button
-                    type="button"
-                    class="products-tab-btn py-2 px-1 border-b-2 font-medium text-sm transition-colors"
                     :class="activeProductTab === 'canceled' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
                     x-on:click="selectProductSubtab('canceled')"
                 >
@@ -231,30 +112,6 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">Geen openstaande producten</p>
                 @endif
             </div>
-            <div x-show="activeProductTab === 'purchased'" x-cloak
-                 class="products-panel products-panel-purchased inkoopTab__table w-full">
-                @if ($record)
-                    @livewire(PurchasedProductsTableWidget::class, ['record' => $record], 'purchased-products-' . $record->id . '-' . $purchasedCount)
-                @else
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Geen ingekochte producten</p>
-                @endif
-            </div>
-            <div x-show="activeProductTab === 'released'" x-cloak
-                 class="products-panel products-panel-released inkoopTab__table w-full">
-                @if ($record)
-                    @livewire(ReleasedProductsTableWidget::class, ['record' => $record], 'released-products-' . $record->id . '-' . $releasedCount)
-                @else
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Geen afgeroepen producten</p>
-                @endif
-            </div>
-            <div x-show="activeProductTab === 'picked'" x-cloak
-                 class="products-panel products-panel-picked inkoopTab__table w-full">
-                @if ($record)
-                    @livewire(PickedProductsTableWidget::class, ['record' => $record], 'picked-products-' . $record->id . '-' . $pickedCount)
-                @else
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Geen gepickte producten</p>
-                @endif
-            </div>
             <div x-show="activeProductTab === 'canceled'" x-cloak
                  class="products-panel products-panel-canceled inkoopTab__table w-full">
                 @if ($record)
@@ -268,4 +125,3 @@
 </main>
 
 @include('livewire.modals.order-picked-confirm-modal')
-@include('livewire.modals.order-delivered-pick-confirm-modal')

@@ -295,9 +295,9 @@ class CustomerResource extends Resource
     /**
      * Bewerkpagina met actieve schema-tab ({@see EditCustomer} `persistTabInQueryString()`).
      *
-     * @param  string  $tabKey  {@see Tab::key()} op het tabblad, bv. `units`.
+     * @param  string  $tabKey  {@see Tab::key()} op het tabblad, bv. `documents`.
      */
-    public static function getEditUrlWithTab(Customer|string|int $record, string $tabKey = 'units'): string
+    public static function getEditUrlWithTab(Customer|string|int $record, string $tabKey = 'klantgegevens'): string
     {
         return static::urlWithTab(static::getUrl('edit', ['record' => $record]), $tabKey);
     }
@@ -305,7 +305,7 @@ class CustomerResource extends Resource
     /**
      * Voegt `?tab=…` (of `&tab=…`) toe voor klantschema-tabs.
      */
-    public static function urlWithTab(?string $url, string $tabKey = 'units'): ?string
+    public static function urlWithTab(?string $url, string $tabKey = 'klantgegevens'): ?string
     {
         if ($url === null || $url === '') {
             return $url;

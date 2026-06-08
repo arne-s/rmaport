@@ -34,8 +34,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FALLBACK_FROM_EMAIL', 'info@rdmobility.com'),
-        'name' => env('MAIL_FALLBACK_FROM_NAME', 'RD Mobility'),
+        'address' => env('MAIL_FALLBACK_FROM_EMAIL', 'info@autovision.nl'),
+        'name' => env('MAIL_FALLBACK_FROM_NAME', 'Autovision'),
     ],
 
     'mailers' => [

@@ -12,7 +12,6 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/filament.js',
                 'resources/js/filament_scripts.js',
-                'resources/js/appointment-calendar-picker-entry.js',
 
             ],
             refresh: [

@@ -4,7 +4,7 @@ namespace App\Filament\Resources\OrderResource\Support;
 
 use App\Actions\SendInvoiceMailAction;
 use App\Enums\CustomerType;
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Helpers\EmailHelper;
 use App\Models\Customer;
 use App\Models\Order\Order;
@@ -210,7 +210,7 @@ final class OrderConfirmMailRecipients
      */
     public static function recipientOptions(Order $order, mixed $livewire = null): array
     {
-        $options = ApprovePurchaseOrderEmailAction::getRecipientOptions();
+        $options = EmailRecipientResolver::getRecipientOptions();
 
         if ($order->customer !== null) {
             $customerEmail = OrderCustomerMailRecipients::resolveCustomerContactEmailForModal($order, $livewire);
@@ -272,7 +272,7 @@ final class OrderConfirmMailRecipients
                 continue;
             }
 
-            $emails = array_merge($emails, ApprovePurchaseOrderEmailAction::resolveRecipients([$key]));
+            $emails = array_merge($emails, EmailRecipientResolver::resolveRecipients([$key]));
         }
 
         return array_values(array_unique($emails));

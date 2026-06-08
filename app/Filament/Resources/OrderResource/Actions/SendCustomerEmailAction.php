@@ -15,7 +15,7 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\Section;
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 
 class SendCustomerEmailAction extends Action
 {
@@ -169,7 +169,7 @@ class SendCustomerEmailAction extends Action
     {
         $customer = $livewire->record;
 
-        $options = ApprovePurchaseOrderEmailAction::getRecipientOptions();
+        $options = EmailRecipientResolver::getRecipientOptions();
 
         if ($customer instanceof Customer) {
             $options['customer'] = 'Klant: ' . $customer->getName() . ' <' . ($customer->getEmail() ?: '—') . '>';
@@ -201,7 +201,7 @@ class SendCustomerEmailAction extends Action
                 continue;
             }
 
-            $emails = array_merge($emails, ApprovePurchaseOrderEmailAction::resolveRecipients([$key]));
+            $emails = array_merge($emails, EmailRecipientResolver::resolveRecipients([$key]));
         }
 
         return array_values(array_unique(array_filter($emails, fn ($v): bool => is_string($v) && $v !== '')));

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReportingResource\Pages\RevenueOverview;
-use App\Filament\Resources\ReportingResource\Pages\StatisticsOverview;
 use App\Models\Order\Order;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,9 +31,7 @@ class ReportingResource extends Resource
     public static function getPages(): array
     {
         return [
-            // 'index' => ListReportings::route('/'),
             'revenue' => RevenueOverview::route('/revenue'),
-            'statistics' => StatisticsOverview::route('/statistics'),
         ];
     }
 }

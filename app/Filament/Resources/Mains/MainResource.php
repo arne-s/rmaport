@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Mains;
 
-use App\Enums\AppointmentType;
 use App\Enums\CustomerAddressType;
 use App\Enums\CustomerStatus;
 use App\Enums\CustomerType;
@@ -19,16 +18,13 @@ use App\Filament\Resources\Mains\Pages\EditMain;
 use App\Filament\Resources\OrderResource\Pages\ViewOrder as ViewMain;
 use App\Filament\Resources\Resource;
 use App\Filament\Support\SalesAuthorization;
-use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Order\Main;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\SerialNumber;
 use App\Models\Setting;
 use App\Support\NavigationLink;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Grid;
@@ -44,7 +40,6 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 
 class MainResource extends Resource
@@ -78,8 +73,7 @@ class MainResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->with(['activeFittingAppointment']);
+        return parent::getEloquentQuery();
     }
 
     public static function getGlobalSearchEloquentQuery(): Builder
@@ -517,7 +511,6 @@ class MainResource extends Resource
                                 $set('customer_or_dealer', null);
                                 $set('customer_id', null);
                                 $set('billing_customer_id', null);
-                                $set('linked_serial_number', null);
                             }
                         }
                     }
@@ -537,101 +530,6 @@ class MainResource extends Resource
         ];
     }
 
-    protected static function createMainShowsFittingType(Get $get, bool $hideRequestTypeSelect): bool
-    {
-        if ($hideRequestTypeSelect) {
-            return true;
-        }
-
-        return (string) $get('subtype') === OrderSubtype::Unit->value;
-    }
-
-    protected static function createMainFittingTypeField(bool $hideRequestTypeSelect): Select
-    {
-        return Select::make('fitting_type')
-            ->label('Type passing')
-            ->options(BaseOrder::fittingTypes())
-            ->searchable()
-            ->columnSpanFull()
-            ->extraFieldWrapperAttributes(['class' => 'whitespace-nowrap'])
-            ->visible(fn (Get $get): bool => static::createMainShowsFittingType($get, $hideRequestTypeSelect))
-            ->required(fn (Get $get): bool => static::createMainShowsFittingType($get, $hideRequestTypeSelect))
-            ->dehydrated(fn (Get $get): bool => static::createMainShowsFittingType($get, $hideRequestTypeSelect))
-            ->validationMessages([
-                'required' => 'Selecteer een type passing.',
-            ]);
-    }
-
-    /**
-     * Serienummers voor “nieuwe aanvraag” bij een gekozen klant: eigenaar {@see SerialNumber::$owner_id},
-     * plus historische rijen alleen gekoppeld via {@see SerialNumber::$customer_debtor_number}
-     * (zelfde idee als {@see \App\Filament\Resources\CustomerResource\Widgets\CustomerUnitsWidget::getSerialNumbers()}).
-     */
-    protected static function querySerialNumbersForCreateMainCustomer(int $customerId): Builder
-    {
-        $rawDebtor = Customer::query()->whereKey($customerId)->value('debtor_number');
-        $normalizedDebtor = $rawDebtor !== null ? trim((string) $rawDebtor) : '';
-        $normalizedDebtor = $normalizedDebtor !== '' ? $normalizedDebtor : null;
-
-        return SerialNumber::query()
-            ->where('order_sub_type', OrderSubtype::Unit->value)
-            ->where(function (Builder $q) use ($customerId, $normalizedDebtor): void {
-                $q->where('owner_id', $customerId);
-
-                if ($normalizedDebtor !== null) {
-                    $q->orWhere(function (Builder $inner) use ($normalizedDebtor): void {
-                        $inner->whereNull('owner_id')
-                            ->whereRaw(
-                                'TRIM(COALESCE(customer_debtor_number, \'\')) = ?',
-                                [$normalizedDebtor]
-                            );
-                    });
-                }
-            });
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected static function getLinkedSerialNumberOptionsForCreateMain(?string $customerOrDealer): array
-    {
-        if (! is_string($customerOrDealer) || ! filled($customerOrDealer)) {
-            return [];
-        }
-
-        if (str_starts_with($customerOrDealer, 'customer-')) {
-            $customerId = (int) str_replace('customer-', '', $customerOrDealer);
-            $query = static::querySerialNumbersForCreateMainCustomer($customerId);
-        } elseif (str_starts_with($customerOrDealer, 'dealer-')) {
-            $dealerCustomerId = (int) str_replace('dealer-', '', $customerOrDealer);
-            $query = SerialNumber::query()
-                ->where('order_sub_type', OrderSubtype::Unit->value)
-                ->whereHas('order', fn ($q) => $q->where('billing_customer_id', $dealerCustomerId));
-        } else {
-            return [];
-        }
-
-        return $query
-            ->orderByDesc('order_date')
-            ->orderByDesc('updated_at')
-            ->get()
-            ->mapWithKeys(fn (SerialNumber $sn): array => [
-                $sn->serial_number => $sn->serial_number . ($sn->name ? ' – ' . $sn->name : ''),
-            ])
-            ->all();
-    }
-
-    protected static function getLinkedSerialNumberSelectPlaceholder(Get $get): string
-    {
-        $options = static::getLinkedSerialNumberOptionsForCreateMain(
-            is_string($get('customer_or_dealer')) ? $get('customer_or_dealer') : null,
-        );
-
-        return $options === []
-            ? 'Geen unit beschikbaar'
-            : 'Niet koppelen aan unit';
-    }
-
     public static function getCreateFormSchema(bool $hideRequestTypeSelect = false): array
     {
         return [
@@ -639,7 +537,6 @@ class MainResource extends Resource
                 ->extraAttributes(['class' => 'custom-form-design main-modal'])
                 ->schema([
                     ...static::createMainFormSubtypeFields($hideRequestTypeSelect),
-                    static::createMainFittingTypeField($hideRequestTypeSelect),
 
                     Select::make('customer_or_dealer')
                         ->columnSpanFull()
@@ -700,17 +597,6 @@ class MainResource extends Resource
                             return '';
                         })
                         ->afterStateUpdated(function ($state, Set $set, Get $get): void {
-                            $latestSn = null;
-                            if (is_string($state) && filled($state)) {
-                                if (preg_match('/^customer-(\d+)(?:-shipping)?$/', $state, $snMatches)) {
-                                    $latestSn = static::querySerialNumbersForCreateMainCustomer((int) $snMatches[1])
-                                        ->orderByDesc('order_date')
-                                        ->orderByDesc('updated_at')
-                                        ->value('serial_number');
-                                }
-                            }
-                            $set('linked_serial_number', $latestSn);
-
                             if (! is_string($state)) {
                                 $set('customer_id', null);
                                 $set('billing_customer_id', null);
@@ -722,7 +608,6 @@ class MainResource extends Resource
                             if (self::isNewCustomerSelection($state)) {
                                 $set('customer_id', null);
                                 $set('billing_customer_id', self::NEW_CUSTOMER_OPTION);
-                                $set('linked_serial_number', null);
                                 $set('customer_address_type', CustomerAddressType::Billing->value);
                                 $set('delivery_address_type', 'customer');
                                 $set('new_customer_type', CustomerType::B2C->value);
@@ -910,66 +795,11 @@ class MainResource extends Resource
                         ->selectablePlaceholder(false)
                         ->live(),
 
-                    Select::make('linked_serial_number')
-                        ->label('Serienummer')
-                        ->columnSpanFull()
-                        ->visible(fn (Get $get): bool =>
-                            in_array($get('subtype'), [OrderSubtype::Part->value, OrderSubtype::Service->value], true)
-                            && self::hasExistingCustomerOrDealerSelected($get)
-                        )
-                        ->placeholder(fn (Get $get): string => static::getLinkedSerialNumberSelectPlaceholder($get))
-                        ->options(fn (Get $get): array => static::getLinkedSerialNumberOptionsForCreateMain(
-                            is_string($get('customer_or_dealer')) ? $get('customer_or_dealer') : null,
-                        ))
-                        ->live(),
-
                     Hidden::make('customer_id')
                         ->dehydrated(),
 
                     Hidden::make('customer_address_type')
                         ->dehydrated(),
-
-                    Section::make(fn(Get $get): HtmlString => new HtmlString('<span style="font-size:14px">' . e(SerialNumber::query()->where('serial_number', $get('linked_serial_number'))->where('order_sub_type', OrderSubtype::Unit->value)->value('name') ?? 'Rolstoel informatie') . '</span>'))
-                        ->columnSpanFull()
-                        ->columns(1)
-                        ->extraAttributes(['style' => 'padding: 10px'])
-                        ->visible(fn(Get $get): bool =>
-                            in_array($get('subtype'), [OrderSubtype::Part->value, OrderSubtype::Service->value], true)
-                            && filled($get('linked_serial_number'))
-                        )
-                        ->schema([
-                            Placeholder::make('sn_info')
-                                ->hiddenLabel()
-                                ->content(function(Get $get): HtmlString {
-                                    $sn = SerialNumber::query()
-                                        ->where('serial_number', $get('linked_serial_number'))
-                                        ->where('order_sub_type', OrderSubtype::Unit->value)
-                                        ->first();
-                                    if (! $sn) {
-                                        return new HtmlString('');
-                                    }
-
-                                    $rows = [
-                                        'Klantnaam'      => $sn->customer_name ?? '-',
-                                        'Debiteurnummer' => $sn->customer_debtor_number ?? '-',
-                                        'Type'           => $sn->getType() ?? '-',
-                                        'Kleur'          => $sn->getColor() ?? '-',
-                                        'Ordernummer'    => $sn->order_number ?? '-',
-                                        'Orderdatum'     => $sn->getOrderDate()?->format('d-m-Y') ?? '-',
-                                    ];
-
-                                    $html = '<dl class="space-y-1 text-xs">';
-                                    foreach ($rows as $label => $value) {
-                                        $html .= '<div class="flex gap-1">'
-                                            . '<dt class="font-medium text-gray-700 shrink-0">' . e($label) . ':</dt>'
-                                            . '<dd class="text-gray-900">' . e($value) . '</dd>'
-                                            . '</div>';
-                                    }
-                                    $html .= '</dl>';
-
-                                    return new HtmlString($html);
-                                }),
-                        ]),
                 ]),
         ];
     }
@@ -1041,25 +871,6 @@ class MainResource extends Resource
                         return OrderStatus::formatWithMainIndexAndSubLabel($status);
                     })
                     ->sortable(),
-
-                TextColumn::make('activeFittingAppointment.datetime')
-                    ->label('Datum passing')
-                    ->date('j M Y')
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        $dir = strtoupper($direction) === 'DESC' ? 'desc' : 'asc';
-
-                        return $query->orderBy(
-                            Appointment::query()
-                                ->select('appointments.datetime')
-                                ->whereColumn('appointments.order_id', 'orders.id')
-                                ->where('appointments.type', AppointmentType::Fitting->value)
-                                ->where('appointments.is_active', true)
-                                ->orderByDesc('appointments.created_at')
-                                ->orderByDesc('appointments.id')
-                                ->limit(1),
-                            $dir,
-                        );
-                    }),
 
                 TextColumn::make('billingCustomer.name')
                     ->label('Dealer')

@@ -2,14 +2,12 @@
 
 namespace App\Filament\Resources\OrderResource\Pages\Traits;
 
-use App\Models\Appointment;
 use App\Models\Country;
 use App\Models\Customer;
 use App\Models\Order\Main;
 
 /**
- * Manages delivery location in the ViewOrder delivery tab.
- * Location is stored on the active delivery Appointment (location_type, location_customer_id, location_custom).
+ * Manages delivery location fields in the ViewOrder delivery tab.
  */
 trait DeliveryLocationTrait
 {
@@ -30,48 +28,8 @@ trait DeliveryLocationTrait
             $this->deliveryNoteGeneralNotes = (string)($note['general_notes'] ?? '');
         }
 
-        $appointment = $this->record->getActiveDeliveryAppointment();
-        $this->deliveryLocationType = $this->appointmentToDeliveryLocationFormValue($appointment);
-
-        if ($this->deliveryLocationType === 'custom') {
-            $custom = is_string($appointment?->location_custom)
-                ? json_decode($appointment->location_custom, true)
-                : null;
-            if (is_array($custom)) {
-                $this->deliveryLocationCustomName = (string)($custom['location'] ?? '');
-                $this->deliveryLocationCustomPostcode = (string)($custom['postcode'] ?? '');
-                $this->deliveryLocationCustomStreet = (string)($custom['street'] ?? '');
-                $this->deliveryLocationCustomHouseNumber = (string)($custom['house_number'] ?? '');
-                $this->deliveryLocationCustomHouseNumberAddition = (string)($custom['house_number_addition'] ?? '');
-                $this->deliveryLocationCustomCity = (string)($custom['city'] ?? '');
-                $this->deliveryLocationCustomCountryId = isset($custom['country_id']) ? (int)$custom['country_id'] : Country::NL_ID;
-            }
-        }
-    }
-
-    private function appointmentToDeliveryLocationFormValue(?Appointment $appointment): string
-    {
-        if ($appointment === null) {
-            $shippingCustomerId = $this->record->shipping_customer_id;
-            return $shippingCustomerId !== null ? 'customer-' . $shippingCustomerId : '';
-        }
-
-        $locationType = $appointment->location_type;
-
-        if ($locationType === 'phone') {
-            return 'phone';
-        }
-
-        if ($locationType === 'custom') {
-            return 'custom';
-        }
-
-        if ($locationType === 'customer' && $appointment->location_customer_id !== null) {
-            return 'customer-' . $appointment->location_customer_id;
-        }
-
         $shippingCustomerId = $this->record->shipping_customer_id;
-        return $shippingCustomerId !== null ? 'customer-' . $shippingCustomerId : '';
+        $this->deliveryLocationType = $shippingCustomerId !== null ? 'customer-' . $shippingCustomerId : '';
     }
 
     public function updatedDeliveryLocationType(?string $value): void
@@ -197,47 +155,6 @@ trait DeliveryLocationTrait
 
     private function persistDeliveryLocationFromFittingTab(): bool
     {
-        if ($this->record === null) {
-            return true;
-        }
-
-        $locationType = $this->deliveryLocationType !== '' ? $this->deliveryLocationType : null;
-        if ($locationType === null) {
-            return true;
-        }
-
-        $appointment = $this->record->getActiveDeliveryAppointment();
-        if ($appointment === null) {
-            return true;
-        }
-
-        if ($locationType === 'custom') {
-            $customData = array_filter([
-                'location'              => trim($this->deliveryLocationCustomName) !== '' ? trim($this->deliveryLocationCustomName) : null,
-                'postcode'              => trim($this->deliveryLocationCustomPostcode) !== '' ? trim($this->deliveryLocationCustomPostcode) : null,
-                'street'                => trim($this->deliveryLocationCustomStreet) !== '' ? trim($this->deliveryLocationCustomStreet) : null,
-                'house_number'          => trim($this->deliveryLocationCustomHouseNumber) !== '' ? trim($this->deliveryLocationCustomHouseNumber) : null,
-                'house_number_addition' => trim($this->deliveryLocationCustomHouseNumberAddition) !== '' ? trim($this->deliveryLocationCustomHouseNumberAddition) : null,
-                'city'                  => trim($this->deliveryLocationCustomCity) !== '' ? trim($this->deliveryLocationCustomCity) : null,
-                'country_id'            => $this->deliveryLocationCustomCountryId ?? Country::NL_ID,
-            ]);
-
-            $appointment->location_type = 'custom';
-            $appointment->location_customer_id = null;
-            $appointment->location_custom = $customData !== [] ? json_encode($customData) : null;
-        } elseif ($locationType === 'phone') {
-            $appointment->location_type = 'phone';
-            $appointment->location_customer_id = null;
-            $appointment->location_custom = null;
-        } elseif (str_starts_with($locationType, 'customer-')) {
-            $customerId = (int) str_replace('customer-', '', $locationType);
-            $appointment->location_type = 'customer';
-            $appointment->location_customer_id = $customerId;
-            $appointment->location_custom = null;
-        }
-
-        $appointment->save();
-
         return true;
     }
 

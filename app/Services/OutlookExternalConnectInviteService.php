@@ -35,7 +35,7 @@ class OutlookExternalConnectInviteService
             if ($this->isInviteFlowCompleted($invite->id)) {
                 return $this->redirectToResult(
                     true,
-                    'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
+                    'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook e-mailaccounts.',
                 );
             }
 
@@ -50,7 +50,7 @@ class OutlookExternalConnectInviteService
                 if ($this->isReusedAuthorizationCodeError($error) && $this->isInviteFlowCompleted($invite->id)) {
                     return $this->redirectToResult(
                         true,
-                        'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
+                        'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook e-mailaccounts.',
                     );
                 }
 
@@ -62,7 +62,7 @@ class OutlookExternalConnectInviteService
 
             return $this->redirectToResult(
                 true,
-                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
+                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook e-mailaccounts.',
             );
         });
     }
@@ -72,35 +72,7 @@ class OutlookExternalConnectInviteService
      */
     public function handleExternalCalendarCallback(OutlookExternalConnectInvite $invite, string $code): RedirectResponse
     {
-        return $this->withOAuthCodeLock('calendar', $code, function () use ($invite, $code): RedirectResponse {
-            if ($redirect = $this->redirectIfOAuthCodeAlreadyHandled('calendar', $code, $invite)) {
-                return $redirect;
-            }
-
-            if ($this->isInviteFlowCompleted($invite->id)) {
-                return $this->redirectToResult(
-                    true,
-                    'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
-                );
-            }
-
-            $error = app(MicrosoftCalendarService::class)->saveAccessToken($code);
-
-            if ($error !== null) {
-                if ($this->isReusedAuthorizationCodeError($error)
-                    && ($redirect = $this->redirectIfOAuthCodeAlreadyHandled('calendar', $code, $invite)) !== null) {
-                    return $redirect;
-                }
-
-                return $this->redirectToResult(false, $error);
-            }
-
-            $this->rememberOAuthCodeOutcome('calendar', $code, 'calendar_completed');
-
-            return redirect(app(MicrosoftMailService::class)->getAuthorizationUrl(
-                state: $this->buildState($invite->id, 'mail'),
-            ));
-        });
+        return $this->redirectToResult(false, 'Outlook-agenda koppeling is uitgeschakeld.');
     }
 
     /**
@@ -116,7 +88,7 @@ class OutlookExternalConnectInviteService
             if ($this->isInviteFlowCompleted($invite->id)) {
                 return $this->redirectToResult(
                     true,
-                    'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
+                    'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook e-mailaccounts.',
                 );
             }
 
@@ -131,7 +103,7 @@ class OutlookExternalConnectInviteService
                 if ($this->isReusedAuthorizationCodeError($error) && $this->isInviteFlowCompleted($invite->id)) {
                     return $this->redirectToResult(
                         true,
-                        'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
+                        'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook e-mailaccounts.',
                     );
                 }
 
@@ -143,7 +115,7 @@ class OutlookExternalConnectInviteService
 
             return $this->redirectToResult(
                 true,
-                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
+                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook e-mailaccounts.',
             );
         });
     }
@@ -282,7 +254,7 @@ class OutlookExternalConnectInviteService
         if ($this->isInviteFlowCompleted($invite->id)) {
             return $this->redirectToResult(
                 true,
-                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
+                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook e-mailaccounts.',
             );
         }
 
@@ -291,7 +263,7 @@ class OutlookExternalConnectInviteService
         if ($outcome === 'connect_completed' && $step === 'connect') {
             return $this->redirectToResult(
                 true,
-                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
+                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook e-mailaccounts.',
             );
         }
 
@@ -306,7 +278,7 @@ class OutlookExternalConnectInviteService
 
             return $this->redirectToResult(
                 true,
-                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook afspraken en Outlook e-mailaccounts.',
+                'Koppeling geslaagd. Het account is nu beschikbaar voor Outlook e-mailaccounts.',
             );
         }
 

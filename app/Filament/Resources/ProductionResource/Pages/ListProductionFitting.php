@@ -31,7 +31,7 @@ class ListProductionFitting extends ListProduction
     protected function getTableQuery(): Builder
     {
         return $this->getTableQueryFitting()
-            ->with(['advisor', 'customer', 'billingCustomer', 'activeFittingAppointment']);
+            ->with(['advisor', 'customer', 'billingCustomer']);
     }
 
     public function table(Table $table): Table
@@ -113,16 +113,6 @@ class ListProductionFitting extends ListProduction
                             ->orWhere('email', 'like', "%{$search}%"));
                     }),
 
-
-                TextColumn::make('activeFittingLocation')
-                    ->label('Locatie passing')
-                    ->state(fn(Main $record): string => $record->getActiveFittingAppointment()?->locationCustomer?->getName() ?? '')
-                    ->sortable(false),
-
-                TextColumn::make('activeFittingAppointmentDatetime')
-                    ->label('Datum passing')
-                    ->state(fn(Main $record): string => $record->getActiveFittingAppointment()?->datetime?->format('j M Y') ?? '')
-                    ->sortable(false),
 
                 TextColumn::make('billingCustomer.name')
                     ->label('Dealer')

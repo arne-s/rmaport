@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\CreditInvoiceResource\Actions;
 
 use App\Filament\Resources\OrderResource\Support\OrderCustomerMailRecipients;
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Helpers\EmailHelper;
 use App\Mail\CreditInvoiceMail;
 use App\Models\Order\CreditInvoice;
@@ -156,7 +156,7 @@ class SubmitCreditInvoiceEmailAction extends Action
     private static function getRecipientOptions($livewire): array
     {
         $record = $livewire->record;
-        $options = ApprovePurchaseOrderEmailAction::getRecipientOptions();
+        $options = EmailRecipientResolver::getRecipientOptions();
 
         if ($record instanceof CreditInvoice) {
             $customerLabel = OrderCustomerMailRecipients::customerRecipientOptionLabel($record, $livewire);
@@ -200,7 +200,7 @@ class SubmitCreditInvoiceEmailAction extends Action
                 continue;
             }
 
-            $emails = array_merge($emails, ApprovePurchaseOrderEmailAction::resolveRecipients([$key]));
+            $emails = array_merge($emails, EmailRecipientResolver::resolveRecipients([$key]));
         }
 
         return array_values(array_unique($emails));

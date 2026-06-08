@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'RD Mobility'),
+    'name' => env('APP_NAME', 'Autovision'),
 
     /*
     |--------------------------------------------------------------------------

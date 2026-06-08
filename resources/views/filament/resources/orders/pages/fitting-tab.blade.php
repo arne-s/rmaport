@@ -1,27 +1,13 @@
 @php
-    use App\Enums\AppointmentType;
-    use App\Enums\OrderStatus;
     use App\Filament\Resources\OrderResource\Pages\ViewOrder;
-    use App\Models\Appointment;
     use App\Models\Order\Main;
-    use Filament\Support\Enums\IconSize;
-    use Filament\Support\Icons\Heroicon;
-    use function Filament\Support\generate_icon_html;
 
     $fittingPreviousUnitCustomValue = ViewOrder::FITTING_NOTE_PREVIOUS_UNIT_CUSTOM_VALUE;
     $showFittingPreviousUnitCustomFields = ($fittingNotePreviousUnit ?? '') === $fittingPreviousUnitCustomValue;
 
     /** @var Main $record */
-    /** @var Appointment $appointment */
 
     $displayName = $record->getCustomerAddressDisplayName() ?: '-';
-    $displayPhone = $record->getCustomerContactPhone() ?: '-';
-    $displayMobile = $record->getCustomerContactMobile() ?: '-';
-    $activeFittingAppointment = $record->getActiveFittingAppointment();
-    $appointments = $record->getAppointments(AppointmentType::Fitting) ?? collect();
-    $showNewAppointmentButton = $appointments->isEmpty() && ! $record->is_completed;
-    $fittingOnHoldAppointmentId = $record->getFittingOnHoldAppointmentId();
-    $canModifyFittingAppointment = $record->canModifyFittingAppointment();
 @endphp
 
 <main class="ordersTab fittingTab">
@@ -34,70 +20,6 @@
                 <span class="v">{{ $displayName }}</span>
             </li>
             <li>
-                <span class="k">Datum/Tijdstip: </span>
-                <span class="v">
-                        @if($activeFittingAppointment?->datetime)
-                        {{ $activeFittingAppointment->datetime->translatedFormat('d-m-Y - H:i') }} uur
-                    @else
-                        -
-                    @endif
-                    </span>
-            </li>
-            <li>
-                <span class="k">&nbsp;</span>
-                <span class="v">&nbsp;</span>
-            </li>
-
-
-            @php
-                $fittingLocationType = $activeFittingAppointment?->location_type;
-                $fittingLocationCustomer = $activeFittingAppointment?->locationCustomer;
-                $fittingLocationAddress = $fittingLocationCustomer?->billingAddress;
-                $fittingLocationCustomJson = $activeFittingAppointment?->location_custom ? json_decode($activeFittingAppointment->location_custom, true) : null;
-                $fittingLocationName = $fittingLocationCustomer?->id === $record->customer_id
-                    ? $record->getCustomerAddressDisplayName()
-                    : ($fittingLocationCustomer?->getName() ?? ($fittingLocationCustomJson['name'] ?? '-'));
-            @endphp
-            <li>
-                <span class="k">Locatienaam:</span>
-                <span class="v">{{ $fittingLocationName }}</span>
-            </li>
-            @if($fittingLocationType === 'phone')
-                <li>
-                    <span class="k">Telefoonnummer:</span>
-                    <span class="v">{{ $displayPhone }}</span>
-                </li>
-                <li>
-                    <span class="k">Mobiel nummer:</span>
-                    <span class="v">{{ $displayMobile }}</span>
-                </li>
-            @elseif($fittingLocationCustomer?->id === $record->customer_id)
-                <li>
-                    <span class="k">Adres:</span>
-                    <span class="v">{{ $record->getCustomerAddress()?->getAddressTemplate() ?: '-' }}</span>
-                </li>
-            @elseif($fittingLocationAddress)
-                <li>
-                    <span class="k">Adres:</span>
-                    <span class="v">{{ $fittingLocationAddress->getAddressTemplate() ?: '-' }}</span>
-                </li>
-            @elseif($fittingLocationCustomJson)
-                <li>
-                    <span class="k">Adres:</span>
-                    <span class="v">{{ $fittingLocationCustomJson['address'] ?? '-' }}</span>
-                </li>
-            @else
-                <li>
-                    <span class="k">Adres:</span>
-                    <span class="v">-</span>
-                </li>
-            @endif
-            <li>
-                <span class="k">&nbsp;</span>
-                <span class="v">&nbsp;</span>
-            </li>
-
-            <li>
                 <span class="k">Adviseur:</span>
                 <span class="v">{{ $record?->advisor?->name ?? '-' }}</span>
             </li>
@@ -108,99 +30,6 @@
                 </li>
             @endif
         </ul>
-    </section>
-
-    <section id="card-fitting-afspraken" class="card">
-        <div class="card__header-row fi-ta-actions" style="margin-bottom: 18px">
-            <h3 class="card__title">Afspraken</h3>
-            @if ($showNewAppointmentButton)
-                <div class="card__header-action">
-                    <button
-                        type="button"
-                        class="fi-color fi-color-primary fi-bg-color-400 hover:fi-bg-color-300 dark:fi-bg-color-600 dark:hover:fi-bg-color-500 fi-text-color-900 hover:fi-text-color-800 dark:fi-text-color-950 dark:hover:fi-text-color-950 fi-btn fi-size-md fi-ac-btn-action"
-                        wire:click="mountAction('newAppointment')"
-                        wire:loading.attr="disabled"
-                    >
-                        <span wire:loading wire:target="mountAction('newAppointment')" class="inline-flex items-center fi-ac-btn-action-label">
-                            <x-filament::loading-indicator class="fi-icon fi-size-md animate-spin ml-2" />
-                        </span>
-                        <span wire:loading.remove wire:target="mountAction('newAppointment')"
-                              class="new-appointment-btn-label fi-ac-btn-action-label">
-                            <span class="new-appointment-btn-label__icon">
-                                {{ generate_icon_html(Heroicon::PlusCircle, size: IconSize::Medium) }}
-                            </span>
-                            <span class="new-appointment-btn-label__text">Nieuwe afspraak</span>
-                        </span>
-                    </button>
-                </div>
-            @endif
-        </div>
-        <div class="docs-list docs-list--afspraken">
-            <div class="docs-list-inner" style="margin-top: -10px">
-                <div class="doc doc--appointment doc--header">
-                    <span class="doc__aantal">Aantal</span>
-                    <span class="doc__passing-datum">Passing-datum</span>
-                    <span class="doc__tijdstip">Tijdstip</span>
-                    <span class="doc__reden">Reden wijziging</span>
-                    <span class="doc__acties">Acties</span>
-                </div>
-                @forelse($appointments as $index => $appointment)
-                    @php
-                    $time = $appointment->getCustomerDatetimeStart() ?? $appointment->getDatetime();
-                    $isActive = $appointment->is_active;
-                    $showReplanButton = ! $isActive
-                        && ! $record->is_completed
-                        && $fittingOnHoldAppointmentId !== null
-                        && $appointment->getId() === $fittingOnHoldAppointmentId;
-                    @endphp
-
-                    <div class="doc doc--appointment {{ $isActive ? 'doc--appointment-active' : '' }}" wire:key="fitting-appointment-{{ $appointment->getId() }}">
-                        <span class="doc__aantal" style="font-size: 12px">{{ $appointments->count()-$index }}</span>
-                        <div class="doc__left">
-                            <button
-                                type="button"
-                                class="doc__name doc__name--underline doc__name--clickable"
-                                wire:click="mountAction('viewFittingAppointment', { appointmentId: {{ $appointment->getId() }} })"
-                            >
-                                {{ $time?->translatedFormat('d-m-Y') }}
-                            </button>
-                        </div>
-                        <span class="doc__meta"
-                              style="font-size: 12px;">{{ $time?->translatedFormat('H:i') }}</span>
-                        <span class="doc__meta doc__meta--comment"
-                              style="font-size: 12px;">{{ $appointment->getComment() ?? '–' }}</span>
-                        <span class="doc__acties doc__appointment-actions">
-                            @if ($isActive && ! $record->is_completed && $canModifyFittingAppointment)
-                                <button
-                                    type="button"
-                                    class="doc__appointment-action-btn"
-                                    wire:click="mountAction('editFittingAppointment')"
-                                >
-                                    Wijzigen
-                                </button>
-                                <button
-                                    type="button"
-                                    class="doc__appointment-action-btn doc__appointment-action-btn--danger"
-                                    wire:click="mountAction('cancelFittingAppointment')"
-                                >
-                                    Annuleren
-                                </button>
-                            @elseif ($showReplanButton && $canModifyFittingAppointment)
-                                <button
-                                    type="button"
-                                    class="doc__appointment-action-btn"
-                                    wire:click="mountAction('editFittingAppointment', { appointmentId: {{ $appointment->getId() }} })"
-                                >
-                                    Opnieuw inplannen
-                                </button>
-                            @endif
-                        </span>
-                    </div>
-                @empty
-                    <p class="muted text-sm text-center pt-4">Geen afspraken.</p>
-                @endforelse
-            </div>
-        </div>
     </section>
 
     <livewire:documents-block
@@ -305,9 +134,6 @@
                                     <option value="{{ $fittingPreviousUnitCustomValue }}">
                                         Zelf ingeven
                                     </option>
-                                    @foreach($serialNumberOptions ?? [] as $id => $label)
-                                        <option value="{{ $id }}">{{ $label }}</option>
-                                    @endforeach
                                 </select>
                             </div>
                         </div>

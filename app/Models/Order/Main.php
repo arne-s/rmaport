@@ -11,39 +11,24 @@ use App\Actions\SendOrderConfirmMailAction;
 use App\Actions\SendAssemblyCompletedMailAction;
 use App\Actions\SendAssemblyStartMailAction;
 use App\Actions\SendPlanAssemblyMailAction;
-use App\Actions\SendOrderReadyForPurchaseMailAction;
 use App\Actions\SendOrderReadyForQuoteMailAction;
-use App\Enums\AppointmentType;
 use App\Enums\CustomerType;
-use App\Enums\FulfillmentType;
 use App\Enums\OrderGeneralStatus;
 use App\Enums\OrderSubtype;
 use App\Enums\OrderProductStatus;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Enums\PaymentTerms;
-use App\Enums\PurchaseOrderType;
-use App\Enums\ReleaseOrderStatus;
-use App\Models\Appointment;
 use App\Models\Address;
 use App\Models\Customer;
-use App\Models\MainReport;
-use App\Models\PurchaseOrderInvoice;
-use App\Models\SerialNumber;
 use App\Models\Setting;
 use App\Models\OrderStatusChange;
-use App\Models\ReleaseOrder;
-use App\Services\SerialNumberLedgerService;
-use App\Services\SerialNumberService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Log;
-use stdClass;
-use function Psy\debug;
 
 class Main extends BaseOrder
 {
@@ -55,11 +40,6 @@ class Main extends BaseOrder
     public function quotes(): HasMany
     {
         return $this->hasMany(Quote::class, 'main_id', 'id')->orderByDesc('rev');
-    }
-
-    public function mainReport(): HasOne
-    {
-        return $this->hasOne(MainReport::class, 'main_id', 'id');
     }
 
     public function getDescriptor(): string
@@ -289,17 +269,7 @@ class Main extends BaseOrder
 
     public function buildProductSummary(): string
     {
-        $openQuery = $this->getPurchaseOpenProducts();
-        $purchasedQuery = $this->getPurchasedProducts();
-        $releasedQuery = $this->getReleasedProducts();
-        $pickedQuery = $this->getPurchasedPickedProducts();
-
-        $openQty = (int)round((float)($openQuery?->sum('qty') ?? 0));
-        $purchasedQty = (int)round((float)($purchasedQuery?->sum('qty') ?? 0));
-        $releasedQty = (int)round((float)($releasedQuery?->sum('qty') ?? 0));
-        $pickedQty = (int)round((float)($pickedQuery?->sum('qty') ?? 0));
-
-        return "{$openQty} / {$purchasedQty} / {$releasedQty} / {$pickedQty}";
+        return '0 / 0 / 0 / 0';
     }
 
     public function recalculateProductSummary(): void
@@ -336,7 +306,7 @@ class Main extends BaseOrder
             }
 
             if ($this->getSubtype() !== OrderSubtype::Service) {
-                $serial = trim((string) ($this->getSerialNumberRecord()?->getSerialNumber() ?? ''));
+                $serial = trim((string) ($this->getSerialNumber() ?? ''));
                 if ($serial === '') {
                     throw ValidationException::withMessages([
                         'order_status' => [
@@ -386,148 +356,11 @@ class Main extends BaseOrder
         ]);
 
         $this->runOrderStatusTasks($from, $to);
-
-        if ($isCompleted && in_array($this->getSubtype(), [OrderSubtype::Part, OrderSubtype::Service], true)) {
-            app(SerialNumberLedgerService::class)->recordCompletedFollowUpMain($this);
-        }
-
-        if ($to === OrderStatus::ReadyForAssembly
-            && $this->getSubtype() === OrderSubtype::Service
-            && $this->getActiveServiceAppointment() !== null) {
-            $this->changeOrderStatus(OrderStatus::AssemblyPlanned);
-        }
-    }
-
-    /**
-     * @param \Illuminate\Support\Collection<int, OrderProductStatus|null> $lineStatuses
-     */
-    public static function deriveOrderStatusFromOrderProductLineStatuses(
-        \Illuminate\Support\Collection $lineStatuses,
-        ?self $main = null,
-    ): OrderStatus {
-        $isInactiveLine = static fn(?OrderProductStatus $s): bool => in_array($s, [
-            OrderProductStatus::Canceled,
-            OrderProductStatus::AddToStock,
-        ], true);
-
-        $raw = $lineStatuses
-            ->filter(fn (?OrderProductStatus $s): bool => $s !== null)
-            ->reject($isInactiveLine)
-            ->values();
-
-        $isPicked = static fn(?OrderProductStatus $s): bool => in_array($s, [
-            OrderProductStatus::PickedReceived,
-            OrderProductStatus::PickedStock,
-        ], true);
-
-        $lines = $raw->reject($isPicked)->values();
-
-        if ($raw->isEmpty()) {
-            return OrderStatus::OrderAwaitingPurchase;
-        }
-
-        $allPicked = $raw->every($isPicked);
-        if ($allPicked) {
-            if ($main !== null && $main->getSubtype() === OrderSubtype::Part) {
-                return OrderStatus::ReadyForPickup;
-            }
-
-            if ($main !== null && $main->usesUnitSimplifiedSalesFlow()) {
-                return OrderStatus::ReadyForPickup;
-            }
-
-            return OrderStatus::ReadyForAssembly;
-        }
-
-        $anyPicked = $raw->contains($isPicked);
-        if ($anyPicked) {
-            return OrderStatus::PartiallyReceived;
-        }
-
-        $eq = static fn(OrderProductStatus $v) => static fn(?OrderProductStatus $s): bool => $s === $v;
-        $isDeliveredTier = static fn(?OrderProductStatus $s): bool => $s === OrderProductStatus::Delivered;
-
-        if ($lines->every($isDeliveredTier)) {
-            return OrderStatus::Received;
-        }
-
-        if ($lines->contains($isDeliveredTier)) {
-            return OrderStatus::PartiallyReceived;
-        }
-
-        if ($lines->every($eq(OrderProductStatus::Confirmed))) {
-            return OrderStatus::PoConfirmed;
-        }
-
-        if ($lines->contains($eq(OrderProductStatus::Confirmed))) {
-            return OrderStatus::PartiallyConfirmed;
-        }
-
-        $isPurchasedOrSent = static fn(?OrderProductStatus $s): bool => in_array($s, [
-            OrderProductStatus::Ordered,
-            OrderProductStatus::Purchased,
-            OrderProductStatus::Sent,
-        ], true);
-
-        if ($lines->every($isPurchasedOrSent)) {
-            return OrderStatus::Purchased;
-        }
-
-        if ($lines->contains($isPurchasedOrSent)) {
-            return OrderStatus::PartiallyPurchased;
-        }
-
-        return OrderStatus::OrderAwaitingPurchase;
-    }
-
-    /**
-     * @param callable(OrderProduct): OrderProductStatus|null $resolveLineStatus
-     */
-    public function applyDerivedOrderStatusFromOrderProducts(callable $resolveLineStatus): void
-    {
-        $current = $this->getOrderStatus();
-        if ($current === null || $current === OrderStatus::Cancelled) {
-            return;
-        }
-
-        if (OrderStatus::getMainStatusFor($current) !== OrderStatus::Purchase) {
-            return;
-        }
-
-        $lines = $this->orderProducts()
-            ->whereHas('product', fn(Builder $q): Builder => $q->where('type', '!=', 'service'))
-            ->get(['id', 'status']);
-
-        if ($lines->isEmpty()) {
-            return;
-        }
-
-        $target = self::deriveOrderStatusFromOrderProductLineStatuses($lines->map($resolveLineStatus), $this);
-
-        if ($target === OrderStatus::Purchased && $this->getPurchaseOpenProducts()->exists()) {
-            $target = OrderStatus::PartiallyPurchased;
-        }
-
-        if ($current === $target) {
-            return;
-        }
-
-        $this->changeOrderStatus($target);
     }
 
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'main_id', 'id');
-    }
-
-    public function releaseOrders(): HasMany
-    {
-        return $this->hasMany(ReleaseOrder::class, 'main_id');
-    }
-
-    public function purchaseOrderInvoices(): HasMany
-    {
-        return $this->hasMany(PurchaseOrderInvoice::class, 'main_id');
     }
 
     /**
@@ -587,11 +420,6 @@ class Main extends BaseOrder
                 }
 
                 $this->changeOrderStatus(OrderStatus::OrderAwaitingPurchase);
-                try {
-                    app(SendOrderReadyForPurchaseMailAction::class)->execute($this);
-                } catch (\Exception $e) {
-                    Log::error('Failed to send order ready for purchase email: ' . $e->getMessage());
-                }
                 break;
             case OrderStatus::OrderAudit:
                 $advisor = $this->advisor;
@@ -626,11 +454,6 @@ class Main extends BaseOrder
                 $this->createUnitB2bInvoiceAfterOrderConfirmationIfNeeded();
 
                 $this->changeOrderStatus(OrderStatus::OrderAwaitingPurchase);
-                try {
-                    app(SendOrderReadyForPurchaseMailAction::class)->execute($this);
-                } catch (\Exception $e) {
-                    Log::error('Failed to send order ready for purchase email: ' . $e->getMessage());
-                }
 
                 break;
             case OrderStatus::QuoteDraft:
@@ -711,10 +534,6 @@ class Main extends BaseOrder
                     } catch (\Throwable $e) {
                         Log::error('Failed to queue slot invoice mail after delivered: ' . $e->getMessage(), ['exception' => $e]);
                     }
-                }
-
-                if ($this->getSubtype() !== OrderSubtype::Part) {
-                    app(SerialNumberService::class)->markDeliveredAtForMain($this);
                 }
 
                 break;
@@ -1159,14 +978,6 @@ class Main extends BaseOrder
     }
 
     /**
-     * Serial number row is keyed by child {@see Order} id, not the main row id.
-     */
-    public function getSerialNumberRecord(): ?SerialNumber
-    {
-        return $this->getLastOrder()?->serialNumber;
-    }
-
-    /**
      * Order / quote used for purchasing
      */
     public function getOrderForPurchase(): Order|Quote|null
@@ -1192,53 +1003,6 @@ class Main extends BaseOrder
         return $row instanceof Order ? $row : null;
     }
 
-    public function getPurchaseOpenProducts(): HasMany
-    {
-        return $this->orderProducts()
-            ->whereHas('product', function ($query) {
-                $query->where('type', '!=', 'service');
-            })
-            ->with(['releaseOrder', 'purchaseOrder', 'product.stock', 'supplier'])
-            ->where('status', '!=', 'picked_stock')
-            ->where('status', '!=', 'picked_received')
-            ->whereNotIn('status', [
-                OrderProductStatus::Canceled->value,
-                OrderProductStatus::AddToStock->value,
-            ])
-            ->whereDoesntHave('releaseOrder')
-            ->whereDoesntHave('purchaseOrder');
-    }
-
-    /* Purchase section queries */
-    public function getPurchasedProducts(): HasMany
-    {
-        return $this->orderProducts()
-            ->with(['purchaseOrder', 'product.stock', 'supplier'])
-            ->whereHas('purchaseOrder', fn(Builder $q): Builder => $q->where('type', PurchaseOrderType::Order))
-            ->where('fulfillment_type', FulfillmentType::MakeToOrder->value)
-            ->whereNotIn('status', [
-                'picked_stock',
-                'picked_received',
-                OrderProductStatus::Canceled->value,
-                OrderProductStatus::AddToStock->value,
-            ]);
-    }
-
-    public function getReleasedProducts(): HasMany
-    {
-        return $this->orderProducts()
-            ->with(['releaseOrder', 'product.stock', 'supplier'])
-            ->where('fulfillment_type', FulfillmentType::Release->value)
-            ->whereHas('releaseOrder', fn(Builder $q): Builder => $q->where('status', '!=', ReleaseOrderStatus::Initial))
-            ->whereNotIn('status', [
-                'picked_stock',
-                'picked_received',
-                OrderProductStatus::Canceled->value,
-                OrderProductStatus::AddToStock->value,
-            ])
-            ->whereNotNull('release_order_id');
-    }
-
     public function getCanceledProducts(): HasMany
     {
         return $this->orderProducts()
@@ -1248,14 +1012,6 @@ class Main extends BaseOrder
                 OrderProductStatus::AddToStock->value,
             ]);
     }
-
-    public function getPurchasedPickedProducts(): HasMany
-    {
-        return $this->orderProducts()
-            ->with(['purchaseOrder', 'product.stock', 'supplier'])
-            ->whereIn('status', ['picked_stock', 'picked_received']);
-    }
-
 
     /**
      * Generate the next main order UID. Format: A-{year}-{nr} e.g. A-2026-0001.
@@ -1292,154 +1048,54 @@ class Main extends BaseOrder
         return $this;
     }
 
-    /**
-     * Latest active passing appointment: type fitting, active, highest {@see Appointment::$created_at}.
-     *
-     * @return HasOne<Appointment, $this>
-     */
-    public function activeFittingAppointment(): HasOne
-    {
-        return $this->hasOne(Appointment::class, 'order_id')->ofMany(
-            ['created_at' => 'max'],
-            function (Builder $query): void {
-                $query->where('type', AppointmentType::Fitting)
-                    ->where(function (Builder $segmentQuery): void {
-                        $segmentQuery
-                            ->whereNull('segment')
-                            ->orWhere('segment', 'appointment');
-                    })
-                    ->where('is_active', true);
-            },
-        );
-    }
-
-    public function getActiveFittingAppointment(): ?Appointment
-    {
-        return $this->activeFittingAppointment;
-    }
-
     public function getFittingOnHoldAppointmentId(): ?int
     {
-        return $this->resolveOnHoldAppointmentId(OrderStatus::FittingOnHold, 'Passing on hold: opnieuw inplannen');
+        return null;
     }
 
     public function getDeliveryOnHoldAppointmentId(): ?int
     {
-        return $this->resolveOnHoldAppointmentId(OrderStatus::DeliveryOnHold, 'Levering on hold: opnieuw inplannen');
+        return null;
     }
 
     public function getAssemblyOnHoldAppointmentId(): ?int
     {
-        return $this->resolveOnHoldAppointmentId(OrderStatus::AssemblyOnHold, 'Montage on hold: opnieuw inplannen');
-    }
-
-    private function resolveOnHoldAppointmentId(OrderStatus $onHoldStatus, string $eventType): ?int
-    {
-        if ($this->getOrderStatus() !== $onHoldStatus) {
-            return null;
-        }
-
-        $event = $this->orderEvents()
-            ->where('type', $eventType)
-            ->latest('id')
-            ->first();
-
-        $appointmentId = $event?->data['appointment_id'] ?? null;
-
-        return is_numeric($appointmentId) ? (int) $appointmentId : null;
+        return null;
     }
 
     public function getFittingAt(): ?Carbon
     {
-        return $this->getActiveFittingAppointment()?->getDatetime();
+        return null;
     }
 
-    /**
-     * FittingCancelled may only be selected after a fitting appointment (and advisor) exists.
-     */
     public function isFittingCancellationSelectable(): bool
     {
-        if ($this->getAdvisorId() === null) {
-            return false;
-        }
-
-        return $this->appointments()
-            ->where('type', AppointmentType::Fitting)
-            ->exists();
+        return $this->getAdvisorId() !== null;
     }
 
-    /**
-     * Main record for fitting appointment e-mail previews (customer and advisor changed/confirmation mails).
-     */
     public static function resolveForFittingEmailPreview(bool $forCustomerMail = true): self
     {
-        $fittingAppointmentConstraints = function ($query) use ($forCustomerMail): void {
-            $query
-                ->where('type', AppointmentType::Fitting->value)
-                ->where('is_active', true);
+        return static::resolveForAdvisorOrderEmailPreview();
+    }
 
-            if ($forCustomerMail) {
-                $query->whereNotNull('customer_datetime_start');
-            } else {
-                $query->whereNotNull('datetime');
-            }
-        };
+    public static function resolveForDeliveryEmailPreview(bool $forCustomerMail = true): self
+    {
+        return static::resolveForAdvisorOrderEmailPreview();
+    }
 
-        $mainQuery = static::query()
-            ->with([
-                'customer',
-                'billingCustomer',
-                'advisor',
-                'activeFittingAppointment.locationCustomer.billingAddress',
-            ])
-            ->whereHas('activeFittingAppointment', $fittingAppointmentConstraints);
+    public function resolvePackingSlipRecipientAddress(): ?Address
+    {
+        return $this->getShippingAddress();
+    }
 
-        if ($forCustomerMail) {
-            $mainQuery->where(function ($query): void {
-                $query
-                    ->whereNotNull('customer_id')
-                    ->orWhereNotNull('billing_customer_id');
-            });
-        } else {
-            $mainQuery->whereNotNull('advisor_id');
-        }
+    public function getDeliveryAt(): ?Carbon
+    {
+        return null;
+    }
 
-        $main = $mainQuery->latest('id')->first();
-
-        if ($main === null) {
-            $fallback = static::query()
-                ->with([
-                    'customer',
-                    'billingCustomer',
-                    'advisor',
-                    'activeFittingAppointment.locationCustomer.billingAddress',
-                ])
-                ->whereHas('activeFittingAppointment', function ($query): void {
-                    $query
-                        ->where('type', AppointmentType::Fitting->value)
-                        ->where('is_active', true);
-                });
-
-            if (! $forCustomerMail) {
-                $fallback->whereNotNull('advisor_id');
-            }
-
-            $main = $fallback->latest('id')->first();
-        }
-
-        if ($main === null) {
-            $fallback = static::query()
-                ->with(['customer', 'billingCustomer', 'advisor'])
-                ->latest('id');
-
-            if (! $forCustomerMail) {
-                $fallback->whereNotNull('advisor_id');
-            }
-
-            $main = $fallback->first();
-        }
-
-        return $main ?? new static;
+    public function getServiceAt(): ?Carbon
+    {
+        return null;
     }
 
     /**
@@ -1472,173 +1128,5 @@ class Main extends BaseOrder
 
         return $main ?? new static;
     }
-
-    /**
-     * Main for delivery appointment e-mail previews (customer and advisor confirmation/changed/reminder mails).
-     */
-    public static function resolveForDeliveryEmailPreview(bool $forCustomerMail = true): self
-    {
-        $deliveryAppointmentConstraints = function ($query) use ($forCustomerMail): void {
-            $query
-                ->where('type', AppointmentType::Delivery->value)
-                ->where('is_active', true);
-
-            if ($forCustomerMail) {
-                $query->whereNotNull('customer_datetime_start');
-            } else {
-                $query->whereNotNull('datetime');
-            }
-        };
-
-        $deliveryWithLocationConstraints = function ($query) use ($deliveryAppointmentConstraints): void {
-            $deliveryAppointmentConstraints($query);
-            $query->where(function ($locationQuery): void {
-                $locationQuery
-                    ->where(function ($custom): void {
-                        $custom
-                            ->where('location_type', 'custom')
-                            ->whereNotNull('location_custom');
-                    })
-                    ->orWhere(function ($customer): void {
-                        $customer
-                            ->where('location_type', 'customer')
-                            ->whereNotNull('location_customer_id');
-                    });
-            });
-        };
-
-        $mainQuery = static::query()
-            ->with(['customer', 'billingCustomer', 'advisor'])
-            ->whereHas('appointments', $deliveryWithLocationConstraints);
-
-        if ($forCustomerMail) {
-            $mainQuery->where(function ($query): void {
-                $query
-                    ->whereNotNull('customer_id')
-                    ->orWhereNotNull('billing_customer_id');
-            });
-        } else {
-            $mainQuery->whereNotNull('advisor_id');
-        }
-
-        $main = $mainQuery->latest('id')->first();
-
-        if ($main === null) {
-            $fallback = static::query()
-                ->with(['customer', 'billingCustomer', 'advisor'])
-                ->whereHas('appointments', $deliveryAppointmentConstraints);
-
-            if ($forCustomerMail) {
-                $fallback->where(function ($query): void {
-                    $query
-                        ->whereNotNull('customer_id')
-                        ->orWhereNotNull('billing_customer_id');
-                });
-            } else {
-                $fallback->whereNotNull('advisor_id');
-            }
-
-            $main = $fallback->latest('id')->first();
-        }
-
-        if ($main === null) {
-            $fallback = static::query()
-                ->with(['customer', 'billingCustomer', 'advisor'])
-                ->latest('id');
-
-            if (! $forCustomerMail) {
-                $fallback->whereNotNull('advisor_id');
-            }
-
-            $main = $fallback->first();
-        }
-
-        return $main ?? new static;
-    }
-
-    public function getActiveDeliveryAppointment(): ?\App\Models\Appointment
-    {
-        return $this->appointments()
-            ->where('type', \App\Enums\AppointmentType::Delivery)
-            ->where(function (Builder $query): void {
-                $query
-                    ->whereNull('segment')
-                    ->orWhere('segment', 'appointment');
-            })
-            ->where('is_active', true)
-            ->latest('datetime')
-            ->first();
-    }
-
-    /**
-     * Afleveradres for packing slip PDF: active delivery appointment location, then {@see getShippingAddress()}.
-     */
-    public function resolvePackingSlipRecipientAddress(): ?Address
-    {
-        return $this->resolveDeliveryAppointmentLocationAddress($this->getActiveDeliveryAppointment())
-            ?? $this->getShippingAddress();
-    }
-
-    private function resolveDeliveryAppointmentLocationAddress(?Appointment $appointment): ?Address
-    {
-        if ($appointment === null) {
-            return null;
-        }
-
-        if ($appointment->location_type === 'phone') {
-            return null;
-        }
-
-        if ($appointment->location_type === 'custom') {
-            $custom = is_string($appointment->location_custom)
-                ? json_decode($appointment->location_custom, true)
-                : null;
-
-            if (! is_array($custom) || ! filled($custom['street'] ?? null)) {
-                return null;
-            }
-
-            return new Address([
-                'street' => $custom['street'] ?? null,
-                'house_number' => $custom['house_number'] ?? null,
-                'house_number_addition' => $custom['house_number_addition'] ?? null,
-                'postcode' => $custom['postcode'] ?? null,
-                'city' => $custom['city'] ?? null,
-                'location_name' => $custom['location'] ?? null,
-                'country_id' => $custom['country_id'] ?? null,
-            ]);
-        }
-
-        if ($appointment->location_type === 'customer' && $appointment->location_customer_id !== null) {
-            $customer = Customer::query()->find($appointment->location_customer_id);
-
-            return $customer?->getPhysicalDeliveryAddress();
-        }
-
-        return null;
-    }
-
-    public function getDeliveryAt(): ?Carbon
-    {
-        return $this->getActiveDeliveryAppointment()?->getDatetime();
-    }
-
-    public function getServiceAt(): ?Carbon
-    {
-        return $this->getActiveServiceAppointment()?->getDatetime();
-    }
-
-    public function getActiveServiceAppointment(): ?\App\Models\Appointment
-    {
-        return $this->appointments()
-            ->where('type', \App\Enums\AppointmentType::Service)
-            ->where(function (Builder $query): void {
-                $query
-                    ->whereNull('segment')
-                    ->orWhere('segment', 'appointment');
-            })
-            ->where('is_active', true)
-            ->latest('datetime')
-            ->first();
-    }
 }
+

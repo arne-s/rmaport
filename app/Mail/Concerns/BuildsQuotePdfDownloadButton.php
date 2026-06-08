@@ -15,7 +15,7 @@ trait BuildsQuotePdfDownloadButton
             return '';
         }
 
-        return '<a href="'.e($url).'" style="display:inline-block;padding:12px 24px;background:#3a3a3a;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">'.e($label).'</a>';
+        return '<a href="'.e($url).'" style="display:inline-block;padding:12px 24px;background:#032d5c;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">'.e($label).'</a>';
     }
 
     /**
@@ -39,7 +39,7 @@ trait BuildsQuotePdfDownloadButton
             return '';
         }
 
-        return '<a href="'.e($url).'" style="display:inline-block;padding:12px 24px;background:#3a3a3a;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">'.e($label).'</a>';
+        return '<a href="'.e($url).'" style="display:inline-block;padding:12px 24px;background:#032d5c;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">'.e($label).'</a>';
     }
 
     /**

@@ -8,11 +8,8 @@ use App\Enums\NoteStatus;
 use App\Enums\OrderGeneralStatus;
 use App\Enums\OrderStatus;
 use Filament\Schemas\Components\Grid;
-use App\Enums\PurchaseOrderStatus;
-use App\Enums\PurchaseOrderType;
 use App\Filament\Forms\Components\ToggleFilter;
 use App\Models\Customer;
-use App\Models\Supplier;
 use Carbon\Carbon;
 use Exception;
 use Filament\Forms\Components\CheckboxList;
@@ -308,53 +305,6 @@ abstract class Resource extends \Filament\Resources\Resource
 
 
     /**
-     * Get the "Supplier" filter for the resource table.
-     *
-     * @return Filter
-     * @throws Exception
-     */
-
-    public static function getSupplierFilter(?string $relationshipColumn = null): Filter
-    {
-        return Filter::make('supplier_id')
-            ->label('Leverancier')
-            ->indicateUsing(function (array $data): ?string {
-                if (empty($data['supplier_id'])) {
-                    return null;
-                }
-
-                $list = Supplier::query()
-                    ->whereIn('id', $data['supplier_id'])
-                    ->pluck('name');
-
-                if (count($list) > 1) {
-                    $str = $list->slice(0, 1)->join(', ') . ' (+' . (count($list) - 1) . ')';
-                } else {
-                    $str = $list->join(', ');
-                }
-
-                return 'Leverancier: ' . $str;
-            })
-            ->schema([
-                ToggleFilter::make()
-                    ->label('Leverancier')
-                    ->schema([
-                        CheckboxList::make('supplier_id')
-                            ->searchable(false)
-                            ->label('')
-                            ->options(fn() => Supplier::query()
-                                ->pluck('name', 'id')
-                                ->all()
-                            ),
-                    ]),
-            ])
-            ->query(fn(Builder $query, array $data): Builder => $query
-                ->when(!empty($data['supplier_id']), fn(Builder $query) => $query->whereHas($relationshipColumn ?? 'product.supplier', fn(Builder $q) => $q->whereIn('id', $data['supplier_id']))
-                )
-            );
-    }
-
-    /**
      * Get the "OrderStatus" filter for the resource table.
      *
      * @param array $options
@@ -462,56 +412,6 @@ abstract class Resource extends \Filament\Resources\Resource
     }
 
     /**
-     * Get the "PurchaseOrderStatus" filter for the resource table.
-     *
-     * @param array $options
-     * @param string $default
-     * @return Filter
-     * @throws Exception
-     */
-    public static function getPurchaseOrderStatusFilter(array $options, string $default = ''): Filter
-    {
-        if (!$options) {
-            $options = PurchaseOrderStatus::visibleStatuses();
-        }
-
-        $checkboxlist = CheckboxList::make('status')
-            ->searchable(false)
-            ->label('')
-            ->options($options);
-
-        if (!empty($default)) {
-            $checkboxlist->default([$default]);
-        }
-
-        return Filter::make('status')
-            ->label('Status')
-            ->schema([
-                ToggleFilter::make()
-                    ->label('Status')
-                    ->schema([
-                        $checkboxlist
-                    ])
-            ])
-            ->indicateUsing(function (array $data) use ($options): ?string {
-                if (!$data['status']) {
-                    return null;
-                }
-
-                foreach ($data['status'] as &$status) {
-                    $status = $options[$status];
-                }
-                return 'Status: ' . implode(', ', $data['status'] ?? []);
-            })
-            ->query(fn(Builder $query, array $data): Builder => $query
-                ->when($data['status'], fn(Builder $query, $ids) => $query
-                    ->whereIn('status', $ids)
-                )
-            );
-    }
-
-
-    /**
      * Get the "MailLogStatus" filter for the resource table.
      *
      * @param array $options
@@ -559,55 +459,6 @@ abstract class Resource extends \Filament\Resources\Resource
     }
 
 
-
-    /**
-     * Get the "PurchaseOrderType" filter for the resource table.
-     *
-     * @param array $options
-     * @param string $default
-     * @return Filter
-     * @throws Exception
-     */
-    public static function getPurchaseOrderTypeFilter(?array $options = null, string $default = ''): Filter
-    {
-        if (!$options) {
-            $options = PurchaseOrderType::labels();
-        }
-
-        $checkboxlist = CheckboxList::make('type')
-            ->searchable(false)
-            ->label('')
-            ->options($options);
-
-        if (!empty($default)) {
-            $checkboxlist->default([$default]);
-        }
-
-        return Filter::make('type')
-            ->label('Type')
-            ->schema([
-                ToggleFilter::make()
-                    ->label('Type')
-                    ->schema([
-                        $checkboxlist
-                    ])
-            ])
-            ->indicateUsing(function (array $data) use ($options): ?string {
-                if (!$data['type']) {
-                    return null;
-                }
-
-                foreach ($data['type'] as &$type) {
-                    $type = $options[$type];
-                }
-                return 'Type: ' . implode(', ', $data['type'] ?? []);
-            })
-            ->query(fn(Builder $query, array $data): Builder => $query
-                ->when($data['type'], fn(Builder $query, $ids) => $query
-                    ->whereIn('type', $ids)
-                )
-            );
-    }
 
     /**
      * Create a status filter for a resource table.

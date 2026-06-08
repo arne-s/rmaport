@@ -5,7 +5,6 @@ namespace App\Filament\Resources\OrderResource\Widgets;
 use App\Filament\Resources\OrderResource\Widgets\Concerns\ConfiguresClickableProductNameColumn;
 use App\Filament\Resources\OrderResource\Widgets\Concerns\DerivesMainOrderStatusAfterProductLineSave;
 use App\Filament\Resources\OrderResource\Widgets\Concerns\LocksProductTabWhenMainOrderPhase;
-use App\Filament\Support\PurchaseAuthorization;
 use App\Filament\Support\RecordLockNavigation;
 use App\Enums\OrderProductStatus;
 use App\Enums\ProductType;
@@ -55,7 +54,7 @@ class CanceledProductsTableWidget extends TableWidget
             ->columns([
                 $this->configureProductNameColumn(
                     TextColumn::make('product.name')
-                        ->label('Artikelnaam RD Mobility')
+                        ->label('Artikelnaam')
                         ->placeholder('-')
                         ->sortable(),
                 ),
@@ -69,7 +68,7 @@ class CanceledProductsTableWidget extends TableWidget
 
                 $this->configureClickableProductUidColumn(
                     TextColumn::make('product.uid')
-                        ->label('Artikelnummer RD Mobility')
+                        ->label('Artikelnummer')
                         ->placeholder('-')
                         ->sortable(),
                 ),
@@ -130,7 +129,9 @@ class CanceledProductsTableWidget extends TableWidget
                         return $record !== null && $record->getStatus() === OrderProductStatus::AddToStock;
                     })
                     ->updateStateUsing(function (OrderProduct $record, OrderProductStatus|string|null $state): void {
-                        abort_unless(PurchaseAuthorization::canManage(), 403);
+                        if (! $this->canInteractWithPurchaseTabProducts()) {
+                            return;
+                        }
 
                         if ($record->getStatus() === OrderProductStatus::AddToStock) {
                             return;

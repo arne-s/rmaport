@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\OrderResource\Actions;
 
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Models\Customer;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
@@ -184,7 +184,7 @@ class SendDealerEmailAction extends Action
     {
         $dealer = $livewire->record;
 
-        $options = ApprovePurchaseOrderEmailAction::getRecipientOptions();
+        $options = EmailRecipientResolver::getRecipientOptions();
 
         if ($dealer instanceof Customer) {
             $options['dealer'] = 'Dealer: ' . $dealer->getName() . ' <' . ($dealer->getEmail() ?: '—') . '>';
@@ -211,7 +211,7 @@ class SendDealerEmailAction extends Action
                 continue;
             }
 
-            $emails = array_merge($emails, ApprovePurchaseOrderEmailAction::resolveRecipients([$key]));
+            $emails = array_merge($emails, EmailRecipientResolver::resolveRecipients([$key]));
         }
 
         return array_values(array_unique(array_filter($emails, fn ($v): bool => is_string($v) && $v !== '')));

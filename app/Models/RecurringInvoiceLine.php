@@ -73,11 +73,4 @@ class RecurringInvoiceLine extends Model
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * @return BelongsTo<Supplier, $this>
-     */
-    public function supplier(): BelongsTo
-    {
-        return $this->belongsTo(Supplier::class);
-    }
 }

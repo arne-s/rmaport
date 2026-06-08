@@ -1,9 +1,9 @@
 @php
     /**
      * @var \App\Models\Order\Order $order
-     * @var App\Models\Customer $rdMobility
+     * @var App\Models\Customer $avMobility
      */
-    $RdMobility = \App\Models\Customer::getRdMobilityCustomer();
+    $avMobility = \App\Models\Customer::getRdMobilityCustomer();
 @endphp
 @extends('emails.layouts.default-layout')
 

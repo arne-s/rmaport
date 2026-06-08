@@ -10,7 +10,7 @@ use App\Filament\Resources\OrderResource\Pages\ViewOrder;
 use App\Filament\Resources\OrderResource\Support\OrderCustomerMailRecipients;
 use App\Filament\Resources\OrderResource\Support\PackingSlipDeliveryProofFormSchema;
 use App\Filament\Resources\OrderResource\Support\PackingSlipMailRecipients;
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Filament\Support\RecordLockNavigation;
 use App\Mail\PackingSlipMail;
 use App\Models\MailSenderProfile;
@@ -478,14 +478,14 @@ class SendPackingSlipAction extends Action
         $main = $livewire->record instanceof Main ? $livewire->record : null;
         $order = $main !== null ? self::resolveOrderForPackingSlip($main) : null;
 
-        $options = ApprovePurchaseOrderEmailAction::getRecipientOptions();
+        $options = EmailRecipientResolver::getRecipientOptions();
 
         $deliveryLabel = PackingSlipMailRecipients::recipientOptionLabel($main, $order);
         if ($deliveryLabel !== null) {
             $options[PackingSlipMailRecipients::RECIPIENT_KEY] = $deliveryLabel;
         }
 
-        $options[PackingSlipMailRecipients::INFO_CC_EMAIL] = 'Info: info@rdmobility.com <'
+        $options[PackingSlipMailRecipients::INFO_CC_EMAIL] = 'Info: info@autovision.nl <'
             .PackingSlipMailRecipients::INFO_CC_EMAIL.'>';
 
         $template = PackingSlipMail::emailTemplate();
@@ -614,18 +614,6 @@ class SendPackingSlipAction extends Action
 
     public static function resolveSerialNumberDisplay(Main $main, mixed $livewire = null): string
     {
-        if ($livewire instanceof ViewOrder) {
-            $fromPage = trim($livewire->orderSerialNumber);
-            if ($fromPage !== '') {
-                return $fromPage;
-            }
-        }
-
-        $fromRecord = trim((string) ($main->getSerialNumberRecord()?->getSerialNumber() ?? ''));
-        if ($fromRecord !== '') {
-            return $fromRecord;
-        }
-
         $fromMain = trim((string) ($main->getSerialNumber() ?? ''));
         if ($fromMain !== '') {
             return $fromMain;

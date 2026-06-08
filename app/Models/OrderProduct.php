@@ -74,7 +74,6 @@ use Throwable;
  * @property-read float $item_price_ex_vat
  * @property ProductType|null $type
  * @property bool $is_configurable
- * @property-read Supplier|null $supplier
  * @method static Builder|OrderProduct whereIsConfigurable($value)
  * @method static Builder|OrderProduct whereItemPriceExMargin($value)
  * @property float $vat
@@ -87,10 +86,7 @@ use Throwable;
  * @property string|null $doc
  * @property Carbon|null $delivered_at
  * @property Carbon|null $purchased_at
- * @property int|null $purchase_order_id
- * @property-read PurchaseOrder|null $purchaseOrder
  * @method static Builder|OrderProduct whereDoc($value)
- * @method static Builder|OrderProduct wherePurchaseOrderId($value)
  * @property string|null $attribute_summary_basic
  * @method static Builder|OrderProduct whereAttributeSummaryBasic($value)
  * @method static Builder|OrderProduct whereReference($value)
@@ -136,7 +132,7 @@ use Throwable;
 class OrderProduct extends Model implements HasMedia
 {
     /**
-     * When > 0, line status changes do not re-derive parent PO/RO/Main (avoids feedback loops during bulk header→lines sync).
+     * When > 0, line status changes do not re-derive parent Main (avoids feedback loops during bulk header→lines sync).
      */
     private static int $parentDerivationSuppressionDepth = 0;
 
@@ -155,8 +151,6 @@ class OrderProduct extends Model implements HasMedia
         'company_sales_price_discount',
         'company_sales_price_credited',
         'product_id',
-        'purchase_order_id',
-        'release_order_id',
         'supplier_id',
         'type',
         'attribute_summary',
@@ -334,29 +328,6 @@ class OrderProduct extends Model implements HasMedia
         return $this->belongsTo(PackingSlip::class);
     }
 
-    public function supplier(): BelongsTo
-    {
-        return $this->belongsTo(Supplier::class);
-    }
-
-    public function purchaseOrder(): BelongsTo
-    {
-        return $this->belongsTo(PurchaseOrder::class)
-            ->where('status', '!=', 'initial');
-    }
-
-    public function releaseOrder(): BelongsTo
-    {
-        return $this->belongsTo(ReleaseOrder::class)
-            ->where('status', '!=', 'initial');
-    }
-
-    public function initialPurchaseOrder(): BelongsTo
-    {
-        return $this->belongsTo(PurchaseOrder::class)
-            ->where('status', '!=', 'initial');
-    }
-
     public function order(): BelongsTo
     {
         return $this->belongsTo(BaseOrder::class, 'order_id');
@@ -530,35 +501,6 @@ class OrderProduct extends Model implements HasMedia
     public function setOrderId(?int $order_id): OrderProduct
     {
         $this->order_id = $order_id;
-        return $this;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getPurchaseOrderId(): ?int
-    {
-        return $this->purchase_order_id;
-    }
-
-    /**
-     * @param int|null $purchase_order_id
-     * @return OrderProduct $purchase_order_id
-     */
-    public function setPurchaseOrderId(?int $purchase_order_id): OrderProduct
-    {
-        $this->purchase_order_id = $purchase_order_id;
-        return $this;
-    }
-
-    public function getReleaseOrderId(): ?int
-    {
-        return $this->release_order_id;
-    }
-
-    public function setReleaseOrderId(?int $release_order_id): OrderProduct
-    {
-        $this->release_order_id = $release_order_id;
         return $this;
     }
 
@@ -775,11 +717,6 @@ class OrderProduct extends Model implements HasMedia
 
             return $op->getStatus();
         };
-
-        if (self::$parentDerivationSuppressionDepth === 0) {
-            $this->purchaseOrder?->applyDerivedStatusFromOrderProducts($resolveLineStatus);
-            $this->releaseOrder?->applyDerivedStatusFromOrderProducts($resolveLineStatus);
-        }
 
         $order = $this->order;
         $main = $order instanceof Main ? $order : $order?->getMain();

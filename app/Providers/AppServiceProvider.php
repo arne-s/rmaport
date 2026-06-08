@@ -104,7 +104,6 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         Livewire::component('global-edit-note', \App\Livewire\GlobalEditNote::class);
-        Livewire::component('global-planning-calendar', \App\Livewire\GlobalPlanningCalendar::class);
         Livewire::component('global-create-main', \App\Livewire\GlobalCreateMain::class);
         Livewire::component('global-quote-preview-placeholder', \App\Livewire\GlobalQuotePreviewPlaceholder::class);
         Livewire::component('note-documents-panel', \App\Livewire\NoteDocumentsPanel::class);

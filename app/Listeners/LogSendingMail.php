@@ -30,8 +30,8 @@ class LogSendingMail
             $token = MailSenderProfile::where('is_default', true)->first()?->microsoftMailToken;
             $fromAddress = $token?->microsoft_email ?? config('mail.fallback_from_address');
             $fromName = $token?->microsoft_email
-                ? config('app.name', 'RD Mobility')
-                : (config('mail.fallback_from_name') ?? config('app.name', 'RD Mobility'));
+                ? config('app.name', 'Autovision')
+                : (config('mail.fallback_from_name') ?? config('app.name', 'Autovision'));
 
             if ($fromAddress) {
                 $message->from($fromAddress, $fromName);

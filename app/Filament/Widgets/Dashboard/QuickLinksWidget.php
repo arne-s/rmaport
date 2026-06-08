@@ -4,7 +4,6 @@ namespace App\Filament\Widgets\Dashboard;
 
 use App\Filament\Actions\CreateMainAction;
 use App\Filament\Resources\CustomerResource;
-use App\Filament\Support\PurchaseAuthorization;
 use App\Filament\Support\SalesAuthorization;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -76,14 +75,6 @@ class QuickLinksWidget extends BaseWidget implements HasActions
                     ->extraAttributes([
                         'wire:click.prevent' => "\$dispatch('open-create-main-dashboard-order')",
                     ]),
-            ] : []),
-
-            ...(PurchaseAuthorization::canManage() ? [
-                Action::make('Inkooporder')
-                    ->button()
-                    ->color('black')
-                    ->icon('heroicon-s-plus-circle')
-                    ->url(route('filament.app.resources.stock-orders.create')),
             ] : []),
         ]);
 

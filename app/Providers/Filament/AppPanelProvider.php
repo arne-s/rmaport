@@ -98,10 +98,6 @@ class AppPanelProvider extends PanelProvider
                 fn (): \Illuminate\Contracts\View\View => view('filament.hooks.exact-sync-toast-listener')
             )
             ->renderHook(
-                PanelsRenderHook::SCRIPTS_BEFORE,
-                fn (): \Illuminate\Contracts\View\View => view('filament.hooks.appointment-calendar-picker-scripts')
-            )
-            ->renderHook(
                 PanelsRenderHook::AUTH_PASSWORD_RESET_REQUEST_FORM_BEFORE,
                 fn () => new HtmlString('<span class="resetPasswordDescription">Voer je emailadres in en check je mailbox om je wachtwoord te wijzigen. Check ook de spam.</span>')
             )

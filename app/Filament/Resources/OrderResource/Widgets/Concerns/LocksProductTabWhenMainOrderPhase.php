@@ -4,7 +4,6 @@ namespace App\Filament\Resources\OrderResource\Widgets\Concerns;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderSubtype;
-use App\Filament\Support\PurchaseAuthorization;
 use App\Models\Order\Main;
 
 trait LocksProductTabWhenMainOrderPhase
@@ -25,6 +24,6 @@ trait LocksProductTabWhenMainOrderPhase
 
     protected function canInteractWithPurchaseTabProducts(): bool
     {
-        return PurchaseAuthorization::canManage() && ! $this->isProductTabInteractionLocked();
+        return ! $this->isProductTabInteractionLocked();
     }
 }

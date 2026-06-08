@@ -7,7 +7,6 @@ use App\Mail\Traits\HasTemplate;
 use App\Models\EmailTemplate;
 use App\Models\MailSenderProfile;
 use App\Models\Order\Main;
-use App\Enums\AppointmentType;
 use App\Enums\OrderSubtype;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -107,10 +106,6 @@ class VerifyCustomerPaymentMail extends Mailable
     {
         $main = Main::query()
             ->where('subtype', OrderSubtype::Unit)
-            ->whereHas('appointments', function ($q): void {
-                $q->where('type', AppointmentType::Delivery)
-                    ->where('is_active', true);
-            })
             ->latest()
             ->first();
 

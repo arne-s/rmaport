@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\MicrosoftMailToken;
-use App\Models\MicrosoftToken;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +14,6 @@ class MicrosoftExternalConnectService
     private const GRAPH_URL = 'https://graph.microsoft.com/v1.0';
 
     private const SCOPES = [
-        'Calendars.ReadWrite',
         'MailboxSettings.Read',
         'Mail.Send',
         'offline_access',
@@ -85,14 +83,6 @@ class MicrosoftExternalConnectService
             'refresh_token' => $response['refresh_token'] ?? null,
             'expires_at' => now()->addSeconds((int) ($response['expires_in'] ?? 3600)),
         ];
-
-        MicrosoftToken::updateOrCreate(
-            ['microsoft_email' => $email],
-            [
-                ...$tokenPayload,
-                'timezone' => $this->resolveTimezone($response['access_token']),
-            ],
-        );
 
         MicrosoftMailToken::updateOrCreate(
             ['microsoft_email' => $email],

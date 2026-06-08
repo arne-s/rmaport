@@ -41,32 +41,6 @@ $authUser->can('manage users')
             </a>
         </div>
 
-        @can('manage sales')
-        <template x-if="activeMenu === null || activeMenu === 'planning'">
-            <div class="sidebar-menuitem">
-                <div class="sidebar-menuitem-wrapper" x-show="activeMenu === null" x-on:click="activeMenu = 'planning'">
-                    <div class="sidebar-menuitem-info">
-                        <img class="sidebar-menuitem-icon" src="{{ asset('/img/icons/user-menu/calendar.svg') }}" alt="menu-icon">
-                        <span class="sidebar-menuitem-name">Planning</span>
-                    </div>
-                </div>
-
-                <div class="menuitem-subitems" x-show="activeMenu === 'planning'"
-                    x-transition:enter="transition-opacity duration-200"
-                    x-transition:enter-start="opacity-0"
-                    x-transition:enter-end="opacity-100">
-                    <button class="subitems-back" x-on:click="activeMenu = null">Alle categorieën</button>
-                    <h2>Planning</h2>
-
-                    <div class="subitems-list">
-                        <button type="button" x-on:click.prevent="window.Livewire.dispatch('open-dashboard-planning-my')">Mijn agenda</button>
-                        <button type="button" x-on:click.prevent="window.Livewire.dispatch('open-dashboard-planning-general')">Passing/Aflever agenda</button>
-                        <button type="button" x-on:click.prevent="window.Livewire.dispatch('open-dashboard-planning-mechanic')">Werkplaats agenda</button>
-                    </div>
-                </div>
-            </div>
-        </template>
-        @endcan
 
         <template x-if="activeMenu === null || activeMenu === 'relaties'">
             <div class="sidebar-menuitem">
@@ -97,7 +71,7 @@ $authUser->can('manage users')
                     <h2 x-show="!subMenu">Verkoop</h2>
 
                     <div class="subitems-list" x-show="!subMenu">
-                        <a href="{{ route('filament.app.resources.production.purchased') }}"><strong>Verkoopproces</strong></a>
+                        <a href="{{ route('filament.app.resources.production.index') }}"><strong>Verkoopproces</strong></a>
                         <div x-on:click="subMenu = 'passing'">Passing</div>
                         <div x-on:click="subMenu = 'offertes'">Offertes</div>
                         <div x-on:click="subMenu = 'orders'">Orders</div>
@@ -150,49 +124,6 @@ $authUser->can('manage users')
         </template>
         @endcan
 
-        @can('manage purchases')
-        <template x-if="activeMenu === null || activeMenu === 'inkoop'">
-            <div class="sidebar-menuitem">
-                <div class="sidebar-menuitem-wrapper" x-show="activeMenu === null" x-on:click="activeMenu = 'inkoop'">
-                    <div class="sidebar-menuitem-info">
-                        <img class="sidebar-menuitem-icon" src="{{ asset('/img/icons/user-menu/truck-solid.svg') }}" alt="menu-icon">
-                        <span class="sidebar-menuitem-name">Inkoop</span>
-                    </div>
-                </div>
-
-                <div class="menuitem-subitems" x-show="activeMenu === 'inkoop'"
-                    x-transition:enter="transition-opacity duration-200"
-                    x-transition:enter-start="opacity-0"
-                    x-transition:enter-end="opacity-100">
-                    <button class="subitems-back" :class="{ 'mobielheader-marginbottom-none': subMenu !== null }" x-on:click="activeMenu = null; subMenu = null">Alle categorieën</button>
-                    <h2 x-show="!subMenu">Inkoop</h2>
-
-                    <div class="subitems-list" x-show="!subMenu">
-                        <a href="{{ route('filament.app.resources.purchase-orders.confirmed') }}"><strong>Inkoopproces</strong></a>
-                        <div x-on:click="subMenu = 'inkoop-menu'">Inkooporders</div>
-                        <a href="{{ route('filament.app.resources.purchase-order-confirmations.index') }}">Inkoopbevestigingen</a>
-                        <a href="{{ route('filament.app.resources.suppliers.index') }}">Leveranciers</a>
-                    </div>
-
-                    <div x-show="subMenu === 'inkoop-menu'"
-                        x-transition:enter="transition-opacity duration-200"
-                        x-transition:enter-start="opacity-0"
-                        x-transition:enter-end="opacity-100">
-                        <button class="subitems-back" x-on:click="subMenu = null">Terug naar Inkoop</button>
-
-                        <h2>Inkooporders</h2>
-
-                        <div class="subitems-list">
-                            <a href="{{ route('filament.app.resources.purchase-orders.index') }}">Overzicht</a>
-                            <a href="{{ route('filament.app.resources.stock-orders.create') }}">Inkooporder aanmaken</a>
-                            <a href="{{ route('filament.app.resources.stock-orders.index') }}">Concepten</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </template>
-        @endcan
-
         @can('manage products')
         <template x-if="activeMenu === null || activeMenu === 'producten'">
             <div class="sidebar-menuitem">
@@ -212,7 +143,6 @@ $authUser->can('manage users')
 
                     <div class="subitems-list" x-show="!subMenu">
                         <a href="{{ route('filament.app.resources.products.index') }}">Artikelen</a>
-                        <a href="{{ route('filament.app.resources.bill-of-materials.index') }}">Stuklijsten</a>
                     </div>
                 </div>
             </div>
@@ -240,7 +170,6 @@ $authUser->can('manage users')
                         <div x-on:click="subMenu = 'facturen-menu'">Facturen</div>
                         <div x-on:click="subMenu = 'abonnementen-menu'">Abonnementen</div>
                         <a href="{{ route('filament.app.resources.credit-invoices.index') }}">Creditfacturen</a>
-                        <a href="{{ route('filament.app.resources.purchase-order-invoices.index') }}">Inkoopfacturen</a>
                     </div>
 
                     <div x-show="subMenu === 'facturen-menu'"

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\OrderResource\Pages;
 
-use App\Actions\SendOrderReadyForPurchaseMailAction;
 use App\Actions\SyncDeliveryNotePdfAction;
 use App\Enums\CustomerType;
 use App\Enums\DeliveryTime;
@@ -33,7 +32,6 @@ use App\Models\Customer;
 use App\Models\OrderProduct;
 use App\Models\Product;
 use App\Enums\OrderGeneralStatus;
-use App\Filament\Actions\ImportBomAction;
 use App\Filament\Forms\AddressFormSchema;
 use App\Filament\Forms\Components\ProductSelect;
 use App\Filament\Support\OrderProductRepeaterAddAction;
@@ -45,7 +43,6 @@ use App\Models\User;
 use App\Models\Document;
 use App\Services\InventoryService;
 use App\Services\PurchaseProductService;
-use App\Services\SerialNumberService;
 use App\Traits\Company\PostcodeValidatorTrait;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Hidden;
@@ -92,7 +89,6 @@ class EditOrder extends EditRecord
     protected $listeners = [
 
         'addOrderProduct' => 'addOrderProduct',
-        'loadBomProducts' => 'loadBomProducts',
     ];
 
     /**
@@ -372,9 +368,6 @@ class EditOrder extends EditRecord
             'user_id' => Auth::id(),
         ]);
 
-        if ($previousOrder !== null) {
-            app(SerialNumberService::class)->reattachSerialNumberToNewOrderRevision($previousOrder, $this->record);
-        }
     }
 
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true, bool $syncLivewireFormState = true): void
@@ -542,11 +535,6 @@ class EditOrder extends EditRecord
         }
 
         $main->changeOrderStatus(OrderStatus::OrderAwaitingPurchase);
-        try {
-            app(SendOrderReadyForPurchaseMailAction::class)->execute($main);
-        } catch (\Exception $e) {
-            Log::error('Failed to send order ready for purchase email: ' . $e->getMessage());
-        }
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
@@ -1062,17 +1050,6 @@ class EditOrder extends EditRecord
         }
 
         $this->redirect(route('filament.app.resources.orders.index'));
-    }
-
-    public function loadBomProducts(?array $orderProducts)
-    {
-        foreach ($orderProducts as $orderProductId) {
-            $this->addOrderProduct([
-                'orderProductId' => $orderProductId,
-            ]);
-        }
-
-        $this->dispatch('update-totals');
     }
 
     public function loadOrderProduct(Get $get, Set $set)
@@ -1593,9 +1570,6 @@ class EditOrder extends EditRecord
                             ->default([])
                             ->minItems(1)
                             ->extraAttributes(['class' => 'orderProductsRepeater'])
-                            ->hintAction(
-                                ImportBomAction::make('import_bom')
-                            )
                             ->table([
                                 TableColumn::make('Aantal'),
                                 TableColumn::make('Eenheid'),
@@ -1803,9 +1777,9 @@ class EditOrder extends EditRecord
         }
 
         if ($key === 'rd') {
-            $rd = Customer::getRdMobilityCustomer();
+            $av = Customer::getRdMobilityCustomer();
 
-            return $forDelivery ? $rd->getPhysicalDeliveryAddress() : $rd->billingAddress;
+            return $forDelivery ? $av->getPhysicalDeliveryAddress() : $av->billingAddress;
         }
 
         if ($key === 'customer') {

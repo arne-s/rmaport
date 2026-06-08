@@ -9,7 +9,7 @@ use App\Filament\Resources\OrderResource\Support\FinancialDocumentMailAttachment
 use App\Filament\Resources\OrderResource\Support\OrderConfirmMailRecipients;
 use App\Filament\Resources\OrderResource\Support\OrderCustomerMailRecipients;
 use App\Models\Order\BaseOrder;
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Models\EmailTemplate;
 use App\Models\Order\Order;
 use Filament\Actions\Action;
@@ -261,7 +261,7 @@ class ApproveOrderEmailAction extends Action
     private static function getRecipientOptionsForOrder(?Order $order, $livewire): array
     {
         if (! $order instanceof Order) {
-            return ApprovePurchaseOrderEmailAction::getRecipientOptions();
+            return EmailRecipientResolver::getRecipientOptions();
         }
 
         return OrderConfirmMailRecipients::recipientOptions($order, $livewire);

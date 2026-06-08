@@ -1,6 +1,5 @@
 @use './address-form.scss' as *;
 @use './one-time-code-input' as *;
-@use '../../components/modals/new-appointment-modal' as *;
 @use '../../components/email-recipient-select' as *;
 @use '../../components/modals/upload-document-modal' as *;
 @use './orderPage.scss' as *;
@@ -15,9 +14,7 @@
 @use "behaviours/richeditor-min-height" as *;
 @use "behaviours/checkbox-compact" as *;
 @use "./chart-widget-filters" as *;
-@use "./statistics-charts" as *;
 @use "./notes" as *;
-@use "./my-appointments" as *;
 
 
 html.filament {
@@ -181,14 +178,14 @@ html.filament {
 
             .editStep {
                 padding: 5px 12px !important;
-                background-color: #d0e1fe;
+                background-color: #f3f7fe;
                 transition: all .2s;
                 font-size: 11px !important;
                 min-height: 0;
                 font-weight: 450 !important;
                 line-height: 1.2 !important;
                 color: #030303 !important;
-                border: 1px solid #d0e1fe;
+                border: 1px solid #f3f7fe;
                 border-radius: 5px;
 
                 &:hover {
@@ -613,7 +610,7 @@ html.filament {
                 &[type=submit] {
                     padding: 7px 30px 7px !important;
                     color: white !important;
-                    background-color: #3B3B3B;
+                    background-color: #032d5c;
                     font-weight: 700;
 
                     @media screen and (max-width: 992px) {
@@ -2509,7 +2506,7 @@ html.filament {
 
     div.fi-global-search-field {
         width: 100%;
-        border-bottom: 1px solid #0195c9;
+        border-bottom: 1px solid #3366cc;
         max-width: 100%;
 
         .fi-input-wrp {
@@ -8932,7 +8929,7 @@ div.fi-input-wrp {
 
     .fi-no-notification-unread-ctn {
         .fi-no-notification {
-            background: #d0e1fe;
+            background: #f3f7fe;
         }
     }
 

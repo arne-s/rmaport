@@ -5,12 +5,10 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\Quote\MainAppointmentIcsController;
 use App\Http\Controllers\Quote\QuotePublicDocumentController;
 use App\Http\Controllers\QuoteApprovalController;
 use App\Models\OutlookExternalConnectInvite;
 use App\Services\ExactOnlineService;
-use App\Services\MicrosoftCalendarService;
 use App\Services\MicrosoftMailService;
 use App\Services\OutlookExternalConnectInviteService;
 use Illuminate\Support\Facades\Route;
@@ -40,39 +38,6 @@ Route::get('/invoice-header', function () {
 })->name('invoice-header');
 
 $quoteDomain = config('quote.domain');
-
-/*
- * Public appointment .ics downloads (e-mail [calendar_link]). Registered on the quote host when
- * QUOTE_DOMAIN is set; otherwise on the default app host so links still work without a subdomain.
- */
-$registerAppointmentIcsRoutes = static function (): void {
-    Route::get('/fitting-{main}.ics', [MainAppointmentIcsController::class, 'fitting'])
-        ->whereNumber('main')
-        ->middleware('throttle:120,1')
-        ->name('quote.calendar.fitting');
-    Route::get('/delivery-{main}.ics', [MainAppointmentIcsController::class, 'delivery'])
-        ->whereNumber('main')
-        ->middleware('throttle:120,1')
-        ->name('quote.calendar.delivery');
-    Route::get('/fitting-customer-{main}.ics', [MainAppointmentIcsController::class, 'fittingCustomer'])
-        ->whereNumber('main')
-        ->middleware('throttle:120,1')
-        ->name('quote.calendar.fitting-customer');
-    Route::get('/delivery-customer-{main}.ics', [MainAppointmentIcsController::class, 'deliveryCustomer'])
-        ->whereNumber('main')
-        ->middleware('throttle:120,1')
-        ->name('quote.calendar.delivery-customer');
-    Route::get('/service-customer-{main}.ics', [MainAppointmentIcsController::class, 'serviceCustomer'])
-        ->whereNumber('main')
-        ->middleware('throttle:120,1')
-        ->name('quote.calendar.service-customer');
-};
-
-if (is_string($quoteDomain) && $quoteDomain !== '') {
-    Route::domain($quoteDomain)->group($registerAppointmentIcsRoutes);
-} else {
-    $registerAppointmentIcsRoutes();
-}
 
 if (is_string($quoteDomain) && $quoteDomain !== '') {
     Route::domain($quoteDomain)->group(function (): void {
@@ -181,7 +146,7 @@ Route::get('/microsoft/callback', function () use ($authorizeManageSettings) {
     $inviteService = app(OutlookExternalConnectInviteService::class);
     $parsedState = $inviteService->parseAndValidateState(request()->get('state'));
 
-    if ($parsedState !== null && in_array($parsedState['step'], ['connect', 'calendar'], true)) {
+    if ($parsedState !== null && $parsedState['step'] === 'connect') {
         $invite = OutlookExternalConnectInvite::query()->find($parsedState['inviteId']);
         if ($invite === null) {
             return $inviteService->redirectToResult(false, 'Koppeling mislukt: ongeldige koppellink.');
@@ -198,35 +163,13 @@ Route::get('/microsoft/callback', function () use ($authorizeManageSettings) {
             return $inviteService->redirectToResult(false, 'Microsoft koppeling mislukt: geen autorisatiecode ontvangen.');
         }
 
-        if ($parsedState['step'] === 'connect') {
-            return $inviteService->handleExternalConnectCallback($invite, $code);
-        }
-
-        return $inviteService->handleExternalCalendarCallback($invite, $code);
+        return $inviteService->handleExternalConnectCallback($invite, $code);
     }
 
     $authorizeManageSettings();
 
-    $outlookUrl = route('filament.app.resources.customers.settings').'?area=outlook';
-
-    if ($error = request()->get('error')) {
-        $description = request()->get('error_description', $error);
-
-        return redirect($outlookUrl)->with('error', 'Microsoft koppeling mislukt: ' . $description);
-    }
-
-    $code = request()->get('code');
-    if (! $code) {
-        return redirect($outlookUrl)->with('error', 'Microsoft koppeling mislukt: geen autorisatiecode ontvangen.');
-    }
-
-    $error = (new MicrosoftCalendarService())->saveAccessToken($code);
-
-    return redirect($outlookUrl)
-        ->with($error === null ? 'success' : 'error', $error === null
-            ? 'Outlook-agenda succesvol gekoppeld.'
-            : $error
-        );
+    return redirect(route('filament.app.resources.customers.settings').'?area=outlook-mail')
+        ->with('error', 'Deze callback is niet meer beschikbaar.');
 })->name('microsoft.callback');
 
 Route::get('/microsoft-mail/callback', function () use ($authorizeManageSettings) {
@@ -278,22 +221,6 @@ Route::get('/microsoft-mail/callback', function () use ($authorizeManageSettings
 })->name('microsoft-mail.callback');
 
 Route::middleware('auth')->group(function () use ($authorizeManageSettings) {
-    Route::get('/microsoft/connect', function () use ($authorizeManageSettings) {
-        $authorizeManageSettings();
-
-        return redirect((new MicrosoftCalendarService())->getAuthorizationUrl());
-    })->name('microsoft.connect');
-
-    Route::post('/microsoft/disconnect/{token}', function (\App\Models\MicrosoftToken $token) use ($authorizeManageSettings) {
-        $authorizeManageSettings();
-
-        (new MicrosoftCalendarService())->disconnect($token->id);
-        $url = route('filament.app.resources.customers.settings').'?area=outlook';
-
-        return redirect($url)
-            ->with('success', 'Outlook-agenda ontkoppeld.');
-    })->name('microsoft.disconnect');
-
     Route::get('/microsoft-mail/connect', function () use ($authorizeManageSettings) {
         $authorizeManageSettings();
 
@@ -379,20 +306,6 @@ Route::get('/order-margins/{orderId}/download', [DocumentController::class, 'ord
 
 Route::get('/delivery-notes/{orderId}', [DocumentController::class, 'deliveryNote'])->name('documents.deliveryNote')->middleware('can:export-order');
 Route::get('/delivery-notes/{orderId}/download', [DocumentController::class, 'deliveryNoteDownload'])->name('documents.deliveryNoteDownload')->middleware('can:export-order');
-
-Route::get('/purchase-order-confirmations/{id}', [DocumentController::class, 'purchaseOrderConfirmation'])->name('documents.purchaseOrderConfirmation')->middleware('auth');
-Route::get('/purchase-order-confirmations/{id}/download', [DocumentController::class, 'purchaseOrderConfirmationDownload'])->name('documents.purchaseOrderConfirmationDownload')->middleware('auth');
-
-Route::get('/purchase-order-confirmation-modal/{id}', [DocumentController::class, 'purchaseOrderConfirmationModal'])->name('purchaseOrderConfirmationModal')->middleware('auth');
-Route::get('/documents/purchase-orders/{purchaseOrder}', [DocumentController::class, 'purchaseOrderDocumentPreview'])
-    ->name('documents.purchase-order-preview')
-    ->middleware('can:export-order');
-Route::get('/purchase-orders/{purchaseOrder}/preview-download', [DocumentController::class, 'purchaseOrderPreviewDownload'])->name('documents.purchaseOrderPreviewDownload')->middleware('can:export-order');
-Route::get('/stock-orders/{stockOrder}/preview-download', [DocumentController::class, 'stockOrderPreviewDownload'])->name('documents.stockOrderPreviewDownload')->middleware('can:export-order');
-Route::get('/release-orders/{releaseOrder}/preview-download', [DocumentController::class, 'releaseOrderPreviewDownload'])->name('documents.releaseOrderPreviewDownload')->middleware('can:export-order');
-
-Route::get('/purchase-order-invoices/{id}', [DocumentController::class, 'purchaseOrderInvoice'])->name('documents.purchaseOrderInvoice')->middleware('auth');
-Route::get('/purchase-order-invoices/{id}/download', [DocumentController::class, 'purchaseOrderInvoiceDownload'])->name('documents.purchaseOrderInvoiceDownload')->middleware('can:export-order');
 
 Route::get('/media-preview/{id}', [DocumentController::class, 'mediaPreview'])->name('documents.media-preview')->middleware(['auth', 'can:export-order']);
 

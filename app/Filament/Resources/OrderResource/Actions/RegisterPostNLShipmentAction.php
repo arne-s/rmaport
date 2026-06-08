@@ -401,20 +401,20 @@ class RegisterPostNLShipmentAction extends Action
                         ],
                     );
 
-                    /** @var array{company: string, street: string, house_nr: string, postcode: string, city: string, country?: string} $rdSender */
-                    $rdSender = config('postnl.sender');
+                    /** @var array{company: string, street: string, house_nr: string, postcode: string, city: string, country?: string} $avSender */
+                    $avSender = config('postnl.sender');
 
                     PostNLShipment::create([
                         'order_id'                   => $record->getId(),
                         'barcode'                    => $returnBarcode,
                         'recipient_name'             => '',
-                        'recipient_company'          => $rdSender['company'],
-                        'recipient_street'           => $rdSender['street'],
-                        'recipient_house_nr'         => $rdSender['house_nr'],
+                        'recipient_company'          => $avSender['company'],
+                        'recipient_street'           => $avSender['street'],
+                        'recipient_house_nr'         => $avSender['house_nr'],
                         'recipient_house_nr_addition' => null,
-                        'recipient_postcode'         => $rdSender['postcode'],
-                        'recipient_city'             => $rdSender['city'],
-                        'recipient_country'          => strtoupper($rdSender['country'] ?? 'NL'),
+                        'recipient_postcode'         => $avSender['postcode'],
+                        'recipient_city'             => $avSender['city'],
+                        'recipient_country'          => strtoupper($avSender['country'] ?? 'NL'),
                         'reference'                  => $data['reference'] ?? null,
                     ]);
 

@@ -47,7 +47,7 @@ class AccountActivateMail extends Mailable
             'activate_button' => view('emails.partials.button', [
                 'url' => $activationUrl,
                 'label' => 'Activeren',
-                'backgroundColor' => '#3a3a3a',
+                'backgroundColor' => '#032d5c',
                 'textColor' => '#fff',
                 'fontWeight' => '600',
                 'padding' => '12px 24px',

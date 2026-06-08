@@ -7,7 +7,6 @@ use App\Enums\DeliveryTime;
 use App\Enums\OrderSubtype;
 use App\Enums\PaymentTerms;
 use App\Enums\ValidityPeriod;
-use App\Filament\Actions\ImportBomAction;
 use App\Filament\Support\OrderProductRepeaterAddAction;
 use App\Filament\Concerns\HasSalesOrderProductRepeaterHelpers;
 use App\Filament\Concerns\ManagesDeliveryAddressMode;
@@ -68,7 +67,6 @@ class EditQuote extends EditRecord
 
     protected $listeners = [
         'addOrderProduct' => 'addOrderProduct',
-        'loadBomProducts' => 'loadBomProducts',
     ];
 
     /**
@@ -733,17 +731,6 @@ class EditQuote extends EditRecord
         $this->redirect(route('filament.app.resources.quotes.index'));
     }
 
-    public function loadBomProducts(?array $orderProducts)
-    {
-        foreach ($orderProducts as $orderProductId) {
-            $this->addOrderProduct([
-                'orderProductId' => $orderProductId,
-            ]);
-        }
-
-        $this->dispatch('update-totals');
-    }
-
     public function loadOrderProduct(Get $get, Set $set)
     {
         /** @var Product $product */
@@ -1144,9 +1131,6 @@ class EditQuote extends EditRecord
                             ->default([])
                             ->minItems(1)
                             ->extraAttributes(['class' => 'orderProductsRepeater'])
-                            ->hintAction(
-                                ImportBomAction::make('import_bom')
-                            )
                             ->table([
                                 TableColumn::make('Aantal'),
                                 TableColumn::make('Eenheid'),

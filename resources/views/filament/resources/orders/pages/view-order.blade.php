@@ -120,16 +120,12 @@
         <div x-show="activeTab === 'fitting'">
             @include('filament.resources.orders.pages.fitting-tab', [
                 'record' => $record,
-                'fittingAppointments' => $record->appointments()->orderByDesc('created_at')->get(),
-                'newAppointmentAction' => $this->newAppointmentAction(),
-                'serialNumberOptions' => $this->getFittingNoteSerialNumberOptions(),
             ])
         </div>
 
         <div x-show="activeTab === 'service'">
             @include('filament.resources.orders.pages.service-tab', [
                 'record' => $record,
-                'newServiceAppointmentAction' => $this->newServiceAppointmentAction(),
             ])
         </div>
 

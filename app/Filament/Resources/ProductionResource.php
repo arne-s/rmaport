@@ -10,7 +10,6 @@ use App\Filament\Resources\ProductionResource\Pages\ListProductionAssembled;
 use App\Filament\Resources\ProductionResource\Pages\ListProductionDelivered;
 use App\Filament\Resources\ProductionResource\Pages\ListProductionFitting;
 use App\Filament\Resources\ProductionResource\Pages\ListProductionOrdered;
-use App\Filament\Resources\ProductionResource\Pages\ListProductionPurchased;
 use App\Filament\Resources\ProductionResource\Pages\ListProductionQuote;
 use App\Filament\Actions\CreateMainAction;
 use App\Filament\Support\SalesAuthorization;
@@ -193,7 +192,6 @@ class ProductionResource extends Resource
             'index' => ListProduction::route('/'),
             'fitting' => ListProductionFitting::route('/fitting'),
             'quote' => ListProductionQuote::route('/quote'),
-            'purchased' => ListProductionPurchased::route('/purchased'),
             'assembled' => ListProductionAssembled::route('/assembled'),
             'ordered' => ListProductionOrdered::route('/ordered'),
             'delivered' => ListProductionDelivered::route('/delivered'),

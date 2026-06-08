@@ -9,7 +9,6 @@ use App\Filament\Resources\CustomerResource\Widgets\CompanyDocumentsWidget;
 use App\Filament\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Filament\Resources\CustomerResource\Widgets\CustomerNotesWidget;
-use App\Filament\Resources\CustomerResource\Widgets\CustomerUnitsWidget;
 use App\Filament\Resources\OrderResource\Actions\SendCustomerEmailAction;
 use App\Jobs\SyncCustomerToExactJob;
 use App\Models\Address;
@@ -800,14 +799,6 @@ class EditCustomer extends EditRecord
                                     ->columnSpanFull(),
                             ]),
 
-                        Tab::make('Units')
-                            ->key('units')
-                            ->schema([
-                                Livewire::make(CustomerUnitsWidget::class)
-                                    ->columnSpanFull()
-                                    ->key(fn (): string => 'customer-units-widget-' . $this->record->getKey()),
-                            ]),
-
                         Tab::make('Exact koppeling')
                             ->key('exactkoppeling')
                             ->schema([
@@ -819,7 +810,7 @@ class EditCustomer extends EditRecord
                                                 Section::make('Exact koppeling')
                                                     ->extraAttributes(['class' => 'exactSection'])
                                                     ->schema([
-                                                        Text::make('Als een klant wordt aangemaakt, ge-update of naar status Actief wordt gezet, volgt directe synchronisatie met Exact en wordt een debiteur aangemaakt (niet van toepassing op type RD — stamgegevens).')
+                                                        Text::make('Als een klant wordt aangemaakt, ge-update of naar status Actief wordt gezet, volgt directe synchronisatie met Exact en wordt een debiteur aangemaakt.')
                                                             ->columnSpanFull()
                                                             ->extraAttributes(['style' => '']),
                                                         TextInput::make('debtor_number')

@@ -385,11 +385,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->belongsTo(Region::class);
     }
 
-    public function microsoftToken(): HasOne
-    {
-        return $this->hasOne(MicrosoftToken::class);
-    }
-
     public function sentChatMessages(): HasMany
     {
         return $this->hasMany(ChatMessage::class, 'from_user_id');
@@ -398,22 +393,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function receivedChatMessages(): HasMany
     {
         return $this->hasMany(ChatMessage::class, 'to_user_id');
-    }
-
-    /**
-     * @return BelongsToMany<Appointment, $this>
-     */
-    public function mechanicAppointments(): BelongsToMany
-    {
-        return $this->belongsToMany(Appointment::class, 'appointment_mechanic');
-    }
-
-    /**
-     * @return BelongsToMany<Appointment, $this>
-     */
-    public function advisorAppointments(): BelongsToMany
-    {
-        return $this->belongsToMany(Appointment::class, 'appointment_advisor');
     }
 
     public function touchLastOnline(): void

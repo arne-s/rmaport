@@ -5,27 +5,21 @@ namespace App\Console\Commands\ExactOnline;
 use App\Enums\OrderGeneralStatus;
 use App\Enums\OrderType;
 use App\Models\Order\BaseOrder;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderInvoice;
 use App\Services\ExactOnlineService;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Builder;
 
 class SyncPayments extends Command
 {
     protected $signature = 'exact-online:sync-payments';
 
-    protected $description = 'Sync sales and purchase payment status from Exact Online';
+    protected $description = 'Sync sales payment status from Exact Online';
 
     public function handle(): int
     {
         /** @var ExactOnlineService $exact */
         $exact = app('exact');
 
-        $salesPaymentsStatus = $this->syncSalesPayments($exact);
-        $purchasePaymentsStatus = $this->syncPurchasePayments($exact);
-
-        return $salesPaymentsStatus && $purchasePaymentsStatus ? 0 : 1;
+        return $this->syncSalesPayments($exact) ? 0 : 1;
     }
 
     public function syncSalesPayments(ExactOnlineService $exact): bool
@@ -85,74 +79,6 @@ class SyncPayments extends Command
                     $order->save();
                     $this->info("Order #{$order->getUidFormatted()} verified due to deposit invoice payment.");
                 }
-            }
-        }
-
-        return true;
-    }
-
-    public function syncPurchasePayments(ExactOnlineService $exact): bool
-    {
-        $unpaidPurchaseInvoiceIds = PurchaseOrderInvoice::query()
-            ->whereNotNull('exact_id')
-            ->whereNull('paid_at')
-            ->where(function (Builder $query): void {
-                $query
-                    ->whereNull('orderable_type')
-                    ->orWhereHasMorph(
-                        'orderable',
-                        [PurchaseOrder::class],
-                        fn (Builder $purchaseOrderQuery): Builder => $purchaseOrderQuery->where('is_cancelled', false),
-                    );
-            })
-            ->pluck('exact_id')
-            ->filter(fn (?string $exactId): bool => filled($exactId) && ! str_starts_with((string) $exactId, 'manual-'))
-            ->values()
-            ->all();
-
-        if ($unpaidPurchaseInvoiceIds === []) {
-            $this->info('No unpaid purchase invoices to check.');
-
-            return true;
-        }
-
-        $paidPurchaseInvoices = $exact->getPaidPurchaseInvoices($unpaidPurchaseInvoiceIds);
-
-        if (is_array($paidPurchaseInvoices) && empty($paidPurchaseInvoices)) {
-            $this->info('No paid purchase invoices found.');
-
-            return true;
-        }
-
-        if (is_null($paidPurchaseInvoices)) {
-            $this->error('Error fetching paid purchase invoices from Exact Online.');
-
-            return false;
-        }
-
-        foreach ($paidPurchaseInvoices as $paidInvoice) {
-            $exactId = $paidInvoice['TransactionEntryID'] ?? null;
-
-            if (blank($exactId)) {
-                continue;
-            }
-
-            $purchaseInvoice = PurchaseOrderInvoice::query()
-                ->where('exact_id', $exactId)
-                ->first();
-
-            if ($purchaseInvoice === null) {
-                $this->error("Purchase invoice not found for Exact ID {$exactId}");
-
-                continue;
-            }
-
-            if ($purchaseInvoice->paid_at === null) {
-                $date = $exact->parseDotNetDate($paidInvoice['EntryDate']) ?? now();
-                $purchaseInvoice->paid_at = $date;
-                $purchaseInvoice->save();
-
-                $this->info("Payment received via Exact for purchase invoice {$purchaseInvoice->id}, {$purchaseInvoice->invoice_number}, Exact ID: {$exactId}");
             }
         }
 

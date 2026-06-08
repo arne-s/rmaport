@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\RecurringInvoices\Actions;
 
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Mail\CustomInvoiceMail;
 use App\Models\RecurringInvoice;
 use Filament\Actions\Action;
@@ -170,7 +170,7 @@ class ConfigureRecurringInvoiceEmailAction extends Action
     private static function getRecipientOptions($livewire): array
     {
         $record = $livewire->record;
-        $options = ApprovePurchaseOrderEmailAction::getRecipientOptions();
+        $options = EmailRecipientResolver::getRecipientOptions();
 
         if ($record instanceof RecurringInvoice) {
             $customer = $record->billingCustomer;

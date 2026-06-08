@@ -1,8 +1,8 @@
 @php
     use App\Models\Customer;
 
-    $rdCustomer = Customer::getRdMobilityCustomer();
-    $rdAddr = $rdCustomer?->billingAddress;
+    $avCustomer = Customer::getRdMobilityCustomer();
+    $avAddr = $avCustomer?->billingAddress;
 
     $recipientAddress = $order?->shippingCustomer?->shippingAddress ?? $order?->customer?->shippingAddress;
 
@@ -55,14 +55,14 @@
                 @include('order._rd_logo', ['variant' => 'inline-top-right'])
                 <div style="margin-top: 30px;">
                     <div>
-                        <strong style="font-size: 16px;">{{ $rdCustomer?->getName() }}</strong>
+                        <strong style="font-size: 16px;">{{ $avCustomer?->getName() }}</strong>
                     </div>
-                    @if ($rdCustomer)
+                    @if ($avCustomer)
                         <div style="padding: 0; font-size: 16px;">
-                            @if ($rdAddr)
-                                {{ $rdAddr->getStreet() }} {{ $rdAddr->getHouseNumber() }}{{ $rdAddr->getHouseNumberAddition() ? ' ' . $rdAddr->getHouseNumberAddition() : '' }}<br/>
-                                {{ $rdAddr->getPostcode() }} {{ $rdAddr->getCity() }}<br/>
-                                {{ $rdAddr->country?->name ?? '' }}<br/><br/>
+                            @if ($avAddr)
+                                {{ $avAddr->getStreet() }} {{ $avAddr->getHouseNumber() }}{{ $avAddr->getHouseNumberAddition() ? ' ' . $avAddr->getHouseNumberAddition() : '' }}<br/>
+                                {{ $avAddr->getPostcode() }} {{ $avAddr->getCity() }}<br/>
+                                {{ $avAddr->country?->name ?? '' }}<br/><br/>
                             @endif
                         </div>
                     @endif

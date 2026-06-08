@@ -1,12 +1,10 @@
 @php
     use App\Enums\OrderSubtype;
     use App\Enums\PaymentTerms;
-    use App\Enums\ReleaseOrderStatus;
     use App\Filament\Resources\OrderResource\Pages\ViewOrder;
     use App\Filament\Resources\OrderResource\Widgets\OrderDocsTableWidget;
     use App\Models\Order\Main;
     use App\Models\Product;
-    use App\Models\ReleaseOrder;
 
        /** @var Main $record **/
        /** @var ViewOrder $this **/
@@ -17,17 +15,6 @@
     $chairTypeRaw = $frameProductForChair?->getChairType();
     $chairType = Product::getFrameChairTypeLabel(is_string($chairTypeRaw) ? $chairTypeRaw : null);
 
-    $linkedSerialNumber = null;
-    if (in_array($record?->subtype?->value, ['part', 'service'], true)) {
-        $linkedSnValue = $record->getFittingNote()['linked_serial_number'] ?? null;
-        if ($linkedSnValue) {
-            $linkedSerialNumber = \App\Models\SerialNumber::query()->where('serial_number', $linkedSnValue)->first();
-            if ($linkedSerialNumber) {
-                $chairTypeRaw = $linkedSerialNumber->getType();
-                $chairType = Product::getFrameChairTypeLabel(is_string($chairTypeRaw) ? $chairTypeRaw : null);
-            }
-        }
-    }
     $quote = $record?->quote;
     $mainAdditional = $record->getAdditional() ?? [];
     $billingKeyForView = $mainAdditional['billing_address_type_key'] ?? null;
@@ -351,90 +338,6 @@
 
     </section>
 
-    <section id="card-logistics" class="card">
-        <div class="flex justify-between items-start">
-            <h3 class="card__title">Logistiek</h3>
-        </div>
-
-        <div class="logistics">
-            <div class="logistics__head" style="margin-top: 10px">
-                <div>Inkooporder</div>
-                <div>Datum</div>
-                <div>Leverancier</div>
-                <div class="right">Leverweek</div>
-            </div>
-
-            @php
-                $purchaseOrders = $record?->purchaseOrders;
-            @endphp
-            @foreach ($purchaseOrders as $purchaseOrder)
-                @if ($purchaseOrder->getStatus()?->value !== 'initial' && !empty($purchaseOrder->getStatus()))
-                    <div class="logistics__row">
-                        <div>
-                            @can('manage purchases')
-                            <a href="{{ route('filament.app.resources.purchase-orders.view', ['record' => $purchaseOrder->id]) }}" class="main-request-number-link hover:underline">
-                                {{ $purchaseOrder->reference_number }}
-                            </a>
-                            @else
-                            {{ $purchaseOrder->reference_number }}
-                            @endcan
-                        </div>
-
-                        <div class="date"> {{ $purchaseOrder->getSentAt()?->format('d-m-Y') }}</div>
-
-                        <div class="supplier">
-                            {{ $purchaseOrder->supplier?->getName() }}
-                        </div>
-
-
-                        @php
-                            $latestDeliveryDate = $purchaseOrder->getLatestExpectedDeliveryDateAttribute();
-                        @endphp
-                        <div class="right">
-                            @if (!empty($latestDeliveryDate))
-                                Week {{ $latestDeliveryDate?->format('W') }}
-                            @else
-                                -
-                            @endif
-                        </div>
-                    </div>
-                @endif
-            @endforeach
-
-            @php
-                /** @var \Illuminate\Support\Collection<int, ReleaseOrder> $releaseOrders */
-                $releaseOrders = $record?->releaseOrders ?? collect();
-                $visibleReleaseOrders = $releaseOrders->filter(
-                    fn (ReleaseOrder $ro): bool => $ro->getStatus() !== ReleaseOrderStatus::Initial
-                );
-            @endphp
-            @foreach ($visibleReleaseOrders as $releaseOrder)
-                <div class="logistics__row">
-                    <div>
-                        @can('manage purchases')
-                        <a href="{{ route('filament.app.resources.release-orders.view', ['record' => $releaseOrder->id]) }}" class="main-request-number-link hover:underline">
-                            {{ $releaseOrder->reference_number }}
-                        </a>
-                        @else
-                        {{ $releaseOrder->reference_number }}
-                        @endcan
-                    </div>
-
-                    <div class="date"> {{ $releaseOrder->getSentAt()?->format('d-m-Y') }}</div>
-
-
-                    <div class="dealer">
-                        {{ $releaseOrder->dealer?->getName() }}
-                    </div>
-
-
-                    <div class="right">-</div>
-                </div>
-            @endforeach
-
-        </div>
-    </section>
-
     <section id="card-finance" class="card">
 
         <h3 class="card__title">
@@ -460,23 +363,15 @@
                 </li>
                 <li>
                     <span class="k">Serienummer:</span>
-                    <span class="v">
-                        @if($linkedSerialNumber)
-                            {{ $linkedSerialNumber->getSerialNumber() }}
-                        @else
-                            {{ $record->getSerialNumberRecord()?->getSerialNumber() ?: '-' }}
-                        @endif
-                    </span>
+                    <span class="v">-</span>
                 </li>
                 <li>
                     <span class="k">Frame:</span>
                     <span class="v">
                         @if(($record?->subtype?->value ?? '') === 'unit')
                             {{ $record?->orders?->last()?->frameProduct?->getName() ?? '-' }}
-                        @elseif($linkedSerialNumber)
-                            {{ $linkedSerialNumber->getName() ?? '-' }}
                         @else
-                            {{ $record?->getSerialNumberRecord()?->getFrameName() ?? '-' }}
+                            {{ $frameProductForChair?->getName() ?? '-' }}
                         @endif
                     </span>
                 </li>

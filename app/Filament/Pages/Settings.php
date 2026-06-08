@@ -6,13 +6,11 @@ use App\Enums\CustomerStatus;
 use App\Enums\CustomerType;
 use App\Filament\Settings\PaymentSettingsTab;
 use App\Filament\Resources\CustomerResource;
-use App\Http\Livewire\MicrosoftCalendarConnect;
 use App\Http\Livewire\MicrosoftMailConnect;
 use App\Http\Livewire\MicrosoftMailSenderProfiles;
 use App\Models\Country;
 use App\Models\Customer;
 use App\Models\MicrosoftMailToken;
-use App\Models\MicrosoftToken;
 use App\Models\Setting;
 use App\Services\OutlookExternalConnectInviteService;
 use App\Services\SettingService;
@@ -433,33 +431,6 @@ class Settings extends EditRecord
                                         ]);
                                 }
 
-                                $sections[] = Html::make(self::externalOutlookInviteHtml());
-
-                                return $sections;
-                            }),
-
-                        Tab::make('Outlook: afspraken')
-                            ->key('outlook')
-                            ->icon(Heroicon::Link)
-                            ->schema(function (): array {
-                                $tokens = MicrosoftToken::with('user')->orderBy('id')->get();
-
-                                $sections = $tokens->map(function (MicrosoftToken $token): Section {
-                                    $label = $token->microsoft_email ?? ('Account ' . $token->id);
-
-                                    return Section::make($label)
-                                        ->collapsible()
-                                        ->schema([
-                                            FilamentLivewire::make(MicrosoftCalendarConnect::class, ['tokenId' => $token->id])
-                                                ->key('microsoft-calendar-connect-' . $token->id),
-                                        ]);
-                                })->all();
-
-                                $sections[] = Html::make(
-                                    '<a href="' . route('microsoft.connect') . '" class="fi-btn fi-btn-size-sm fi-btn-color-primary fi-color-primary inline-grid">'
-                                    . '<span class="fi-btn-label">Nieuw Outlook-account toevoegen</span>'
-                                    . '</a>'
-                                );
                                 $sections[] = Html::make(self::externalOutlookInviteHtml());
 
                                 return $sections;

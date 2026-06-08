@@ -17,7 +17,7 @@ use Filament\Schemas\Components\Section;
 use App\Filament\Resources\OrderResource\Support\FinancialDocumentMailAttachments;
 use App\Filament\Resources\OrderResource\Support\OrderCustomerMailRecipients;
 use App\Filament\Resources\OrderResource\Support\OrderUploadedDocumentMailAttachments;
-use App\Filament\Resources\PurchaseOrderResource\Actions\ApprovePurchaseOrderEmailAction;
+use App\Filament\Support\EmailRecipientResolver;
 use App\Models\MailSenderProfile;
 
 class SendOrderEmailAction extends Action
@@ -197,7 +197,7 @@ class SendOrderEmailAction extends Action
     {
         $record = $livewire->record;
 
-        $options = ApprovePurchaseOrderEmailAction::getRecipientOptions();
+        $options = EmailRecipientResolver::getRecipientOptions();
 
         if ($record?->customer !== null) {
             $label = OrderCustomerMailRecipients::customerRecipientOptionLabel($record, $livewire);

@@ -10,7 +10,6 @@ use App\Enums\OrderSubtype;
 use App\Enums\OrderType;
 use App\Filament\Resources\Mains\MainResource;
 use App\Models\Customer;
-use App\Models\Order\BaseOrder;
 use App\Models\Order\Main;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Hidden;
@@ -100,9 +99,8 @@ class CreateMainAction extends Action
                 abort_unless(static::canCreate(), 403);
 
                 $mode = CreateMainMode::tryFrom((string) (($arguments['mode'] ?? $data['mode']) ?? CreateMainMode::Fitting->value)) ?? CreateMainMode::Fitting;
-                $fromDashboardPassing = (bool) ($arguments['from_dashboard_passing'] ?? false);
 
-                $main = DB::transaction(function () use ($data, $mode, $fromDashboardPassing) {
+                $main = DB::transaction(function () use ($data, $mode) {
                     $isNewCustomer = MainResource::isNewCustomerSelection($data['customer_or_dealer'] ?? null);
 
                     $customerId = isset($data['customer_id']) && $data['customer_id'] !== '' && (int) $data['customer_id'] !== 0
@@ -236,18 +234,6 @@ class CreateMainAction extends Action
                     $customerAddressType = CustomerAddressType::tryFrom((string) ($data['customer_address_type'] ?? ''))
                         ?? CustomerAddressType::Billing;
 
-                    $requiresFittingType = $fromDashboardPassing
-                        || ($data['subtype'] ?? null) === OrderSubtype::Unit->value;
-
-                    if ($requiresFittingType) {
-                        $fittingType = trim((string) ($data['fitting_type'] ?? ''));
-                        if ($fittingType === '' || ! array_key_exists($fittingType, BaseOrder::fittingTypes())) {
-                            throw ValidationException::withMessages([
-                                'fitting_type' => 'Selecteer een geldig type passing.',
-                            ]);
-                        }
-                    }
-
                     $additional = [
                         'shipping_address_type_key' => $this->resolveShippingAddressTypeKey(
                             $customerId,
@@ -255,10 +241,6 @@ class CreateMainAction extends Action
                             $deliveryAddressType,
                         ),
                     ];
-
-                    if ($requiresFittingType && filled($data['fitting_type'] ?? null)) {
-                        $additional['fitting_type'] = (string) $data['fitting_type'];
-                    }
 
                     $main = Main::withoutGlobalScopes()->create([
                         'type'                  => OrderType::Main,
