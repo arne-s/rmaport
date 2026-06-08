@@ -1,19 +1,24 @@
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 /**
  * PM2 process definitions for production.
  *
  * Setup:
- *   1. Set APP_ROOT to your deploy path below (or override via PM2_APP_ROOT).
- *   2. Configure .env (QUEUE_CONNECTION, BROADCAST_CONNECTION, REVERB_*).
- *   3. pm2 start ecosystem.config.cjs
- *   4. pm2 save && pm2 startup
+ *   cd ~/public_html/prod
+ *   pm2 start
+ *   pm2 save && pm2 startup
+ *
+ * Optional override:
+ *   PM2_APP_ROOT=/path/to/app pm2 start
  *
  * After deploy:
  *   php artisan queue:restart
- *   pm2 reload ecosystem.config.cjs --update-env
+ *   pm2 reload ecosystem.config.js --update-env
  */
-const appRoot = process.env.PM2_APP_ROOT || '/var/www/rma-portal';
+const appRoot = process.env.PM2_APP_ROOT || dirname(fileURLToPath(import.meta.url));
 
-module.exports = {
+export default {
     apps: [
         {
             name: 'rma-portal-queue',
