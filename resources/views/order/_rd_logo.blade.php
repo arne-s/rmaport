@@ -13,5 +13,5 @@
     }
 @endphp
 <div class="company-logo" style="{{ $wrapperStyle }}">
-    <img src="{{ $logoUrl }}" alt="autovision" style="max-height: 60px; width: auto;">
+    <img src="{{ $logoUrl }}" alt="autovision" style="max-height: 40px; width: auto;">
 </div>

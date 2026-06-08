@@ -173,7 +173,7 @@
                         </tr>
                         <tr>
                             <td style="padding: 0 8px 6px 0; white-space: nowrap;">Website:</td>
-                            <td style="padding: 0 0 6px 0;">www.rdmobility.com</td>
+                            <td style="padding: 0 0 6px 0;">www.autovision.com</td>
                         </tr>
                         @if ($avCustomer->getVat())
                             <tr>

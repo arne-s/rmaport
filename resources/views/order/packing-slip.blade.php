@@ -10,7 +10,7 @@
     $companyKvk = $avCustomer?->getKvk();
     $companyIban = $avCustomer?->getIban();
     $companyBic = $avCustomer?->getBic();
-    $companyWebsite = 'https://www.rdmobility.com';
+    $companyWebsite = 'https://autovision.nl';
 
     $recipientAddress = $main->resolvePackingSlipRecipientAddress();
 
