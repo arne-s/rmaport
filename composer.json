@@ -75,6 +75,7 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php -r \"foreach (['storage/framework/cache/data', 'storage/framework/sessions', 'storage/framework/testing', 'storage/framework/views', 'storage/logs', 'storage/app/public'] as \\$directory) { if (! is_dir(\\$directory)) { mkdir(\\$directory, 0755, true); } }\"",
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
