@@ -76,6 +76,7 @@
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php -r \"foreach (['storage/framework/cache/data', 'storage/framework/sessions', 'storage/framework/testing', 'storage/framework/views', 'storage/logs', 'storage/app/public'] as \\$directory) { if (! is_dir(\\$directory)) { mkdir(\\$directory, 0755, true); } }\"",
+            "@php -r \"\\$src = 'resources/img/favicon'; \\$dest = 'public/img/favicon'; if (is_dir(\\$src)) { if (! is_dir('public/img')) { mkdir('public/img', 0755, true); } if (! is_dir(\\$dest)) { mkdir(\\$dest, 0755, true); } foreach (glob(\\$src.'/*') ?: [] as \\$file) { if (is_file(\\$file)) { copy(\\$file, \\$dest.'/'.basename(\\$file)); } } }\"",
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],

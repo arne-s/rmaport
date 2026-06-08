@@ -7,6 +7,8 @@ test('login screen can be rendered', function () {
     $response = $this->get('/login');
 
     $response->assertStatus(200);
+    $response->assertSee('img/favicon/cropped-av-favicon-32x32.png', false);
+    $response->assertSee('img/favicon/cropped-av-favicon-180x180.png', false);
 });
 
 test('users can authenticate using the login screen', function () {

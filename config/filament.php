@@ -20,7 +20,7 @@ return [
             'broadcaster' => 'reverb',
             'key' => env('VITE_REVERB_APP_KEY', env('REVERB_APP_KEY')),
             'wsHost' => env('VITE_REVERB_HOST', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
-            'wsPort' => env('VITE_REVERB_PORT', env('REVERB_PORT', 8493)),
+            'wsPort' => env('VITE_REVERB_PORT', env('REVERB_PORT', 8494)),
             'wssPort' => env('VITE_REVERB_PORT', env('REVERB_PORT', 443)),
             'forceTLS' => (env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'http')) === 'https'),
             'wsPath' => env('REVERB_WS_PATH', '/app'),
@@ -119,5 +119,5 @@ return [
 
     'system_route_prefix' => 'filament',
 
-    'favicon' => '/img/favicon.png',
+    'favicon' => '/img/favicon/cropped-av-favicon-32x32.png',
 ];
