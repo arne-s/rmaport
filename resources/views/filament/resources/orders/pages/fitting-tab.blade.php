@@ -1,6 +1,9 @@
 @php
     use App\Filament\Resources\OrderResource\Pages\ViewOrder;
     use App\Models\Order\Main;
+    use Filament\Support\Enums\IconSize;
+    use Filament\Support\Icons\Heroicon;
+    use function Filament\Support\generate_icon_html;
 
     $fittingPreviousUnitCustomValue = ViewOrder::FITTING_NOTE_PREVIOUS_UNIT_CUSTOM_VALUE;
     $showFittingPreviousUnitCustomFields = ($fittingNotePreviousUnit ?? '') === $fittingPreviousUnitCustomValue;
