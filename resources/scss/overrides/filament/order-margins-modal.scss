@@ -1,0 +1,40 @@
+/* #open-order-margins: content-sized modal, no outer padding on iframe wrapper. */
+div.openDocumentModal.open-order-margins-modal {
+    height: auto;
+
+    div.fi-modal-window {
+        height: auto;
+        max-height: 90vh;
+
+        div {
+            height: auto;
+
+            &.space-y-2 {
+                height: auto;
+            }
+
+            &.fi-modal-content {
+                height: auto !important;
+                overflow: visible;
+            }
+
+            &.contentContainer {
+                padding: 0;
+                box-sizing: border-box;
+                height: auto;
+
+                iframe.order-margins-modal__iframe {
+                    height: auto;
+                    max-height: 85vh;
+                    min-height: 160px;
+                }
+            }
+
+            iframe.order-margins-modal__iframe {
+                height: auto;
+                max-height: 85vh;
+                min-height: 160px;
+            }
+        }
+    }
+}

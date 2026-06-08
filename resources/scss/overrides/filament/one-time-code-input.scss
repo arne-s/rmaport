@@ -1,0 +1,87 @@
+/*
+ * Filament OneTimeCodeInput (2FA): panel loads via admin.scss.
+ */
+
+.fi-one-time-code-input-ctn {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.25rem;
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: 100%;
+    margin: auto;
+    padding: 0.45rem 0.5rem;
+    background-color: #FFF;
+}
+
+.fi-one-time-code-input-digit-field {
+    display: block;
+    flex: 0 0 auto;
+    width: 1.75rem;
+    height: 2.25rem;
+    min-width: 1.75rem;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 0.375rem;
+    background-color: var(--color-white);
+    outline: 1px solid #c0c0c0;
+    box-shadow: none;
+
+
+    &.fi-active {
+        outline: 2px solid #3366cc;
+        outline-offset: 0;
+    }
+}
+
+input.fi-one-time-code-input {
+    position: absolute !important;
+    inset: 0.45rem 0.5rem !important;
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    top: 0.45rem !important;
+    bottom: 0.45rem !important;
+    width: 224px !important;
+    max-width: none !important;
+    height: auto !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    background: initial !important;
+    background-clip: padding-box !important;
+    font-size: 1rem !important;
+    line-height: 2.25rem !important;
+    caret-color: #111827;
+    letter-spacing: 22.5px !important;
+    text-indent: 18px !important;
+    margin-left: -10px !important;
+    padding-left: 0 !important;
+
+    &:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    &.fi-valid {
+        caret-color: transparent;
+    }
+}
+
+div[wire\:name*="SetUpRequiredMultiFactorAuthentication"] {
+    div.fi-sc-actions {
+        margin: -25px !important;
+        padding: 0 !important;
+        position: relative !important;
+        background: none !important;
+        border: none !important;
+    }
+
+    div.fi-ac.fi-width-full {
+        padding: 15px 25px 0;
+    }
+}

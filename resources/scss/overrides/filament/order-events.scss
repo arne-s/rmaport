@@ -1,0 +1,305 @@
+/* Order events modal: ~600px wide; reset height:100% from admin.scss so status layout works */
+div.openDocumentModal.order-events-modal {
+    div.fi-modal-window {
+        max-width: 750px;
+
+        div {
+            height: auto;
+        }
+
+        div.contentContainer {
+            padding: 0;
+        }
+    }
+}
+
+/* Scoped to modal so order page styles don't override; force flex column (orderPage has .status { grid }) */
+.order-events-modal__content .order-events-modal__panel #card-status .status.status--grouped {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    position: relative;
+    padding-left: 2px;
+}
+
+.order-events-modal__content {
+    .order-events-modal__tabs {
+        display: flex;
+        gap: 12px;
+        border-bottom: 2px solid #dedede;
+        margin: 0 12px 20px;
+    }
+
+    .order-events-modal__tabs .tab {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        margin-right: 15px;
+        padding-bottom: 5px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        color: #8d8d8d;
+    }
+
+    .order-events-modal__tabs .tab[aria-selected='true'] {
+        position: relative;
+        color: #333;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-bottom: 2px solid #0296ca;
+        }
+    }
+
+    .order-events-modal__tabs .tab[aria-selected='false']:hover {
+        color: #333;
+    }
+
+    .order-events-modal__panel {
+        margin-top: 0;
+    }
+
+    /* Orderstatus: één dot per hoofdstatus, uitgelijnd met bloktitel; lijn tussen de dots (display:flex staat in hogere-specificity selector hierboven) */
+    .status--grouped {
+        &::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 14px;
+            bottom: 14px;
+            border-left: 2px dashed rgba(51, 51, 51, 0.4);
+            z-index: 0;
+        }
+    }
+
+    .status--grouped .status-row {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        position: relative;
+        z-index: 1;
+    }
+
+    .status--grouped .timeline__cell {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 4px;
+        margin-top: -12px;
+    }
+
+    .status--grouped .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #8d8d8d;
+        flex-shrink: 0;
+        z-index: 1;
+        margin-left: -5px;
+    }
+
+    .status--grouped .dot--outline {
+        background: #fff;
+        box-shadow: inset 0 0 0 2px #8d8d8d;
+    }
+
+    .status--grouped .dot--current {
+        background: #fff;
+        box-shadow: inset 0 0 0 2px #0494c8;
+    }
+
+    .status-block {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .status-block__title {
+        background: #f9fafb;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #374151;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .status-block__items {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .status-block__items .st-item {
+        display: flex;
+        flex-shrink: 0;
+        align-items: baseline;
+        min-height: 2rem;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 0;
+        border-bottom: 1px solid #e5e7eb;
+        background: #fff;
+        color: #374151;
+        font-size: 13px;
+        line-height: 1.4;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &.st-item--current {
+            background: #eff6ff;
+            color: #0494c8;
+            font-weight: 600;
+        }
+    }
+
+    .status-block__items .st-item .st-name {
+        font-weight: inherit;
+        display: inline;
+        color: inherit;
+    }
+
+    .status-block__items .st-item .st-name .st-name__indent {
+        display: none;
+    }
+
+    .status-block__items .st-item .st-name .st-date {
+        font-size: 10px;
+        font-weight: 400;
+        color: #8d8d8d;
+        margin-left: 0.35rem;
+    }
+
+    .status-block__items .st-item.st-item--current .st-name .st-date {
+        color: #0494c8;
+    }
+}
+
+#order-events-section {
+    margin-bottom: 1rem;
+
+    .order-events-section__title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 0.75rem;
+    }
+
+    .order-events-section__table-wrap {
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    thead {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        background-color: #f9fafb;
+    }
+
+    thead tr {
+        box-shadow: inset 0 -1px 0 #e5e7eb;
+    }
+
+    tbody {
+        display: block;
+        overflow-y: auto;
+        max-height: 500px;
+        scrollbar-gutter: stable;
+    }
+
+    tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    th,
+    td {
+        padding: 6px 8px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 12px;
+        box-sizing: border-box;
+    }
+
+    th {
+        z-index: 1;
+    }
+
+    .order-events-section__empty {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    /* Column widths: Datum | Gebruiker | Activiteit */
+    th:nth-child(1),
+    td:nth-child(1) {
+        width: 120px;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+        width: 15%;
+    }
+
+
+    /* Responsive: card layout, header hidden, fields stacked with labels */
+    @media (max-width: 640px) {
+        thead {
+            display: none;
+        }
+
+        tbody tr {
+            display: block;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            background-color: #fafafa;
+
+            &:nth-child(even) {
+                background-color: #f9fafb;
+            }
+        }
+
+        tbody td {
+            display: block;
+            width: 100%;
+            padding: 0.25rem 0 0.5rem;
+            border: none;
+            font-size: 13px;
+
+            &:first-child {
+                padding-top: 0;
+            }
+
+            &::before {
+                content: attr(data-label);
+                font-weight: 600;
+                display: block;
+                margin-bottom: 0.125rem;
+                font-size: 12px;
+                color: #111827;
+            }
+        }
+    }
+}

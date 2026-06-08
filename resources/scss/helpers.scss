@@ -1,0 +1,20 @@
+html,body {
+    scroll-behavior: smooth;
+}
+
+.max-width {
+    width: 100%;
+    max-width: 1560px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.error {
+
+    @media (max-width: 992px) {
+        line-height: 1.2;
+        margin-top: 5px;
+    }
+}

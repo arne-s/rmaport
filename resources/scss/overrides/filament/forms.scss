@@ -1,0 +1,99 @@
+div.fi-sc-component.gap-6 {
+    gap: 0 20px;
+}
+
+.alert-danger {
+    color: red;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="number"],
+input[type="password"],
+select,
+textarea {
+    background-color: #FFFFFF;
+    box-shadow: none;
+    border-radius: 3px;
+    border: 1px solid #C4C4C4;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+div.fi-fo-field {
+    label.fi-fo-field-label {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+
+        > span {
+            color: #3A343E;
+        }
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea {
+        background-color: #F7F6F6;
+        box-shadow: none;
+        border-radius: 3px;
+        border: 1px solid #E7E7E7;
+    }
+}
+
+.custom-table-repeater {
+    border: 2px solid red;
+}
+
+trix-editor {
+    min-height: 110px;
+}
+
+input[type=radio] {
+    color: var(--primary-color);
+
+    &:checked {
+        background-color: var(--primary-color);
+    }
+
+    &:focus {
+        box-shadow: none;
+    }
+}
+
+div.filament-forms-rich-editor-component trix-toolbar {
+    float: right;
+    margin-top: -105px !important;
+}
+
+
+div.test {
+    ul.filepond--list {
+        position: absolute;
+        width: 100%;
+        overflow-y: scroll !important;
+    }
+
+    div.filepond--list-scroller {
+        overflow-y: visible;
+    }
+
+    ul.filepond--list {
+        display: grid !important;
+        grid-template-columns: 33% 33% 33% !important;
+        grid-template-rows: 2fr 2fr !important;
+        grid-gap: 10px !important;
+        padding: 20px !important;
+        margin-left: -15px !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+
+        > li {
+            transform: translate(10px, 10px) !important;
+            position: initial !important;
+        }
+    }
+}

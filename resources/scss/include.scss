@@ -1,0 +1,40 @@
+// general
+@use "helpers" as *;
+@use "typography" as *;
+@use "fonts" as *;
+
+// overrides
+@use "overrides/filament/forms" as *;
+@use "overrides/filament/tables" as *;
+@use "overrides/filament/admin" as *;
+@use "overrides/filament/adminMobilestyling" as *;
+@use "overrides/filament/general" as *;
+@use "overrides/tippy" as *;
+
+// layouts
+@use "layouts/guest" as *;
+
+// components
+@use "components/arrow-button" as *;
+@use "components/modals/company-notification-modal" as *;
+@use "components/company-logo" as *;
+@use "components/inline-message" as *;
+@use "components/mega-menu" as *;
+@use "components/modal-close-icon" as *;
+@use "components/modal-component" as *;
+@use "components/primary-button" as *;
+@use "components/secondary-button" as *;
+@use "components/user-menu" as *;
+
+
+.text-white {
+    color: #fff;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.bg-white {
+    background-color: #fff;
+}

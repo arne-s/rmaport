@@ -1,0 +1,167 @@
+/* Postcode validation: valid/invalid input styling */
+html.filament {
+    div.invalid input {
+        background: #fff3f3 !important;
+    }
+
+    div.valid input {
+        background: #f5ffed !important;
+    }
+}
+
+/* Standalone address form (e.g. inside action modals) */
+.address-form-fields {
+    border-radius: 6px;
+    margin: 0;
+    max-width: calc(100% - 10px);
+    float: right;
+    padding: 12px 2px 13px 6px;
+
+    > div {
+        gap: 12px;
+    }
+
+    .fi-fo-field {
+        row-gap: 5px;
+
+        input,
+        select {
+            font-size: 13px;
+        }
+
+        .fi-fo-field-label-col .fi-fo-field-label-ctn,
+        .fi-fo-field-label-col .fi-fo-field-label-content,
+        .fi-fo-field-label-col label {
+            font-size: 13px !important;
+        }
+    }
+}
+
+/* Read-only address display blocks and editable address forms */
+div.fi-resource-quotes,
+div.fi-resource-stock-orders,
+div.fi-resource-purchase-orders,
+div.fi-resource-release-orders,
+div.fi-resource-orders.fi-resource-create-record-page,
+div.fi-resource-orders.fi-resource-edit-record-page,
+div.fi-resource-fittings.fi-resource-edit-record-page,
+div.fi-resource-credit-invoices.fi-resource-edit-record-page,
+div.fi-resource-bill-of-materials,
+div.fi-resource-form-entries {
+
+    div.factuurAdresContainer {
+
+        div.factuurAdresInner {
+            margin-top: 3px;
+
+            p {
+                font-size: 11px;
+                line-height: 1.4;
+            }
+        }
+    }
+
+    div.verzendAdresContainer {
+
+        div.verzendAdresInner {
+            margin-bottom: -2px;
+
+            p {
+                font-size: 11px;
+                line-height: 1.4;
+            }
+        }
+    }
+
+    /* Factuuradres / Afleveradres: label + dropdown op één regel, dropdown direct achter label */
+    .fi-fo-field:has(.address-type-select) {
+        gap: 0 6px;
+
+        .fi-fo-field-label-col .fi-fo-field-label-ctn,
+        .fi-fo-field-label-col .fi-fo-field-label-content,
+        .fi-fo-field-label-col label {
+            font-size: 13px !important;
+        }
+
+        .fi-input-wrp.address-type-select {
+            //width: 140px;
+        }
+    }
+
+    /* Wrapper factuur- en leveradresformulier: minder ruimte boven het adresblok */
+    div[id='form.additional.invoice_address'],
+    div[id='form.additional.delivery_address']{
+        margin-top: -14px;
+    }
+
+    /* Adresformulieren (factuur/aflever): zelfde breedte als kolom, niet smaller dan factuuradres */
+    #form\.additional\.invoice_address,
+    #form\.additional\.delivery_address {
+        width: 100%;
+        min-width: 0;
+    }
+    #form\.additional\.invoice_address > div,
+    #form\.additional\.delivery_address > div {
+        margin: 15px 0 0;
+        gap: 12px 5px;
+        width: 100%;
+        min-width: 0;
+    }
+    /* Leveradres: heel blok (naam/e-mail/telefoon + adres) volle breedte kolom */
+    .address-contact-fields:has(#form\.additional\.delivery_address) {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Naam/e-mail/telefoon bij Zelf ingeven (factuur/lever): zelfde styling als rest formulier */
+    .address-contact-fields {
+        display: grid;
+        margin: 15px 0 0;
+        gap: 12px 5px;
+
+        /* Ruimte tussen de nieuwe velden (Naam, E-mail, Telefoon) */
+        > div {
+            gap: 12px 5px;
+        }
+
+        /* Alle velden in dit blok: zelfde lettergrootte als rest formulier */
+        .fi-fo-field {
+            input,
+            select {
+                font-size: 13px;
+            }
+            .fi-fo-field-label-col .fi-fo-field-label-ctn,
+            .fi-fo-field-label-col .fi-fo-field-label-content,
+            .fi-fo-field-label-col label {
+                font-size: 13px !important;
+            }
+        }
+
+        .fi-fo-field.fi-fo-field-has-inline-label {
+            .fi-fo-field-label-col {
+                display: grid;
+                gap: 12px;
+                align-items: center;
+                grid-template-columns: auto 1fr;
+                grid-column: span 1 / span 1;
+                padding: 0;
+
+                @media screen and (min-width: 922px) {
+                    &:after {
+                        content: "";
+                        display: inline-block;
+                        width: 100%;
+                        height: 1px;
+                        border: none;
+                        background: repeating-linear-gradient(to right, #A0A0A0, #A0A0A0 5px, transparent 5px, transparent 10px);
+                        opacity: 0.6;
+                    }
+                }
+
+                .fi-fo-field-label-ctn {
+                    column-gap: 5px;
+                }
+            }
+        }
+    }
+}

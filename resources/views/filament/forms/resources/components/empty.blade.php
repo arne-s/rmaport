@@ -1,0 +1,3 @@
+<div class="empty">
+    {{ $content ?? '' }}
+</div>

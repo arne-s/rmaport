@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="73" height="73" viewBox="0 0 73 73">
+  <g id="Group_6928" data-name="Group 6928" transform="translate(-930 -743.504)">
+    <circle id="Ellipse_113" data-name="Ellipse 113" cx="36.5" cy="36.5" r="36.5" transform="translate(930 743.504)" fill="currentColor"/>
+    <g id="Layer_19_x2C__Archive_x2C__box" transform="translate(948.027 762.142)">
+      <g id="Group_6625" data-name="Group 6625">
+        <g id="Group_6621" data-name="Group 6621">
+          <path id="Path_6264" data-name="Path 6264" d="M35.575,10.6H.757A.757.757,0,0,1,0,9.84V.757A.757.757,0,0,1,.757,0H35.575a.757.757,0,0,1,.757.757V9.84A.757.757,0,0,1,35.575,10.6ZM1.514,9.083h33.3V1.514H1.514Z" fill="#fff"/>
+        </g>
+        <g id="Group_6622" data-name="Group 6622" transform="translate(2.271 9.083)">
+          <path id="Path_6265" data-name="Path 6265" d="M61.034,147.249H30.757a.757.757,0,0,1-.757-.757V120.757a.757.757,0,0,1,.757-.757H61.034a.757.757,0,0,1,.757.757v25.735A.757.757,0,0,1,61.034,147.249Zm-29.52-1.514H60.277V121.514H31.514Z" transform="translate(-30 -120)" fill="#fff"/>
+        </g>
+        <g id="Group_6623" data-name="Group 6623" transform="translate(0 4.541)">
+          <path id="Path_6266" data-name="Path 6266" d="M18.923,61.514H.757A.757.757,0,0,1,.757,60H18.923a.757.757,0,0,1,0,1.514Z" transform="translate(0 -60)" fill="#fff"/>
+        </g>
+        <g id="Group_6624" data-name="Group 6624" transform="translate(6.509 13.624)">
+          <path id="Path_6267" data-name="Path 6267" d="M107.951,199.68H86.757a.757.757,0,0,1-.757-.757V180.757a.757.757,0,0,1,.757-.757h21.194a.757.757,0,0,1,.757.757v18.166A.757.757,0,0,1,107.951,199.68Zm-20.437-1.514h19.68V181.514H87.514Z" transform="translate(-86 -180)" fill="#fff"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

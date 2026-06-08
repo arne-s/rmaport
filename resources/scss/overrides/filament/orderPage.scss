@@ -1,0 +1,2456 @@
+.fi-resource-view-record-page.fi-resource-orders,
+.fi-resource-view-record-page.fi-resource-mains,
+.fi-resource-view-record-page.fi-resource-purchase-orders,
+.fi-resource-view-record-page.fi-resource-stock-orders,
+.fi-resource-view-record-page.fi-resource-release-orders {
+    margin-top: 0;
+    margin-bottom: 60px;
+
+    .fi-page-content {
+        gap: 0;
+    }
+
+    .filament-tabs {
+        background: white;
+        margin-top: 10px;
+        padding: 5px 15px;
+
+        .fi-tabs-item-label,
+        .fi-tabs-item {
+            font-size: 13px;
+        }
+    }
+
+    .header {
+        .title-container {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+
+            &__title-group {
+                display: flex;
+                gap: 20px;
+                align-items: center;
+            }
+
+            .title {
+                font-size: 20px;
+                font-weight: 700;
+            }
+
+            .status {
+                display: flex;
+                gap: 4px;
+                align-items: center;
+                background: #fff;
+                box-shadow: 0 1px 11px #00000010;
+                border: 1px solid #dedede;
+                border-radius: 22px;
+                padding: 7px 10px;
+                font-size: 11px;
+            }
+
+            /* Zelfde structuur en uiterlijk als overige Filament native selects (bijv. delivery_address_type) */
+            .order-status-select-wrp {
+                min-width: 140px;
+
+                .fi-input-wrp-content-ctn {
+                    display: block;
+                }
+
+                select.fi-select-input {
+                    appearance: none;
+                    width: 100%;
+                    min-width: 140px;
+                    padding: 6px 28px 6px 10px;
+                    font-size: 13px;
+                    line-height: 1.25;
+                    color: inherit;
+                    background-color: #fff;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m19.5 8.25-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+                    background-repeat: no-repeat;
+                    background-position: right 8px center;
+                    background-size: 1rem;
+                    border-radius: 6px;
+
+                    &:focus {
+                        outline: 2px solid rgb(1 149 199 / 0.5);
+                        outline-offset: 2px;
+                    }
+                }
+            }
+
+            .title-container__right {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            button.order-events-link {
+                font-size: 13px;
+                color: #0195c7;
+                position: relative;
+                top: -10px;
+                left: -22px;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+
+                &.customer-email-link {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 0;
+
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+
+                &--icon {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0.25rem;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: #0195c7;
+
+                    &:hover {
+                        text-decoration: none;
+                        opacity: 0.8;
+                    }
+                }
+
+                &__icon {
+                    width: 1.25rem;
+                    height: 1.25rem;
+                }
+            }
+
+            @media (max-width: 640px) {
+                flex-direction: column;
+                align-items: stretch;
+
+                &__title-group {
+                    order: 1;
+
+                    flex-direction: column;
+                    align-items: start;
+                    gap: 10px;
+                    margin-bottom: 10px;
+                }
+
+                &__historie {
+                    order: 2;
+                    justify-content: flex-end;
+                }
+            }
+        }
+    }
+
+    div.order-events-modal__content {
+        div.order-events-modal__tabs {
+            height: auto !important;
+            margin-bottom: 20px;
+        }
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+        background-color: #E3E3E3;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: #C0C1C1;
+        box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+    }
+
+    /* --------- Basis --------- */
+    .ordersTab {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 10px !important;
+
+        &.assembly-montage-tab {
+            display: block;
+            grid-template-columns: none;
+            gap: 0;
+
+            .assembly-montage__grid {
+                @media (width >=1024px) {
+                    align-items: stretch;
+                }
+            }
+
+            .assembly-montage__left {
+                @media (width >=1024px) {
+                    min-height: 0;
+                    height: 100%;
+                }
+            }
+
+            .assembly-montage__documents {
+                min-height: 0;
+
+                /* Alleen documenten-livewire: kaart vult kolom; lijst mag volledige flex-ruimte gebruiken */
+                & > section.card.documents-block {
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1 1 0;
+                    min-height: 0;
+                    height: 100%;
+
+                    > .card__title {
+                        flex-shrink: 0;
+                        align-self: flex-start;
+                        width: fit-content;
+                        max-width: 100%;
+                    }
+
+                    .docs-list {
+                        flex: 1 1 0;
+                        min-height: 0;
+                        max-height: none;
+                        overflow: hidden;
+                    }
+
+                    .docs-list-upload {
+                        flex-shrink: 0;
+                    }
+                }
+            }
+        }
+
+        &.fittingTab {
+            grid-template-columns: repeat(6, 1fr);
+
+            #card-fitting-info,
+            #card-fitting-documenten,
+            #card-fitting-afspraken {
+                grid-column: span 2;
+            }
+
+            #card-fitting-notes {
+                grid-column: span 4;
+                /* 2/3 */
+            }
+
+            #card-fitting-measurements {
+                grid-column: span 2;
+                /* 1/3 */
+            }
+
+            @media screen and (max-width: 922px) {
+                #card-fitting-documenten {
+                    min-height: 150px;
+                }
+
+                #card-delivery-documenten {
+                    min-height: 200px;
+                }
+            }
+        }
+
+        &.serviceTab {
+            grid-template-columns: repeat(6, 1fr);
+
+            /* Rij 1: Onderhoud | Afspraken | Artikelen (rechts, 2 rijen hoog) */
+            #card-service-info {
+                grid-column: 1 / span 2;
+                grid-row: 1;
+            }
+
+            #card-service-afspraken {
+                grid-column: 3 / span 2;
+                grid-row: 1;
+            }
+
+            #card-service-artikelen {
+                grid-column: 5 / span 2;
+                grid-row: 1 / span 2;
+            }
+
+            /* Rij 2: Omschrijving onder Onderhoud | Documenten onder Afspraken */
+            #card-service-notes {
+                grid-column: 1 / span 2;
+                grid-row: 2;
+            }
+
+            #card-service-documenten {
+                grid-column: 3 / span 2;
+                grid-row: 2;
+            }
+
+            @media screen and (max-width: 922px) {
+                #card-service-info,
+                #card-service-afspraken,
+                #card-service-artikelen,
+                #card-service-notes,
+                #card-service-documenten {
+                    grid-column: 1 / -1;
+                    grid-row: auto;
+                }
+            }
+        }
+
+        &.deliveryTab {
+            grid-template-columns: repeat(6, 1fr);
+
+            #card-delivery-info,
+            #card-delivery-documenten,
+            #card-delivery-appointments {
+                grid-column: span 2;
+            }
+
+            @media screen and (max-width: 922px) {
+                #card-fitting-documenten {
+                    min-height: 150px;
+                }
+
+                #card-delivery-documenten {
+                    min-height: 200px;
+                }
+            }
+
+            #card-delivery-notes {
+                grid-column: 1 / -1;
+            }
+        }
+
+        &.inkoopTab {
+            grid-template-columns: repeat(3, 1fr);
+
+            /* Bovenste rij: Details, Documenten, Logistiek (elk 1/3) – expliciete volgorde */
+            #card-inkoop-details {
+                grid-column: 1;
+                min-height: 220px;
+            }
+
+            #card-inkoop-documenten,
+            & > *:nth-child(2) {
+                grid-column: 2;
+                min-height: 220px;
+            }
+
+            #card-logistics {
+                grid-column: 3;
+                min-height: 220px;
+            }
+
+            /* Products section (tabs + panels) full width */
+            #products-section {
+                grid-column: 1 / -1;
+                width: 100%;
+                min-width: 0;
+                margin-bottom: 750px;
+                /* keep product tabs on same position when switching (in case of long content) */
+            }
+
+            /* Table panels full width inside products section */
+            .inkoopTab__table {
+                width: 100%;
+                margin-top: 10px;
+
+                .orderProductsTable {
+                    div.fi-ta-ctn table.fi-ta-table {
+                        border-top: none;
+                    }
+
+                    nav.fi-pagination {
+                        padding: 12px 14px;
+
+                        * {
+                            font-size: 11px;
+                        }
+                    }
+                }
+            }
+
+            /* Openstaand: Inkopen / Afroepen onder de tabel */
+            .products-panel-open .orderProductsTable .fi-ta-ctn {
+                display: flex;
+                flex-direction: column;
+
+                .fi-ta-content-ctn {
+                    order: 1;
+                }
+
+                .fi-ta-filter-indicators {
+                    order: 2;
+                }
+
+                .fi-ta-selection-indicator {
+                    order: 3;
+                    margin-bottom: 5px;
+                    border-top: 1px solid #e5e7eb;
+                    border-bottom: 1px solid #e5e7eb;
+                }
+
+                .fi-ta-header-ctn {
+                    order: 4;
+                    padding: 10px 0 15px 8px;
+                    margin-left: 16px;
+
+                    .fi-ta-header-toolbar {
+                        border: none;
+                        padding: 0;
+                    }
+                }
+
+                nav.fi-pagination {
+                    order: 5;
+                }
+
+                .fi-ta-empty-state {
+                    order: 1;
+                }
+            }
+        }
+
+        ul.kv {
+
+            input,
+            select {
+                border-color: #bfbfbf !important;
+                box-shadow: none;
+                border-radius: 1px;
+                width: 200px;
+                padding: 0;
+                border-style: dotted;
+
+                &:hover,
+                &:active,
+                &:focus {
+                    border-style: solid;
+                }
+            }
+        }
+    }
+
+    /* --------- Klant notitie tooltip --------- */
+    .customer-note-tooltip {
+        position: absolute;
+        left: 0;
+        top: 100%;
+        margin-top: 6px;
+        background: #1f2937;
+        color: #fff;
+        font-size: 11px;
+        line-height: 1.4;
+        padding: 0 14px 14px;
+        border-radius: 6px;
+        white-space: pre-line;
+        min-width: 300px;
+        max-width: 400px;
+        z-index: 999;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+    }
+
+    @media (max-width: 768px) {
+        .customer-note-tooltip {
+            position: fixed;
+            left: 16px;
+            right: 16px;
+            top: 50%;
+            bottom: auto;
+            transform: translateY(-50%);
+            min-width: 0;
+            max-width: none;
+            width: auto;
+        }
+    }
+
+    /* --------- Kaarten (alleen .fi-page-content — modals zitten buiten content, zie Filament page layout) --------- */
+    .fi-page-content {
+        .card {
+            background: #fff;
+            border: 1px solid #0195C7;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 6px 16px rgba(16, 24, 40, .06);
+            // padding: 20px;
+            padding: 10px 15px;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .card--tight {
+            padding: 16px
+        }
+
+        div[wire\:key*="order-status-overview"] {
+            max-width: 24rem;
+
+            div.card-heading {
+                height: auto !important;
+                display: none;
+            }
+        }
+
+        .card__header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+
+            button {
+                position: relative;
+                top: 6px;
+            }
+        }
+
+        .card__header-row .card__title {
+            margin-bottom: 0;
+        }
+
+        #card-fitting-measurements .card__header-row {
+            justify-content: flex-start;
+            gap: 0;
+
+            .fitting-measurements-title-group {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.35rem;
+            }
+
+            button.fitting-measurements-info-btn {
+                position: relative;
+                top: -6px;
+                border: 0 !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                padding: 2px !important;
+                min-height: 0 !important;
+                width: 22px;
+                left: -4px;
+            }
+        }
+
+        .card__header-action {
+            flex-shrink: 0;
+        }
+
+        .card__title {
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            font-size: 15px;
+            display: inline-block;
+            position: relative;
+            border-bottom: 3px solid #3366cc;
+        }
+
+        .card__action {
+            font-size: 11px;
+            font-weight: 500;
+            color: #333333;
+            text-decoration: underline;
+        }
+
+        .card__action:hover {
+            text-decoration: underline
+        }
+    }
+
+    /* --------- Utility --------- */
+    .grid-span-3 {
+        grid-column: span 3
+    }
+
+    .grid-span-4 {
+        grid-column: span 4
+    }
+
+    .grid-span-6 {
+        grid-column: span 6
+    }
+
+    .grid-span-8 {
+        grid-column: span 8
+    }
+
+    .grid-span-9 {
+        grid-column: span 9
+    }
+
+    .grid-span-12 {
+        grid-column: 1/-1
+    }
+
+    .right {
+        text-align: right
+    }
+
+    .muted {
+        color: #8D8D8D
+    }
+
+    .small {
+        font-size: 10px;
+        font-weight: 500;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border: 1px solid #0195C7;
+        border-radius: 999px;
+        font: 600 12px/1.1 inherit;
+        background: #fafbfc;
+    }
+
+    /* --------- Key/Value lijsten --------- */
+    .kv {
+        list-style: none;
+        margin: 0;
+        padding: 5px;
+        display: grid;
+        gap: 2px;
+        align-content: center;
+
+        li {
+            display: grid;
+            grid-template-columns: 130px auto;
+            align-items: baseline;
+            column-gap: 16px;
+        }
+
+        .k {
+            color: #8D8D8D;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .v {
+            color: #000;
+            font-weight: 600;
+            font-size: 12px;
+
+            & > a {
+                text-decoration: underline;
+            }
+        }
+    }
+
+
+    /* --------- Top: Order details / Finance / Logistiek --------- */
+    .finance {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+    }
+
+    .percentage {
+        color: #898989;
+    }
+
+    .logistics {
+        overflow-y: auto;
+        scrollbar-gutter: stable;
+        padding-right: 4px
+    }
+
+    .logistics__head,
+    .logistics__row {
+        display: grid;
+        grid-template-columns: 2fr .8fr;
+        align-items: center;
+        margin-right: 10px;
+    }
+
+    .logistics__head {
+        padding-bottom: 6px;
+        color: #000;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .logistics__row {
+        padding: 2px 0;
+        font-size: 11px;
+        font-weight: 600;
+        color: #8D8D8D;
+
+
+        div {
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            color: #8d8d8d !important;
+        }
+
+        a.main-request-number-link {
+            color: #3366cc !important;
+            font-weight: 600 !important;
+        }
+    }
+
+    .syncStatus {
+        width: 80px;
+
+        a {
+            display: flex;
+            align-items: center;
+            border: 0;
+
+            span.icon-status {
+                padding-right: 5px;
+            }
+        }
+    }
+
+    /* --------- Tabs Dealer / Eindklant --------- */
+    .tabs {
+        display: flex;
+        gap: 12px;
+        border-bottom: 2px solid #DEDEDE;
+        margin: -4px 0 6px 0;
+        // padding: 0 0 8px 0;
+    }
+
+    .tab {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        margin-right: 15px;
+        padding-bottom: 5px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #8D8D8D;
+    }
+
+    .tab[aria-selected="true"] {
+        position: relative;
+        color: #333;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-bottom: 2px solid #0296ca;
+        }
+    }
+
+    .tab[aria-selected="false"]:hover {
+        // background: #f3f4f6;
+        color: #333;
+    }
+
+    /* Tab info grid */
+    .tab-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: 1fr;
+        column-gap: 20px;
+        row-gap: 5px;
+
+        &:not(.last)::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 0;
+            border-bottom: 2px solid #DEDEDE;
+            margin-top: 0px;
+            grid-column: span 2;
+        }
+
+        .line {
+            grid-column: span 2;
+            height: auto;
+            width: 2px;
+            background-color: #DEDEDE;
+        }
+    }
+
+    .block-title {
+        font-size: 13px;
+        font-weight: 700;
+        margin: 5px 0 2px 0;
+    }
+
+    .fi-fo-field {
+        .fi-fo-field-label span {
+            font-weight: 700;
+            margin: 0 0 0px 0;
+            font-size: 13px;
+        }
+    }
+
+    .rel-link {
+        position: absolute;
+        right: 20px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #333333;
+
+        a {
+            font-size: 11px;
+
+            svg {
+                display: inline;
+                margin-left: 3px;
+                transform: rotate(180deg);
+            }
+
+            span {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .note {
+        margin-top: 20px;
+
+        textarea {
+            font-size: 13px;
+        }
+    }
+
+    .fitting-passing-form {
+        .fitting-note-fields-two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 28px;
+            align-items: start;
+            margin-bottom: 0;
+
+            @media (max-width: 960px) {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fitting-note-fields-col {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* Label links, veld rechts (met dashed border op label) voor de eerste velden */
+        .fitting-note-field-row {
+            display: grid;
+            grid-template-columns: minmax(0, 200px) 1fr;
+            gap: 15px;
+            align-items: start;
+            margin-bottom: 5px;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        .fitting-note-field-label-col {
+            padding: 6px 10px 6px 0;
+            background-color: #FFF;
+            border-radius: 3px;
+            min-height: 34px;
+            display: flex;
+            align-items: center;
+
+            &:after {
+                content: "";
+                width: 100%;
+                height: 1px;
+                border: none;
+                align-self: center;
+                background: repeating-linear-gradient(to right, #A0A0A0, #A0A0A0 5px, transparent 5px, transparent 10px);
+                opacity: 0.6;
+
+            }
+
+
+            .fi-fo-field-label-ctn {
+                gap: 0;
+            }
+
+            .fi-fo-field-label-content {
+                font-size: 13px;
+                font-weight: 700;
+                white-space: nowrap;
+                padding-right: 10px;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                background-color: rgba(255, 255, 255, 0.05);
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .fitting-note-field-content-col {
+            .fi-input-wrp {
+                box-shadow: none;
+            }
+
+            input.fi-input,
+            select.fi-input,
+            textarea.fi-input {
+                box-shadow: none;
+                padding: 5px 7px;
+                border-radius: 3px;
+                border: 1px solid #adadad;
+                font-size: 13px;
+            }
+
+            input.fi-input[type="date"] {
+                width: auto;
+                min-width: 170px;
+                max-width: 100%;
+            }
+        }
+
+        /* Laatste 2 textareas: naast elkaar in 2 kolommen */
+        .fitting-note-textareas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 20px;
+            margin-top: 1rem;
+            align-items: stretch;
+
+            @media screen and (max-width: 922px) {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fitting-note-textareas-grid .fi-fo-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+            height: 100%;
+
+            .fi-fo-field-label-content {
+                font-size: 13px;
+                font-weight: 700;
+            }
+
+            .fi-input-wrp {
+                box-shadow: none;
+                height: 100%;
+
+                textarea.fi-input,
+                input.fi-input {
+                    box-shadow: none;
+                    padding: 5px 7px;
+                    border-radius: 3px;
+                    border: 1px solid #adadad;
+                    font-size: 13px;
+                }
+
+                #fittingNoteGeneralNotes {
+                    height: 100%;
+                    min-height: 680px;
+                }
+            }
+        }
+    }
+
+    .fitting-measurement-table {
+        &__grid {
+            border: 1px solid #dedede;
+            table-layout: fixed;
+
+            @media (prefers-color-scheme: dark) {
+                border-color: #dedede;
+            }
+        }
+
+        &__th,
+        &__td {
+            border-left: 1px solid #dedede;
+            border-right: 1px solid #dedede;
+            border-bottom: 1px solid #dedede;
+            font-size: 12px;
+
+            @media (prefers-color-scheme: dark) {
+                border-color: #dedede;
+            }
+        }
+
+        &__th {
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+
+            &--icon {
+                width: 48px;
+                text-align: center;
+                padding-left: 4px;
+                padding-right: 4px;
+            }
+        }
+
+        &__td {
+            vertical-align: top;
+
+            &--icon {
+                vertical-align: middle;
+                text-align: center;
+                padding: 4px;
+                width: 48px;
+            }
+        }
+
+        &__input-wrp {
+            display: block;
+            width: 100%;
+            min-height: 100%;
+        }
+
+        &__input {
+            display: block;
+            width: 100%;
+            min-height: 30px;
+            padding: 6px 10px;
+            background-color: transparent !important;
+            box-shadow: none;
+            border: none;
+            border-radius: 0;
+
+            &:focus {
+                outline: none;
+                box-shadow: none;
+            }
+        }
+
+        &__row--filled .checklist-table__input {
+            background-color: transparent !important;
+        }
+
+        &__icon-disabled {
+            opacity: 0.5;
+
+            svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+    }
+
+    .checklist-table {
+        &__header {
+            margin-bottom: 12px;
+        }
+
+        &__row--filled > td,
+        &__row--filled > td .checklist-table__input-wrp {
+            background-color: #f4ffdd !important;
+            min-height: 26px;
+            line-height: 20px;
+            max-height: 26px;
+            overflow: hidden;
+        }
+
+        &__grid {
+            border: 1px solid #dedede;
+
+            @media (prefers-color-scheme: dark) {
+                border-color: #dedede;
+            }
+        }
+
+        &__th,
+        &__td {
+            border-left: 1px solid #dedede;
+            border-right: 1px solid #dedede;
+            border-bottom: 1px solid #dedede;
+            font-size: 13px;
+
+            @media (prefers-color-scheme: dark) {
+                border-color: #dedede;
+            }
+        }
+
+        &__th {
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+
+            &:last-child {
+                width: 180px;
+            }
+        }
+
+        &__td {
+            vertical-align: middle;
+        }
+
+        &__td--checkbox {
+            width: 26px;
+            min-width: 26px;
+            min-height: 26px;
+            max-width: 26px;
+            height: 100%;
+            padding: 0 !important;
+            line-height: 1;
+        }
+
+        &__input-wrp {
+            display: block;
+            width: 100%;
+            min-height: 100%;
+        }
+
+        &__input-wrp--checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 26px;
+            max-height: 26px;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            cursor: pointer;
+
+            .checklist-table__checkmark {
+                width: 14px;
+                height: 14px;
+            }
+        }
+
+        &__input {
+            display: block;
+            width: 100%;
+            padding: 4px 10px;
+            background-color: transparent !important;
+            box-shadow: none;
+            border: none;
+            border-radius: 0;
+            font-size: 12px;
+
+            &:focus {
+                outline: none;
+                box-shadow: none;
+            }
+        }
+
+        &__input--date {
+            min-width: 160px;
+            color: #8d8d8d;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        &__td:nth-child(2) .checklist-table__input {
+            color: #333;
+        }
+
+        &__row--last >&__td:nth-child(2) .checklist-table__input {
+            font-size: 11px;
+        }
+
+        &__td--last {
+            font-weight: 700;
+
+            .checklist-table__input {
+                font-weight: 700;
+            }
+        }
+
+        &__td--checkbox.checklist-table__td--last {
+            padding-top: 0 !important;
+        }
+    }
+
+    .checklistTab {
+        display: block;
+        margin-top: 10px;
+
+        &__card {
+            width: 100%;
+            max-width: 100%;
+
+            @media screen and (max-width: 770px) {
+                max-width: 100% !important;
+            }
+        }
+
+        &__top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 10px;
+        }
+
+        &__logo {
+            flex-shrink: 0;
+            max-height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        h3.card__title {
+            background: #0298c7;
+            color: #fff;
+            text-transform: uppercase;
+            border: none !important;
+            padding: 5px 12px 7px;
+            font-weight: 900 !important;
+            font-size: 25px !important;
+            margin: 0;
+        }
+
+        ul.kv li {
+            grid-template-columns: 170px auto !important;
+        }
+
+        .main-summary__meta .k,
+        .main-summary__table th {
+            text-transform: uppercase;
+        }
+
+        &__extra-note .fi-fo-field-label-content {
+            color: #0298c7;
+        }
+
+        .main-summary__meta {
+            width: 100%;
+        }
+
+        .main-summary__content {
+            display: flex;
+            align-items: stretch;
+            gap: 20px;
+        }
+
+        .main-summary__table-col,
+        .main-summary__aside {
+            flex: 1 1 50%;
+            max-width: 50%;
+            min-width: 0;
+        }
+
+        .main-summary__aside {
+            display: flex;
+            flex-direction: column;
+        }
+
+        &__extra-note {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 100%;
+            height: 100%;
+        }
+
+        &__extra-note-input {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            margin-top: 4px;
+        }
+
+        &__extra-note .checklist-comments-input {
+            border: 1px solid #0298c7;
+            border-color: #0298c7 !important;
+            color: #0298c7;
+            flex: 1;
+            width: 100%;
+            min-height: 100%;
+            height: 100%;
+            resize: vertical;
+        }
+
+        @media screen and (max-width: 900px) {
+            .main-summary__content {
+                flex-direction: column;
+            }
+
+            .main-summary__table-col,
+            .main-summary__aside {
+                flex: 1 1 auto;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            &__extra-note {
+                min-height: 200px;
+            }
+        }
+    }
+
+    .main-summary {
+        &__meta {
+            margin-bottom: 12px;
+        }
+
+        &__divider {
+            width: 100%;
+            height: 3px;
+            background: #dedede;
+            margin: 8px 0 14px;
+        }
+
+        &__table {
+            width: 100%;
+            border: 1px solid #dedede;
+
+            th,
+            td {
+                border: 1px solid #dedede;
+                padding: 6px 10px;
+                text-align: left;
+                font-size: 12px;
+                vertical-align: middle;
+            }
+
+            th {
+                font-weight: 700;
+                background: #f8f8f8;
+            }
+
+            .main-summary__initials-cell {
+                color: #333;
+                font-weight: 600;
+            }
+
+            .main-summary__date-cell,
+            .main-summary__number-cell {
+                color: #8d8d8d;
+            }
+
+            .main-summary__activity-cell {
+                vertical-align: top;
+            }
+        }
+
+        &__number-link,
+        &__number-link:hover,
+        &__number-link:visited {
+            text-decoration: underline;
+        }
+
+        &__number-link.main-request-number-link,
+        &__number-link.main-request-number-link:hover,
+        &__number-link.main-request-number-link:visited {
+            color: #3366cc !important;
+            font-weight: 400;
+        }
+    }
+
+    .checklistTab .main-summary {
+        &__divider {
+            background: #0298c7;
+        }
+
+        &__table {
+            border-color: #0298c7;
+
+            th,
+            td {
+                border-color: #0298c7;
+            }
+        }
+    }
+
+    #assembly-section-delivery-notes,
+    .checklistTab {
+        .fi-input-wrp {
+            box-shadow: none;
+        }
+
+        .checklist-comments-input {
+            box-shadow: none;
+            padding: 5px 7px;
+            border-radius: 0;
+            border: 1px solid #adadad;
+            border-color: #adadad !important;
+            font-size: 13px;
+        }
+    }
+
+    .note__actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        justify-content: flex-end;
+
+        button {
+            font-size: 13px !important;
+            padding: 6px 12px !important;
+            gap: 7px;
+
+            svg {
+                width: 13px;
+                height: 13px;
+            }
+        }
+    }
+
+    .btn {
+        appearance: none;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #111827;
+        padding: 10px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn--primary {
+        background: #f3c53f;
+        border-color: #e0b430
+    }
+
+    .btn:active {
+        transform: translateY(1px)
+    }
+
+    /* --------- Documenten: base styling in documents.scss --------- */
+
+    .docs-list--afspraken .doc--appointment {
+        grid-template-columns: 2.5rem 7rem 3rem 1fr auto;
+        gap: 12px;
+    }
+
+    .docs-list--afspraken .doc--appointment.doc--header {
+        font-size: 12px;
+        font-weight: 600;
+        color: #667085;
+        padding-bottom: 2px;
+        border-bottom: 2px solid #DEDEDE;
+    }
+
+    .docs-list--afspraken .doc--appointment.doc--header .doc__passing-datum {
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    .docs-list--afspraken .doc--appointment .doc__name--underline {
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    .docs-list--afspraken .doc--appointment .doc__meta--comment {
+        color: #8D8D8D;
+        font-weight: 500;
+    }
+
+    .docs-list--afspraken .doc--appointment .doc__name--clickable {
+        padding: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    .docs-list--afspraken .doc--appointment .doc__on-hold-label {
+        display: block;
+        margin-top: 2px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #b45309;
+    }
+
+    .docs-list--afspraken .doc--appointment .doc__appointment-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+    }
+
+    .docs-list--afspraken .doc--appointment .doc__appointment-action-btn {
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.2;
+        border-radius: 4px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        color: #374151;
+        cursor: pointer;
+    }
+
+    .docs-list--afspraken .doc--appointment .doc__appointment-action-btn:hover {
+        background: #f3f4f6;
+    }
+
+    .docs-list--afspraken .doc--appointment .doc__appointment-action-btn--danger {
+        border-color: #fca5a5;
+        color: #b91c1c;
+    }
+
+    .docs-list--afspraken .doc--appointment .doc__appointment-action-btn--danger:hover {
+        background: #fef2f2;
+    }
+
+    .assembly-products-table-wrap {
+        margin-top: -10px;
+        max-height: 300px;
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+
+    .assembly-products-table {
+        width: 100%;
+        margin-top: 8px;
+        border-collapse: collapse;
+        table-layout: auto;
+        font-size: 11px;
+    }
+
+    .assembly-products-table th,
+    .assembly-products-table td {
+        text-align: left;
+        padding: 6px 10px;
+        vertical-align: top;
+    }
+
+    .assembly-products-table thead th {
+        font-weight: 600;
+        color: #667085;
+        border-bottom: 2px solid #DEDEDE;
+    }
+
+    .assembly-products-table tbody td {
+        border-bottom: 1px solid #F0F0F0;
+        color: #333;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Quantity + article code: as narrow as content allows */
+    .assembly-products-table th:nth-child(1),
+    .assembly-products-table td:nth-child(1),
+    .assembly-products-table th:nth-child(2),
+    .assembly-products-table td:nth-child(2) {
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    .assembly-products-table th:nth-child(3) {
+        white-space: nowrap;
+    }
+
+    /* Product name: single line; column grows with remaining table width */
+    .assembly-products-table td:nth-child(3) {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 0;
+    }
+
+    .assembly-products-table__empty {
+        text-align: center !important;
+        color: #8D8D8D;
+        padding-top: 16px !important;
+        padding-bottom: 16px !important;
+    }
+
+    .icon-file--calendar svg {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 18px;
+        color: #667085;
+    }
+
+    .new-appointment-btn-label {
+        display: inline-flex !important;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+
+        &__icon {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        &__icon svg,
+        & svg {
+            flex-shrink: 0;
+            display: block;
+        }
+
+        &__text {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+    }
+
+    /* --------- Orderstatus / Tijdlijn --------- */
+    .status {
+        display: grid;
+        grid-template-columns: 20px 1fr;
+        gap: 10px;
+    }
+
+    .timeline {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-around;
+        gap: 10px;
+
+        &::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 7.5%;
+            bottom: 7.5%;
+            border-left: 2px dashed rgba(51, 51, 51, 0.69);
+            transform: translateX(-50%);
+        }
+    }
+
+    .dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #8D8D8D;
+        margin: 18px 0;
+        z-index: 1;
+
+        &.dot--outline {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            box-shadow: inset 0 0 0 3px #8D8D8D;
+        }
+
+        &.dot--current {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            box-shadow: inset 0 0 0 3px #0394c9;
+        }
+    }
+
+    .status__items {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .st-item {
+        border: 1px solid #D8D8D8;
+        border-radius: 12px;
+        padding: 14px 12px;
+        background: #fff;
+        color: #6C6C6C;
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+    }
+
+    .st-item--current {
+        border-color: #484848;
+        color: #333333;
+    }
+
+    .st-cap {
+        color: #8D8D8D;
+        font-size: 11px;
+    }
+
+    .st-col {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .st-name {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .st-date {
+        color: #8D8D8D;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    /* --------- Layout plaatsen --------- */
+    /* 3 breed × 2 hoog: order, logistics, finance | dealer, passing, delivery */
+    &.fi-resource-orders,
+    &.fi-resource-mains {
+        header.fi-header {
+            display: none;
+        }
+
+        #card-order {
+            grid-area: 1 / 1 / 3 / 2;
+            overflow: visible;
+        }
+
+        #card-finance {
+            grid-area: 1 / 2 / 2 / 3;
+
+            .card__title {
+                border-bottom: none;
+
+                .title {
+                    border-bottom: 3px solid #0195c9;
+                }
+            }
+
+            span.tax {
+                font-weight: normal;
+                font-size: 10px;
+                padding: 0 5px;
+            }
+
+            span.date {
+                font-weight: normal;
+            }
+        }
+
+        #card-logistics {
+            grid-area: 1 / 3 / 2 / 4;
+        }
+
+        #card-financial_docs {
+            grid-area: 2 / 2 / 3 / 4;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+
+            > .docs-list {
+                flex: 1 1 0;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+
+                > .fi-wi-widget {
+                    flex: 1 1 0;
+                    min-height: 0;
+                    display: flex;
+                    flex-direction: column;
+                }
+            }
+
+            div.fi-ta-ctn {
+                max-height: 270px;
+                overflow: hidden;
+                border: none !important;
+                border-radius: 0 !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .fi-ta-content-ctn {
+                flex: 1 1 auto;
+                min-height: 0;
+                max-height: 270px;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+
+            table.fi-ta-table {
+                border: none !important;
+                border-collapse: collapse;
+                width: 100%;
+                table-layout: fixed;
+
+                // Type, Nummer, Datum, Status, Betalingsstatus, Verzonden, Acties
+                thead th:nth-child(1),
+                tbody td:nth-child(1) {
+                    width: 35%;
+                }
+
+                thead th:nth-child(2),
+                tbody td:nth-child(2) {
+                    width: 9%;
+                }
+
+                thead th:nth-child(3),
+                tbody td:nth-child(3) {
+                    width: 90px;
+                }
+
+                thead th:nth-child(4),
+                tbody td:nth-child(4) {
+                    width: 11%;
+                }
+
+                thead th:nth-child(5),
+                tbody td:nth-child(5) {
+                    width: 14%;
+                }
+
+                thead th:nth-child(6),
+                tbody td:nth-child(6) {
+                    width: 90px;
+                }
+
+                thead th:nth-child(7),
+                tbody td:nth-child(7) {
+                    width: 90px;
+                }
+
+                thead th,
+                tbody td {
+                    min-width: 0;
+                }
+
+                thead th:nth-child(3),
+                tbody td:nth-child(3),
+                thead th:nth-child(6),
+                tbody td:nth-child(6),
+                thead th:nth-child(7),
+                tbody td:nth-child(7) {
+                    min-width: 90px;
+                    max-width: 90px;
+                }
+
+                thead {
+                    border: none;
+
+                    tr {
+                        th {
+                            position: sticky;
+                            top: 0;
+                            z-index: 2;
+                            border: none !important;
+                            border-bottom: 2px solid #dedede !important;
+                            padding: 8px 10px 4px 10px !important;
+                            font-size: 12px;
+                            font-weight: 600;
+                            text-align: left;
+                            background: #fff !important;
+                            color: #667085 !important;
+                            box-shadow: 0 1px 0 #dedede;
+
+                            .fi-ta-header-cell-sort-btn {
+                                font-size: 12px;
+                                font-weight: 600;
+                                color: #667085 !important;
+                            }
+                        }
+                    }
+                }
+
+                tbody {
+                    tr.fi-ta-row {
+                        td {
+                            border: none !important;
+                            border-bottom: 2px solid #dedede !important;
+                            padding: 6px 10px !important;
+                            font-size: 12px !important;
+                            color: #333 !important;
+
+                            &.fi-ta-cell-description {
+                                overflow: hidden;
+
+                                .description {
+                                    min-width: 0;
+                                    max-width: 100%;
+
+                                    .icon-dl {
+                                        flex-shrink: 0;
+                                    }
+                                }
+
+                                button.description__name,
+                                a.description__name {
+                                    display: block;
+                                    min-width: 0;
+                                    max-width: 100%;
+                                    font-size: 12px !important;
+                                    font-weight: 700 !important;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    text-decoration: underline;
+                                    color: #333 !important;
+                                }
+                            }
+
+                            div.filament-tables-text-column,
+                            div.fi-ta-col,
+                            div.fi-ta-text {
+                                font-size: 12px !important;
+                                color: #333 !important;
+                                min-width: 0;
+                                max-width: 100%;
+                            }
+
+                            &:nth-child(3),
+                            &:nth-child(6) {
+                                white-space: nowrap;
+
+                                div.filament-tables-text-column,
+                                div.fi-ta-col,
+                                div.fi-ta-text,
+                                .fi-ta-text-item {
+                                    min-width: unset;
+                                    max-width: none;
+                                    white-space: nowrap;
+                                    overflow: visible;
+                                    text-overflow: clip;
+                                }
+                            }
+
+                        }
+
+                        td.fi-ta-cell:last-child {
+                            padding-top: 2px !important;
+                            padding-bottom: 2px !important;
+                        }
+
+                        div.fi-ta-actions {
+                            justify-content: flex-end;
+                            gap: 2px;
+
+                            .fi-action-btn,
+                            button {
+                                min-height: unset;
+                            }
+
+                            svg {
+                                max-height: 18px;
+                                max-width: 18px;
+                            }
+                        }
+                    }
+                }
+            }
+
+            &:has(.fi-ta-empty-state) {
+                div.fi-ta-ctn,
+                .fi-ta-content-ctn {
+                    max-height: none;
+                }
+            }
+
+            .financial-docs-upload-zone {
+                background: #f5f5f5;
+                border: 1px solid #adadad;
+                border-radius: 9px;
+                padding: 5px 10px;
+                margin-top: -25px;
+
+                label {
+                    padding: 0;
+                }
+
+                &:hover {
+                    border-color: #b0b0b0;
+                }
+
+                &.border-primary-500 {
+                    border-color: var(--primary-500);
+                }
+
+                &.bg-primary-50 {
+                    background-color: var(--primary-50);
+                }
+            }
+
+        }
+
+        //#card-order,
+        //#card-finance,
+        //#card-logistics {
+        //    height: 175px;
+        //}
+
+        #card-order,
+        #card-finance {
+            .card__title {
+                margin: 0 0 15px 0;
+            }
+        }
+    }
+
+    &.fi-resource-purchase-orders,
+    &.fi-resource-stock-orders {
+        .ordersTab {
+            grid-template-columns: repeat(6, 1fr);
+
+            @media screen and (max-width: 770px) {
+                display: flex !important;
+                flex-direction: column !important;
+
+                #card-docs {
+                    min-height: 150px !important;
+                }
+            }
+        }
+
+        #card-order {
+            grid-area: 1 / 1 / 2 / 3;
+        }
+
+        #card-finance {
+            grid-area: 1 / 3 / 2 / 5;
+
+            .card__title {
+                border-bottom: none;
+
+                .title {
+                    border-bottom: 3px solid #0195c9;
+                }
+            }
+        }
+
+        #card-status {
+            grid-area: 1 / 5 / 5 / 7;
+        }
+
+        #card-dealer {
+            grid-area: 2 / 1 / 5 / 3;
+            /* even breed als Inkooporder details (kolom 1-2) */
+        }
+
+        #card-docs {
+            grid-area: 2 / 3 / 5 / 5;
+            /* even breed als Financieel overzicht (kolom 3-4) */
+
+            .purchase-order-docs-header {
+                margin-bottom: 12px;
+            }
+
+            button.uploadDocumentAction,
+            .purchase-order-docs-header .fi-ac-btn-action {
+                height: min-content;
+                padding: 4px 12px !important;
+                font-size: 12px !important;
+
+                svg {
+                    width: 14px;
+                    height: 14px;
+                    color: #000;
+                    stroke-width: 2px;
+                }
+            }
+        }
+
+        // #card-order,
+        // #card-finance,
+        // #card-logistics {
+        //     height: 150px;
+        // }
+
+        #card-order,
+        #card-finance {
+            .card__title {
+                margin: 0 0 15px 0;
+            }
+        }
+
+        .kv {
+            li {
+                grid-template-columns: 130px auto;
+            }
+        }
+    }
+
+    &.fi-resource-release-orders {
+        .ordersTab {
+            grid-template-columns: repeat(6, 1fr);
+            /* 4 gelijke rijen: links+rechts volle hoogte; midden dealer (2 rijen) + documenten (2 rijen) */
+            grid-template-rows: repeat(4, minmax(0, 1fr));
+            align-items: stretch;
+            min-height: min(72vh, 640px);
+        }
+
+        /* Zelfde als inkooporder-view: titel alleen zo breed als tekst (flex stretch trok H3 over volle kaartbreedte) */
+        .ordersTab .card > h3.card__title {
+            align-self: flex-start;
+            width: fit-content;
+            max-width: 100%;
+        }
+
+        #card-release-details {
+            grid-area: 1 / 1 / 5 / 3;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            justify-content: flex-start;
+
+            .card__title {
+                flex-shrink: 0;
+                margin: 0 0 15px 0;
+                font-weight: 700;
+                font-size: 15px;
+                display: inline-block;
+                border-bottom: 3px solid #3366cc;
+            }
+
+            .kv {
+                align-content: start;
+                flex: 0 1 auto;
+            }
+        }
+
+        #card-dealer {
+            grid-area: 1 / 3 / 3 / 5;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        #card-docs {
+            grid-area: 3 / 3 / 5 / 5;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+
+        #card-status {
+            grid-area: 1 / 5 / 5 / 7;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        main.release-order-tab--no-dealer {
+            #card-docs {
+                grid-area: 1 / 3 / 5 / 5;
+            }
+        }
+
+        #card-dealer {
+            .card__title {
+                margin: 0 0 15px 0;
+            }
+        }
+
+        .kv {
+            li {
+                grid-template-columns: 130px auto;
+            }
+        }
+    }
+
+    /* --------- Products tab --------- */
+    .productsTab {
+        margin-top: 10px;
+
+        .orderProductsTable {
+            div.fi-ta-ctn table.fi-ta-table {
+                border-top: none;
+            }
+        }
+    }
+
+    main.inkoopTab {
+        nav.fi-pagination {
+            display: none !important;
+            /* Verberg "Toont 1 tot X van X resultaten" */
+        }
+    }
+
+    /* --------- Responsive --------- */
+    /* Laptop: zelfde 3×2 grid */
+    @media (max-width: 1500px) {
+        .ordersTab {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        &.fi-resource-orders,
+        &.fi-resource-mains {
+            #card-order {
+                grid-area: 1 / 1 / 3 / 2;
+            }
+
+            #card-finance {
+                grid-area: 1 / 2 / 2 / 3;
+            }
+
+            #card-logistics {
+                grid-area: 1 / 3 / 2 / 4;
+            }
+
+            #card-financial_docs {
+                grid-area: 2 / 2 / 3 / 4;
+            }
+        }
+
+        &.fi-resource-purchase-orders,
+        &.fi-resource-stock-orders {
+            .ordersTab {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 400px;
+            }
+
+            #card-order {
+                grid-area: 1 / 1 / 2 / 2;
+            }
+
+            #card-finance {
+                grid-area: 1 / 2 / 2 / 3;
+            }
+
+            #card-status {
+                grid-area: 1 / 3 / 5 / 4;
+                padding: 10px 10px;
+            }
+
+            #card-dealer {
+                grid-area: 2 / 1 / 5 / 2;
+            }
+
+            #card-docs {
+                grid-area: 2 / 2 / 5 / 3;
+            }
+        }
+
+        &.fi-resource-release-orders {
+            .ordersTab {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 400px;
+                grid-template-rows: repeat(4, minmax(0, 1fr));
+                min-height: min(70vh, 560px);
+            }
+
+            #card-release-details {
+                grid-area: 1 / 1 / 5 / 2;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+                justify-content: flex-start;
+
+                .card__title {
+                    flex-shrink: 0;
+                    margin: 0 0 15px 0;
+                    font-weight: 700;
+                    font-size: 15px;
+                    display: inline-block;
+                    border-bottom: 3px solid #3366cc;
+                }
+
+                .kv {
+                    align-content: start;
+                    flex: 0 1 auto;
+                }
+            }
+
+            #card-status {
+                grid-area: 1 / 3 / 5 / 4;
+                padding: 10px 10px;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
+
+            #card-dealer {
+                grid-area: 1 / 2 / 3 / 3;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
+
+            #card-docs {
+                grid-area: 3 / 2 / 5 / 3;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+                overflow: auto;
+            }
+
+            main.release-order-tab--no-dealer {
+                #card-docs {
+                    grid-area: 2 / 2 / 5 / 3;
+                }
+            }
+        }
+
+        .kv {
+            li {
+                column-gap: 5px;
+            }
+        }
+
+        .timeline {
+            gap: 7px;
+        }
+
+        .status {
+            .status__items {
+                .st-item {
+                    padding: 14px 8px;
+                }
+
+                .st-cap {
+                    font-size: 10px;
+                }
+
+                .st-name {
+                    font-size: 11px;
+                }
+
+                .st-date {
+                    font-size: 9px;
+                }
+            }
+        }
+    }
+
+    @media (max-width: 1100px) {
+        &.fi-resource-purchase-orders,
+        &.fi-resource-stock-orders,
+        &.fi-resource-release-orders {
+            .ordersTab {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 300px;
+            }
+        }
+    }
+
+    /* Mobiel groot: alles onder elkaar, behalve Order details & Logistiek naast elkaar    */
+    @media (max-width: 768px) {
+        #card-delivery-notes {
+            .fitting-note-textareas-grid {
+                & > .fitting-note-fields-col {
+                    .fitting-note-field-row {
+                        gap: 0 !important;
+                        grid-template-columns: 1fr;
+
+                        .fitting-note-field-label-col {
+                            &:after {
+                                display: none !important;
+                            }
+                        }
+                    }
+                }
+
+                .fi-fo-field-wrdp {
+                    margin-top: 0 !important;
+                }
+            }
+        }
+
+        .ordersTab {
+            // grid-template-columns: repeat(6, 1fr);
+
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+        }
+
+        .ordersTab.deliveryTab,
+        .ordersTab.fittingTab {
+
+            #card-delivery-info,
+            #card-delivery-documenten,
+            #card-delivery-appointments,
+            #card-delivery-notes,
+            #card-fitting-info,
+            #card-fitting-documenten,
+            #card-fitting-afspraken {
+                grid-column: span 1;
+            }
+        }
+
+        #card-order,
+        #card-release-details,
+        #card-finance,
+        #card-logistics,
+        #card-docs,
+        #card-financial_docs,
+        #card-status,
+        #card-dealer {
+            grid-area: unset;
+            /* reset vaste grid-areas */
+            height: auto;
+            /* geen vaste hoogte meer */
+        }
+
+        .tab-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+.appears-disabled {
+
+    .fi-select-wrp,
+    .fi-input-wrp {
+        pointer-events: none;
+        opacity: .7;
+    }
+}
+
+html.filament button.fitting-measurements-modal-close.fi-icon-btn {
+    margin: 0 !important;
+    box-shadow: none !important;
+    --tw-shadow: 0 0 #0000 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+
+html.filament main.notesTab {
+    margin-top: -5px;
+
+    div.fi-ta-ctn {
+        border: 1px solid #0195C7 !important;
+        border-radius: 12px;
+        box-shadow: 0 1px 2px #1018280a, 0 6px 16px #1018280f !important;
+
+        nav.fi-pagination {
+            display: none;
+        }
+    }
+}
+
+div.docs-list-upload + div.docs-list {
+    padding-bottom: 50px;
+}
+
+
+div.financial-docs-upload-zone,
+div.docs-list-upload {
+    position: absolute;
+    bottom: 15px;
+    width: calc(100% - 30px);
+}
+
+@media screen and (max-width: 922px) {
+    #assembly-section-images {
+        min-height: 150px;
+    }
+
+    .fi-page {
+
+        .fi-modal-window {
+            .fi-fo-field {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 10px;
+
+                .fi-fo-field-label-ctn {
+                    &:after {
+                        display: none !important;
+                    }
+                }
+            }
+        }
+
+        .view-event {
+            margin-top: 20px !important;
+            gap: 10px !important;
+
+            .view-order-event {
+                display: flex;
+                align-items: start !important;
+                flex-direction: column;
+                position: relative;
+                gap: 5px !important;
+
+                button.order-events-link {
+                    top: 0 !important;
+                    left: 0 !important;
+                }
+            }
+        }
+    }
+}

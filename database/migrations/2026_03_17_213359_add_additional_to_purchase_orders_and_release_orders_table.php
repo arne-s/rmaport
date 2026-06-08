@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('purchase_orders', function (Blueprint $table) {
+            $table->json('additional')->nullable()->after('is_cancelled');
+        });
+        Schema::table('release_orders', function (Blueprint $table) {
+            $table->json('additional')->nullable()->after('is_cancelled');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('purchase_orders', function (Blueprint $table) {
+            $table->dropColumn('additional');
+        });
+        Schema::table('release_orders', function (Blueprint $table) {
+            $table->dropColumn('additional');
+        });
+    }
+};

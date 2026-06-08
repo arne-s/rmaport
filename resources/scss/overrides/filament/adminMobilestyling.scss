@@ -1,0 +1,139 @@
+@media screen and (max-width: 922px) {
+    body:not(.filament-login-page) div.fi-sc-actions {
+        padding: 10px 15px !important;
+    }
+
+    .fi-main-ctn {
+        .fi-main {
+
+            .productTypeContainer {
+                .fi-fo-field {
+                    justify-content: space-between;
+                    width: 100% !important;
+                }
+            }
+
+            .companySection {
+                .fi-grid {
+                    &>.fi-grid-col:nth-child(9) {
+                        .fi-section-content-ctn {
+                            &>.fi-grid {
+                                gap: 15px !important;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .fi-fo-rich-editor-toolbar {
+                overflow-x: scroll;
+            }
+
+            .fi-sc-section {
+
+                &#form\.exact-koppeling\:\:data\:\:section,
+                &#form\.sub-website\:\:data\:\:section {
+                    width: 100% !important;
+                }
+            }
+
+            .fi-ta-header-toolbar {
+                .customFilterOptions {
+                    .fi-sc-component {
+
+                        .toggle-filter,
+                        .toggle-filter>.wrapper {
+                            width: 100%;
+                        }
+                    }
+                }
+            }
+
+            .fi-resource-orders,
+            .fi-resource-mains {
+
+                .ordersTab,
+                .tab-grid {
+                    display: flex;
+                    flex-direction: column;
+                }
+            }
+
+            .price-table-grid>.fi-sc .fi-grid-col:nth-child(4) {
+                margin-right: 0;
+            }
+
+            .sub-siteSection>.fi-section>.fi-section-content-ctn>.fi-sc>.fi-grid-col:nth-child(2) {
+                margin-right: 0;
+            }
+
+            .fi-resource-create-record-page {
+
+                .fi-sc-actions {
+                    .fi-ac {
+
+                        button,
+                        a {
+                            width: 100% !important;
+                        }
+                    }
+                }
+            }
+
+            .fi-resource-news {
+                .fi-ta-ctn {
+                    .fi-ta-header-ctn {
+                        .fi-ta-header-toolbar {
+                            gap: 5px;
+                        }
+                    }
+                }
+
+                .fi-sc-actions {
+                    .fi-ac {
+                        button {
+                            width: 100% !important;
+                        }
+                    }
+                }
+            }
+
+            .fi-resource-edit-record-page {
+                padding-bottom: 135px;
+
+                .fi-sc-actions {
+                    .fi-ac {
+                        button {
+                            width: 100% !important;
+                        }
+                    }
+                }
+            }
+
+            .fi-resource-products {
+                .productTypeContainer {
+                    .fi-section {
+                        padding: 5px 0 15px !important;
+                    }
+                }
+            }
+
+            .fi-resource-margin-overview {
+                .fi-page-header-main-ctn {
+                    gap: 0 !important;
+                }
+            }
+
+            .fi-resource-news {
+                .fi-page-content {
+                    .fi-section-content-ctn {
+                        .fi-fo-field-label-content {
+                            margin-top: 10px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}

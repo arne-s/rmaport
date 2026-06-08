@@ -1,0 +1,12 @@
+You are working in a Laravel project.
+
+Rules:
+- Always follow Laravel conventions unless there is a good reason not to.
+- Prefer Eloquent relationships over raw queries.
+- Do not introduce unnecessary dependencies.
+- Write clean, readable PHP.
+- Everything in the code should be English, except: (1) strings visible to end users (labels, notifications, UI copy, validation messages), when needed. No Dutch in comments, docblocks, log messages, or internal code.
+- **Models: always use getters/setters.** When an Eloquent/model class defines `getX()` or `setX()` (e.g. `getSerialNumber()`, `setReference()`), use those methods instead of reading or writing the underlying attribute (e.g. use `$model->getSerialNumber()` not `$model->serial_number`, and `$model->setSerialNumber($value)->save()` not `$model->serial_number = $value; $model->save()`). Check the model for get/set methods before touching attributes.
+- When creating methods use return types and add doc block
+- When using namespaces, prefer importing classes over using full namespaces when calling the class
+- **Tests:** Never run `php artisan test`, Pest, PHPUnit, or `vendor/bin/phpunit` unless the user explicitly asks to run tests, verify with tests, or debug failing tests. Do not use the test suite as a default verification step after code changes.

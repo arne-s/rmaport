@@ -1,0 +1,483 @@
+// Full-viewport layout for the new-appointment modal.
+// stickyModalFooter/Header is set on the action, which makes Filament put
+// overflow-y-auto + max-h on the WINDOW itself (not just the container).
+
+// Tighten the container padding to 20 px all around
+.fi-modal:has(.new-appointment-modal) > .fi-modal-window-ctn {
+    padding: 20px !important;
+}
+
+.new-appointment-modal {
+    max-width: calc(100vw - 40px) !important;
+    width: calc(100vw - 40px) !important;
+    // Allow the modal to shrink/grow with its content; cap at viewport height.
+    height: auto !important;
+    max-height: calc(100dvh - 40px) !important;
+
+
+    div.custom-form-design > div.fi-sc div.fi-fo-field:not(.address-form-fields *,.address-contact-fields *) {
+        grid-template-columns: minmax(0, 130px) 1fr !important;
+    }
+
+
+    .fi-modal-header {
+        padding-top: 15px !important;
+        padding-bottom: 15px !important;
+    }
+
+    .fi-modal-content {
+        padding-top: 0 !important;
+        margin-top: -10px !important;
+        padding-bottom: 4px !important;
+    }
+
+    .fi-modal-footer {
+        z-index: 100;
+    }
+
+    // Compact label styling for form fields (excluding address sub-forms).
+    div.custom-form-design > div.fi-sc div.fi-fo-field:not(.address-form-fields *, .address-contact-fields *) div.fi-fo-field-label-col div.fi-fo-field-label-ctn label span.fi-fo-field-label-content {
+        font-size: 12px !important;
+    }
+
+    div.address-form-fields {
+        input, select {
+            padding: 5px 10px !important;
+        }
+
+        > div {
+            gap: 8px !important;
+        }
+    }
+
+    div.custom-form-design {
+        margin-top: 0;
+    }
+
+    .appointment-left-col {
+        .appointment-time-fields {
+            margin-top: -5px;
+            margin-left: 20px;
+        }
+    }
+
+    .appointment-right-col {
+        margin-top: 0;
+        padding-top: 0;
+
+        .appointment-calendar-picker {
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        .acp-week-nav {
+            margin-top: 0;
+            margin-bottom: 8px;
+            min-height: 36px;
+            align-items: center;
+        }
+    }
+
+    .appointment-left-col.custom-form-design > .fi-sc > .fi-fo-field:first-child {
+        min-height: 36px;
+    }
+
+    // Compact input styling — excluded from the address sub-form.
+    :not(.address-form-fields, .address-form-fields *) {
+        > .fi-input,
+        > .fi-select-input,
+        > .fi-textarea {
+            padding: 6px !important;
+            font-size: 12px !important;
+        }
+
+
+    }
+
+    // Compact styling for tag/email inputs (e.g. extra_bcc),
+    // but not inside the address sub-form.
+    :not(.address-form-fields, .address-form-fields *) > .fi-input-wrp-content-ctn {
+        .flex.min-h-9 {
+            min-height: unset !important;
+            padding: 2px !important;
+        }
+
+        input {
+            font-size: 12px !important;
+            padding: 5px 10px !important;
+        }
+
+        .fi-badge {
+            font-size: 12px !important;
+        }
+    }
+
+    // Medewerker-select met Outlook-categoriekleur (fitting/delivery + service).
+    .mechanic-user-ids-field {
+        .fi-select-input {
+            padding: 0 !important;
+        }
+
+        .fi-badge {
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+
+        .fi-badge-label {
+            padding: 0 !important;
+        }
+
+        .fi-dropdown-list-item {
+            > span {
+                display: block;
+                width: 100%;
+            }
+
+            .mechanic-category-option {
+                box-sizing: border-box;
+                width: calc(100% + 1rem);
+                margin: -0.25rem -0.5rem;
+            }
+        }
+
+        .mechanic-category-option {
+            display: flex;
+            align-items: center;
+            gap: 0.25em;
+            max-height: 20px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #000;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            &__name,
+            &__email {
+                white-space: nowrap;
+            }
+        }
+
+        .fi-select-input-value-label {
+            display: block;
+            width: 100%;
+
+            .mechanic-category-option {
+                box-sizing: border-box;
+                width: 100%;
+            }
+        }
+    }
+
+    // Prevent the right-column calendar from being clipped by overflow-hidden parents
+    .appointment-right-col,
+    .appointment-calendar-picker {
+        overflow: visible !important;
+
+        // Selection handle: column uses inline cursor: crosshair; cursor inherits unless set here
+        .acp-selection-handle {
+            cursor: grab;
+
+            &:active {
+                cursor: grabbing;
+            }
+        }
+    }
+
+    .appointment-right-col {
+        overflow-x: auto !important;
+    }
+
+    // Calendar body: scrollable viewport over full-day grid (24 h × 45 px/h);
+    // initial scroll positions 07:00 at the top via Alpine init.
+    .acp-grid-body {
+        height: 585px !important;
+        overflow-y: auto !important;
+        max-height: none !important;
+    }
+
+    .acp-grid-container {
+        margin-bottom: 15px !important;
+    }
+
+    .acp-allday-section {
+        .acp-allday-event {
+            box-sizing: border-box;
+        }
+    }
+
+    .acp-category-filter-panel {
+        .acp-category-filter-group:not(:first-child) .acp-category-filter-group__heading {
+            border-top: 1px solid rgb(229 231 235);
+        }
+    }
+
+    .appointment-time-fields {
+        position: relative;
+        z-index: 2;
+        max-width: 100%;
+    }
+
+    .travel-time-label-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 2px;
+
+        label {
+            margin-bottom: 0 !important;
+        }
+    }
+
+    .travel-time-calc-btn {
+        position: relative;
+        z-index: 3;
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        margin: 0;
+        border: none;
+        border-radius: 4px;
+        background: transparent;
+        color: #6b7280;
+        cursor: pointer;
+        line-height: 1;
+        pointer-events: auto;
+
+        svg {
+            width: 14px;
+            height: 14px;
+            pointer-events: none;
+        }
+
+        &:hover {
+            color: #2563eb;
+            background: rgb(243 244 246);
+        }
+
+        &:focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 1px;
+        }
+    }
+
+}
+
+// Two-column grid: left panel ≥ 25% (min 550 px), right panel fills the rest.
+// extraAttributes lands on the Grid outer wrapper; the CSS grid is the direct
+// child Schema element (.fi-sc.fi-grid).
+.appointment-layout-grid > .fi-sc.fi-grid {
+    grid-template-columns: max(25%, 320px) 1fr !important;
+    align-items: start !important;
+    gap: 25px !important;
+
+    // Stack columns on smaller screens.
+    @media (max-width: 1100px) {
+        grid-template-columns: 1fr !important;
+    }
+
+
+}
+
+.appointment-right-col .fi-sc.fi-grid {
+    gap: 15px !important;
+}
+
+// Reistijd-calculator submodal (teleported to body, above Filament action modal)
+.travel-time-calc-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: rgb(0 0 0 / 50%);
+    isolation: isolate;
+}
+
+.travel-time-calc-modal__window {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 28rem;
+    margin: auto;
+    border-radius: 5px;
+    overflow: hidden;
+    background-color: #fff !important;
+    opacity: 1 !important;
+    box-shadow:
+        0 25px 50px -12px rgb(0 0 0 / 25%),
+        0 0 0 1px rgb(0 0 0 / 5%);
+}
+
+.travel-time-calc-modal__header {
+    flex-shrink: 0;
+    padding: 1.25rem 1.5rem 0;
+    background-color: #fff;
+}
+
+.travel-time-calc-modal__heading {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #0d0a0a;
+}
+
+.travel-time-calc-modal__body {
+    flex-shrink: 0;
+    padding: 1rem 1.5rem;
+    background-color: #fff;
+}
+
+.travel-time-calc-modal__footer {
+    display: flex;
+    flex-shrink: 0;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem 1.25rem;
+    background-color: #fff;
+    border-top: 1px solid #e5e7eb;
+}
+
+.travel-time-calc-field {
+    margin-bottom: 12px;
+
+    &:last-of-type {
+        margin-bottom: 0;
+    }
+}
+
+.travel-time-calc-label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #0d0a0a;
+}
+
+.travel-time-calc-result {
+    margin-top: 12px;
+    min-height: 18px;
+    font-size: 11px;
+    color: #374151;
+
+    &__error {
+        color: #9ca3af;
+    }
+}
+
+.travel-time-calc-presets {
+    margin-top: 2px;
+
+    a {
+        font-size: 0.75rem;
+        color: #008ece;
+        text-decoration: underline;
+        line-height: 1.4;
+
+        &:hover {
+            color: #0077b3;
+        }
+    }
+
+    span {
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+}
+
+.appointment-calendar-picker {
+    .acp-week-nav {
+        position: relative;
+        z-index: 30;
+        margin-top: 15px;
+        overflow: visible;
+    }
+
+    .acp-week-nav__filter,
+    .acp-week-nav__settings {
+        position: relative;
+    }
+
+    .acp-week-nav__filter-badge {
+        background-color: #3366cc;
+    }
+
+    .acp-week-nav__settings-trigger {
+        margin-left: 5px;
+    }
+
+    .acp-settings-panel {
+        min-width: 11rem;
+    }
+
+    .acp-category-filter-panel--dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        right: 0;
+        z-index: 50;
+        width: min(18rem, calc(100vw - 2.5rem));
+        min-width: 14rem;
+        max-height: 18rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        border-radius: 0.5rem;
+        border: 1px solid rgb(229 231 235);
+        background-color: #fff;
+        padding-block: 0.25rem;
+        box-shadow:
+            0 10px 15px -3px rgb(0 0 0 / 0.1),
+            0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    .acp-grid-container {
+        position: relative;
+        z-index: 0;
+    }
+}
+
+.acp-allday-event {
+    pointer-events: auto;
+}
+
+.acp-calendar-appointment {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    pointer-events: none;
+
+    a.main-request-number-link {
+        pointer-events: auto;
+        position: relative;
+        z-index: 25;
+    }
+
+    &__title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__description {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        white-space: normal;
+        word-break: break-word;
+    }
+}

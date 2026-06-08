@@ -1,0 +1,7 @@
+trix-toolbar .filament-forms-rich-editor-component-toolbar-button.trix-active {
+    background-color: var(--primary-color) !important;
+}
+/* without this override, the bold styling was not shown as bold in the rich text editor */
+.prose :where(strong):not(:where([class~=not-prose] *)) {
+    font-weight: 700;
+}

@@ -1,0 +1,16 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+
+parameters:
+    level: 0
+    paths:
+        - app
+        - bootstrap
+        - config
+        - database
+        - lang
+        - routes
+    ignoreErrors:
+        - '#Unsafe usage of new static#'
+        - '# is not writable#'

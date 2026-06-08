@@ -1,0 +1,126 @@
+button.secondary-button {
+    background-color: var(--primary-color);
+    text-align: center;
+    color: #fff;
+    font-size: 14px;
+    display: inline-block;
+    white-space: nowrap;
+    height: auto;
+    padding: 10px 20px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    position: relative;
+
+    > div {
+        display: inline-block;
+        margin: auto;
+    }
+
+    &.has-icon {
+        span {
+            margin-left: 22px;
+        }
+
+        &.homePageBtn {
+
+            span {
+                margin-right: 22px;
+                margin-left: 0;
+            }
+        }
+    }
+
+    &[readonly],
+    &.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+    &.loading {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+    svg, img {
+        margin-right: 10px;
+        margin-left: -5px;
+        width: 16px;
+        float: left;
+        position: absolute;
+        top: 50%;
+        margin-top: -1px;
+        transform: translateY(-50%);
+    }
+
+    &.xxs {
+        border-radius: 4px;
+        padding: 3px 15px;
+        font-size: 13px;
+        line-height: 26px;
+
+        svg, img {
+            width: 10px;
+        }
+        &.has-icon {
+            span {
+                margin-left: 12px;
+            }
+        }
+    }
+    &.xs {
+        border-radius: 4px;
+        padding: 5px 15px;
+        font-size: 13px;
+
+        svg, img {
+            width: 10px;
+        }
+    }
+    &.sm {
+        border-radius: 6px;
+        padding: 0px 35px;
+        font-size: 14px;
+
+        svg, img {
+            width: 15px;
+        }
+    }
+
+    &.md {
+        border-radius: 6px;
+        padding: 9px 35px;
+        font-size: 14px;
+
+        svg, img {
+            width: 18px;
+        }
+    }
+
+    &.lg {
+        border-radius: 6px;
+        padding: 12px 35px 11px 35px;
+        font-size: 18px;
+
+        svg, img {
+            width: 20px;
+        }
+    }
+
+    &.homePageBtn {
+        display: inline-flex;
+        flex-direction: row-reverse;
+
+        svg, img {
+            width: 20px;
+            margin-right: -10px;
+            margin-left: 0;
+        }
+    }
+}
+
+button.secondary-button:hover {
+    background-color: var(--primary-color-2);
+}

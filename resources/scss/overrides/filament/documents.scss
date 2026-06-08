@@ -1,0 +1,168 @@
+/* --------- Document list (uploaded files) --------- */
+.docs-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.docs-list-inner {
+    max-height: 380px;
+    overflow: auto;
+    padding-right: 4px;
+}
+
+.doc {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 2px solid #dedede;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.doc:hover {
+    background: #f4fcff;
+}
+
+.doc.doc--appointment.doc--header:hover {
+    background: transparent;
+}
+
+.doc__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.icon-file svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    color: #667085;
+}
+
+.doc__name {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: underline;
+
+    .doc__link {
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        color: inherit;
+        text-align: left;
+    }
+}
+
+.doc__meta {
+    color: #333333;
+    font-size: 11px;
+    font-weight: 600;
+
+    &:last-of-type {
+        color: #8d8d8d;
+    }
+}
+
+.icon-dl svg {
+    width: 14px;
+    height: 14px;
+    color: #667085;
+    justify-self: end;
+}
+
+.doc__edit-icon {
+    justify-self: end;
+    background: transparent !important;
+
+    svg {
+        width: 14px;
+        height: 14px;
+        color: #667085;
+    }
+}
+
+.doc__edit-icon-placeholder {
+    width: 14px;
+    min-width: 14px;
+    justify-self: end;
+}
+
+.doc__btn {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    background: #fff;
+}
+
+.doc__btn:hover {
+    background: #f3f4f6;
+}
+
+/* --------- Upload zone --------- */
+.docs-list-upload {
+    background: #f5f5f5;
+    border: 1px solid #adadad;
+    border-radius: 9px;
+    padding: 5px 10px;
+}
+
+/* --------- Preview modal --------- */
+.documents-preview-modal__header {
+    background: transparent;
+}
+
+.documents-preview-modal__title {
+    margin: 0;
+    line-height: 1.25;
+}
+
+.documents-preview-modal__close {
+    background: transparent !important;
+}
+
+.documents-preview-modal__footer {
+    border-top: 1px solid #e5e7eb;
+}
+
+.financial-documents-preview-modal__iframe {
+    height: min(82vh, calc(100vh - 240px));
+    width: min(100%, calc(min(82vh, calc(100vh - 180px)) * 210 / 297));
+}
+
+.financial-documents-preview-modal__iframe--full,
+.financial-documents-preview-modal__body--full .financial-documents-preview-modal__iframe {
+    width: 100%;
+    max-width: 100%;
+    height: min(82vh, calc(100vh - 240px));
+    border: 0;
+    border-radius: 0;
+}
+
+.financial-documents-preview-modal__body--full {
+    padding: 0;
+}
+
+.dark .documents-preview-modal__footer {
+    border-top-color: #374151;
+}
+
+.documents-preview-modal__download-btn .icon-dl svg {
+    width: 16px;
+    height: 16px;
+    color: #667085;
+}

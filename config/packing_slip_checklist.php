@@ -1,0 +1,117 @@
+<?php
+
+return [
+    'default_type' => 'adl',
+
+    'types' => [
+        'adl' => [
+            'label' => 'Rolstoel',
+            'intro' => 'Bij de aflevering van de rolstoel zijn de onderstaande punten in de praktijk beoefend en uitgelegd. Meer informatie is na te lezen in de overhandigde handleiding.',
+            'items' => [
+                'transfer' => 'Transfer in- en uit de rolstoel',
+                'brakes' => 'Gebruik van de remmen',
+                'maintenance_general' => 'Gewezen op gebruikelijk onderhoud',
+                'maintenance_cushion' => 'Gewezen op onderhoud van zitkussen en rugbekleding',
+                'coupling_unit' => 'Gewezen op risico\'s bij gebruik van een aankoppelunit indien van toepassing',
+                'manual' => 'Gewezen op het lezen van de handleiding',
+                'road_visibility' => 'Gewezen op minder zichtbaar zijn op de openbare weg en in bochten',
+                'skills_training' => 'Gewezen op trainen rolstoelvaardigheid (hellingproef, balanceren, obstakels)',
+                'photo' => 'Foto gemaakt van de rolstoel en zithouding (voor, zij en achter) t.b.v. latere service.',
+            ],
+            'outro' => [
+                'De praktijktest heeft uitgevoerd en begrepen',
+                'De handleiding heeft ontvangen en begrepen',
+            ],
+            'delivery_proof' => [
+                ['key' => 'adl_wheelchair', 'label' => 'ADL-rolstoel', 'kind' => 'checkbox_text', 'exclusive_group' => 'adl_type'],
+                ['key' => 'sport_wheelchair', 'label' => 'Sportrolstoel', 'kind' => 'checkbox_text', 'exclusive_group' => 'adl_type'],
+                ['key' => 'zitski', 'label' => 'Zitski', 'kind' => 'checkbox', 'exclusive_group' => 'adl_type'],
+            ],
+        ],
+        'paws' => [
+            'label' => 'PAWS',
+            'intro' => 'Bij de aflevering van de PAWS aankoppel unit zijn de onderstaande punten in de praktijk beoefend en uitgelegd. Meer informatie is na te lezen in de overhandigde handleiding.',
+            'items' => [
+                'coupling_locks' => 'Aankoppelen van de PAWS inclusief het controleren van de twee vergrendelingspunten',
+                'display' => 'Bedienen en instellen van de PAWS op het display',
+                'throttle_brake' => 'Gasgeven en remmen met behulp van de bediening op het stuur van de PAWS',
+                'support_level' => 'Het instellen van de mate van ondersteuning',
+                'rear_lighting' => 'Gewezen op het aanbrengen van verlichting aan de achterzijde van de rolstoel',
+                'road_risks' => 'Gewezen op risico\'s van snelheid, bochten, hellend vlak en remmen op de weg',
+                'road_visibility' => 'Gewezen op minder zichtbaar zijn op de openbare weg en in bochten',
+                'helmet' => 'Gewezen op het dragen van een helm',
+                'manual' => 'Gewezen op het lezen van de handleiding',
+                'annual_maintenance' => 'Gewezen op de noodzaak om jaarlijks (of met issues eerder) onderhoud uit te laten voeren',
+                'other_wheelchair' => 'Bij gebruik op een andere rolstoel dan de huidige moet een gecertificeerde dealer een hermontage uitvoeren',
+                'wheelchair_changes' => 'Bij elke aanpassing aan de rolstoel dient bij de leverancier gecheckt te worden of de PAWS nog veilig gebruikt kan worden',
+                'transport' => 'De PAWS tijdens het transport loskoppelen van de rolstoel, de PAWS dient als vracht getransporteerd worden.',
+            ],
+            'outro' => [
+                'de praktijktest heeft uitgevoerd en begrepen',
+                'de handleiding heeft ontvangen en begrepen',
+                'de PAWS gebruikt op eigen risico.',
+            ],
+            'delivery_proof' => [
+                ['key' => 'city_12', 'label' => 'PAWS City 12"', 'kind' => 'checkbox', 'exclusive_group' => 'paws_model'],
+                ['key' => 'city_14', 'label' => 'PAWS City 14"', 'kind' => 'checkbox', 'exclusive_group' => 'paws_model'],
+                ['key' => 'cruiser_16', 'label' => 'PAWS Cruiser 16"', 'kind' => 'checkbox', 'exclusive_group' => 'paws_model'],
+                ['key' => 'tourer_20', 'label' => 'PAWS Tourer 20"', 'kind' => 'checkbox', 'exclusive_group' => 'paws_model'],
+                ['key' => 'off_the_road', 'label' => 'Off the road', 'kind' => 'checkbox'],
+                ['key' => 'speed_10', 'label' => '10', 'kind' => 'checkbox', 'group' => 'speed_limit', 'group_label' => 'Begrensd op', 'exclusive_group' => 'paws_speed_limit'],
+                ['key' => 'speed_15', 'label' => '15', 'kind' => 'checkbox', 'group' => 'speed_limit', 'group_label' => 'Begrensd op', 'exclusive_group' => 'paws_speed_limit'],
+                ['key' => 'speed_20', 'label' => '20', 'kind' => 'checkbox', 'group' => 'speed_limit', 'group_label' => 'Begrensd op', 'exclusive_group' => 'paws_speed_limit'],
+            ],
+        ],
+        'apv' => [
+            'label' => 'APV',
+            'intro' => 'Bij de aflevering van de arm powered vehikel (e-)bike zijn de onderstaande punten in de praktijk beoefend en uitgelegd. Meer informatie is na te lezen in de overhandigde handleiding.',
+            'items' => [
+                'transfer' => 'Transfer in- en uit de handbike',
+                'arm_cranks' => 'Aandrijven van de handbike met behulp van de armcranks',
+                'braking' => 'Remmen met behulp van de handrem / terugtraprem (doorhalen wat niet van toepassing is) en wijzen op een langere remweg dan een fiets',
+                'gears' => 'Het schakelen van de handbike',
+                'road_risks' => 'Geattendeerd op risico\'s bij hoge ondersteuning, snelheid, het nemen van bochten, hellend vlak en remmen op de weg',
+                'manual' => 'Gewezen op het lezen van de handleiding',
+                'helmet' => 'Gewezen op het dragen van een helm',
+                'lighting' => 'Gewezen op het aanbrengen van verlichting aan voor- en achterzijde van de handbike',
+                'road_visibility' => 'Gewezen op minder zichtbaar zijn op de openbare weg en in bochten',
+                'annual_maintenance' => 'Gewezen op de noodzaak om jaarlijks (of met issues eerder) onderhoud uit te laten voeren',
+            ],
+            'outro' => [
+                'De praktijktest heeft uitgevoerd en begrepen',
+                'De handleiding heeft ontvangen en begrepen',
+                'De handbike op eigen risico gebruikt',
+            ],
+            'delivery_proof' => [
+                ['key' => 'praschberger_speedbike', 'label' => 'Praschberger Speedbike', 'kind' => 'checkbox_text', 'text_suffix' => 'Datum :', 'exclusive_group' => 'apv_type'],
+                ['key' => 'wolturnus', 'label' => 'Wolturnus Racebike / Fatbike / Antaras / Buzzard', 'kind' => 'checkbox', 'exclusive_group' => 'apv_type'],
+            ],
+        ],
+        'swiss_trac' => [
+            'label' => 'Swiss Trac',
+            'intro' => 'Bij de aflevering van de Swiss Trac aankoppel unit zijn de onderstaande punten in de praktijk beoefend en uitgelegd. Meer informatie is na te lezen in de overhandigde handleiding.',
+            'items' => [
+                'coupling' => 'Aankoppelen van de Swiss Trac inclusief het controleren van de bevestiging',
+                'steering' => 'Bedienen en instellen van de Swiss Trac op het stuur',
+                'rear_lighting' => 'Gewezen op het aanbrengen van verlichting aan de achterzijde van de rolstoel',
+                'power_risks' => 'Gewezen op risico\'s van de kracht van de Swiss Trac',
+                'road_visibility' => 'Gewezen op minder zichtbaar zijn op de openbare weg en in bochten',
+                'incline_obstacles' => 'Gewezen op het gebruik van de Swiss Trac op hellend vlak en het nemen van obstakels',
+                'manual' => 'Gewezen op het lezen van de handleiding',
+                'annual_maintenance' => 'Gewezen op de noodzaak om jaarlijks (of met issues eerder) onderhoud uit te laten voeren',
+                'other_wheelchair' => 'Bij gebruik op een andere rolstoel dan de huidige moet een gecertificeerde dealer een hermontage uitvoeren',
+                'wheelchair_changes' => 'Bij elke aanpassing aan de rolstoel dient bij de leverancier gecheckt te worden of de Swiss Trac nog veilig gebruikt kan worden',
+                'transport' => 'De Swiss Trac tijdens het transport loskoppelen van de rolstoel, op de rem zetten en het stuur wegklappen. Gewezen op gebruik oprijgoten. De Swiss Trac dient als (heavy) vracht getransporteerd worden.',
+            ],
+            'outro' => [
+                'de praktijktest heeft uitgevoerd en begrepen',
+                'de handleiding heeft ontvangen en begrepen',
+                'de Swiss Trac gebruikt op eigen risico.',
+            ],
+            'delivery_proof' => [
+                ['key' => 'swiss_trac_6', 'label' => 'Swiss Trac 6 km/uur', 'kind' => 'checkbox', 'exclusive_group' => 'swiss_trac_type'],
+                ['key' => 'swiss_trac_9', 'label' => 'Swiss Trac 9 km/uur', 'kind' => 'checkbox', 'exclusive_group' => 'swiss_trac_type'],
+            ],
+        ],
+    ],
+];

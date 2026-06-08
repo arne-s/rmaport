@@ -1,0 +1,521 @@
+.hidden-note-edit-btn {
+    display: none !important;
+}
+
+.notes-widget-table {
+
+    .customFilamentSearch,
+    nav.fi-pagination {
+        display: none;
+    }
+}
+
+.note-created-by-line,
+.note-created-by-line .fi-in-entry {
+    font-size: 11px;
+    margin-top: -5px;
+}
+
+.note-modal {
+    .fi-modal-header {
+        padding-top: 15px;
+        padding-bottom: 10px;
+    }
+
+    .fi-modal-content {
+        padding-top: 5px !important;
+    }
+
+    &:has(.note-view-panel) > .fi-modal-content {
+        padding-bottom: 10px !important;
+    }
+
+    div.note-upload-new {
+        margin-top: -10px;
+    }
+
+    span.filepond--file-info-sub {
+        display: none !important;
+    }
+
+    span.filepond--file-status-sub {
+        display: none !important;
+    }
+
+
+    fieldset.filepond--file-wrapper {
+        font-size: 28px !important;
+    }
+
+    .filepond--drop-label label {
+        font-size: 21px;
+    }
+
+    div.fi-fo-file-upload-input-ctn {
+        zoom: .6;
+    }
+
+    span.filepond--file-status-main {
+        margin-top: -5px !important;
+    }
+
+    span.filepond--file-info-main {
+        margin-top: -5px !important;
+    }
+
+    div.filepond--image-clip {
+        min-height: 170px;
+    }
+
+
+    div.filepond--processing-complete-indicator {
+        display: none !important;
+    }
+
+    div.filepond--image-preview-overlay.filepond--image-preview-overlay-idle {
+        display: none !important;
+    }
+
+
+    /* RichEditor in notes: taller editor; min-height on the actual ProseMirror node so the whole area is clickable */
+    .rich-editor-note-tall.fi-fo-rich-editor-main {
+        min-height: 6rem;
+    }
+
+    .rich-editor-note-tall .fi-fo-rich-editor-content {
+        min-height: 5rem;
+    }
+
+    /* TipTap mounts the contenteditable inside .fi-fo-rich-editor-content; it must fill the height */
+    .rich-editor-note-tall .fi-fo-rich-editor-content .ProseMirror {
+        min-height: 5rem;
+
+    }
+
+    /* Verberg ALLEEN de spinner (SVG), niet de buttons */
+    .filepond--item[data-filepond-item-state*="processing"] .filepond--process-indicator svg {
+        display: none !important;
+    }
+
+    /* Zorg dat het abort-kruisje zichtbaar blijft */
+    .filepond--action-abort-item-processing {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+}
+
+html.filament .note-modal .filepond--drop-label label {
+    font-size: 21px !important;
+}
+
+/* Create note modal: modal may not get .note-modal in DOM (header action vs table action), so target the upload field directly */
+.note-upload-create {
+    fieldset.filepond--file-wrapper {
+        font-size: 28px !important;
+    }
+
+    .filepond--drop-label label {
+        font-size: 21px;
+    }
+
+    div.fi-fo-file-upload-input-ctn {
+        zoom: .6;
+    }
+
+    span.filepond--file-status-main {
+        margin-top: -5px !important;
+    }
+
+    span.filepond--file-info-main {
+        margin-top: -5px !important;
+    }
+
+    div.filepond--image-clip {
+        min-height: 170px;
+    }
+
+    .text-sm-2 dt.fi-in-entry-label {
+        font-size: 11px;
+    }
+
+}
+
+html.filament .note-upload-create .filepond--drop-label label {
+    font-size: 21px !important;
+}
+
+/* Note status completed: custom blue #0195cb */
+.fi-badge.bg-info-500,
+.fi-badge[class*="info-500"],
+.fi-badge[class*="fi-color-info"] {
+    background-color: #d0e1fe !important;
+    border-color: #0195cb !important;
+    color: #0195cb;
+}
+
+.notes-widget-table th:nth-child(1),
+.notes-widget-table td:nth-child(1) {
+    width: 15%;
+
+    @media screen and (max-width: 770px) {
+        width: 80px;
+    }
+}
+
+.notes-widget-table th:nth-child(2),
+.notes-widget-table td:nth-child(2) {
+    width: 5%;
+
+    @media screen and (max-width: 770px) {
+        width: 50px;
+    }
+}
+
+.notes-widget-table th:nth-child(3),
+.notes-widget-table td:nth-child(3) {
+    width: 11%;
+
+    @media screen and (max-width: 770px) {
+        width: 90px;
+    }
+}
+
+.notes-widget-table th:nth-child(4),
+.notes-widget-table td:nth-child(4) {
+    width: 19%;
+
+    @media screen and (max-width: 770px) {
+        width: 200px;
+    }
+}
+
+.notes-widget-table th:nth-child(5),
+.notes-widget-table td:nth-child(5) {
+    width: 20%;
+
+    @media screen and (max-width: 770px) {
+        width: 150px;
+    }
+}
+
+.notes-widget-table th:nth-child(6),
+.notes-widget-table td:nth-child(6) {
+    width: 15%;
+
+    @media screen and (max-width: 770px) {
+        width: 70px;
+    }
+}
+
+.notes-widget-table th:nth-child(7),
+.notes-widget-table td:nth-child(7) {
+    width: 15%;
+
+    @media screen and (max-width: 770px) {
+        width: 120px;
+    }
+}
+
+/* Match Filament default field label (13px / 500 / oklch) for custom “Bestanden” block.
+   Geen .note-pending-attachments “kaart” hier: die zit ín .fi-modal-window en geeft dubbele schaduw rond de dropzone.
+   Alleen expliciete notitie-modalvensters (.note-modal), niet elke .fi-modal-window. */
+.note-modal .note-documents-panel,
+html.filament .fi-modal-window.note-modal .note-documents-panel {
+    .docs-list-inner {
+        max-height: 140px;
+        overflow-y: auto;
+    }
+
+    /* Drag zone: 15px dichter bij de lijst erboven (Blade heeft mt-4 = 1rem) */
+    .docs-list-upload {
+        margin-top: calc(1rem - 15px);
+    }
+
+    label.note-documents-panel__label.fi-fo-field-label {
+        display: block;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        cursor: default;
+        font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4285714286;
+        color: oklch(0.141 0.005 285.823);
+        font-feature-settings: normal;
+        font-variation-settings: normal;
+    }
+}
+
+html.dark .note-modal .note-documents-panel label.note-documents-panel__label.fi-fo-field-label,
+html.dark .fi-modal-window.note-modal .note-documents-panel label.note-documents-panel__label.fi-fo-field-label {
+    color: oklch(0.985 0 0);
+}
+
+.note-modal .note-view-panel {
+    .note-view-panel__tabs-card {
+        margin-top: 20px;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 12px;
+        border-bottom: 2px solid #dedede;
+        margin: -4px 0 10px;
+    }
+
+    .tab {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        margin-right: 15px;
+        padding-bottom: 5px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #8d8d8d;
+    }
+
+    .tab[aria-selected='true'] {
+        position: relative;
+        color: #333;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-bottom: 2px solid #0296ca;
+        }
+    }
+
+    .tab[aria-selected='false']:hover {
+        color: #333;
+    }
+
+    .kv {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 5px;
+        align-content: center;
+        margin-bottom: 10px;
+
+        li {
+            display: grid;
+            grid-template-columns: 130px auto;
+            align-items: baseline;
+            column-gap: 16px;
+        }
+
+        .k {
+            color: #8d8d8d;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .v {
+            color: #000;
+            font-weight: 600;
+            font-size: 12px;
+            white-space: nowrap;
+
+            >a {
+                text-decoration: underline;
+            }
+        }
+
+        .note-view-panel__tagged-colleagues {
+            white-space: normal;
+        }
+    }
+
+    .note-view-panel__divider {
+        border: 0;
+        border-top: 1px solid #d1d5db;
+        margin: 4px 0 8px;
+    }
+
+    .note-view-panel__comments:has(.note-view-panel__comment) {
+        margin-top: 25px;
+    }
+
+    .note-view-panel__content {
+        width: 100%;
+        min-height: 40px;
+        padding-bottom: 25px;
+    }
+
+    .docs-list .doc {
+        border-bottom: none;
+    }
+
+    .note-view-panel__status-select {
+        max-width: 120px !important;
+        border-radius: 0 !important;
+        padding: 2px 28px 2px 5px !important;
+        border-color: #5f5f5f !important;
+        appearance: none;
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 10px 6px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23374151' d='M5 6 0 0h10z'/%3E%3C/svg%3E");
+    }
+
+    .note-view-panel__status-select.is-open {
+        background-color: #e9f9ef !important;
+        border-color: #16a34a !important;
+        color: #166534 !important;
+    }
+
+    .note-view-panel__status-select.is-ongoing {
+        background-color: #fff8e8 !important;
+        border-color: #f59e0b !important;
+        color: #92400e !important;
+    }
+
+    .note-view-panel__status-select.is-completed {
+        background-color: #d0e1fe !important;
+        border-color: #0195cb !important;
+        color: #0369a1 !important;
+    }
+
+    .note-view-panel__comment-textarea {
+        border-radius: 0 !important;
+        border-color: #5f5f5f !important;
+        opacity: 0.8;
+        min-height: 3.25rem;
+        transition: min-height 0.2s ease, opacity 0.2s ease;
+    }
+
+    .note-view-panel__comment-compose:focus-within .note-view-panel__comment-textarea,
+    .note-view-panel__comment-textarea:not(:placeholder-shown) {
+        opacity: 1;
+        min-height: 6.5rem;
+    }
+
+    .note-view-panel__comment-submit {
+        padding-block: 3px !important;
+        padding-inline: 8px !important;
+        min-height: 0 !important;
+        font-size: 11px !important;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+
+    .note-view-panel__comment {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        column-gap: 10px;
+        align-items: start;
+    }
+
+    .note-view-panel__avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+    }
+
+    .note-view-panel__comment-meta {
+        display: flex;
+        grid-column: 2;
+        gap: 10px;
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+
+    .note-view-panel__comment p {
+        grid-column: 2;
+        margin: 0;
+        white-space: pre-wrap;
+        background: #f7f7f7;
+        padding: 10px;
+        border-radius: 5px;
+    }
+}
+
+.note-modal {
+    .docs-list-upload {
+        position: relative;
+        margin-top: 5px;
+        bottom: 0px;
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .note-modal {
+
+        &.fi-modal-header {
+            padding-top: 15px;
+            padding-bottom: 10px;
+        }
+
+        &>.fi-modal-content {
+            padding-bottom: 10px;
+
+            .fi-sc-component>div>.fi-sc {
+                gap: 10px;
+            }
+
+            .fi-fo-field-wrp,
+            .fi-fo-field {
+                gap: 5px;
+            }
+
+            .fi-sc {
+                .fi-grid-col:nth-child(2) {
+                    .fi-input-wrp {
+                        box-shadow: none;
+                        border: 1px solid #adadad;
+                    }
+                }
+
+                .docs-list-upload {
+                    border-radius: 4px;
+                }
+            }
+        }
+
+        &>.fi-modal-footer {
+            .fi-modal-footer-actions {
+                .fi-btn {
+                    width: 100% !important;
+                }
+            }
+        }
+
+        .note-modal-top-section {
+            margin-top: 5px !important;
+
+            .fi-dropdown-panel {
+                border-radius: 0 0 4px 4px;
+            }
+
+            &>.fi-sc {
+                gap: 10px 20px !important;
+
+                div.fi-fo-field {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 5px !important;
+                    margin-bottom: 1px !important;
+
+                    .fi-fo-field-label-ctn {
+                        &:after {
+                            content: '';
+                            display: none !important;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

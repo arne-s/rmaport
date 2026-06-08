@@ -1,0 +1,46 @@
+html.app {
+    .text-primary-500 {
+        --tw-text-opacity: 1;
+        color: var(--primary-color) !important;
+        background-color: #f9f9f9;
+    }
+
+    [type='text']:focus, input:where(:not([type])):focus, [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus {
+        --tw-ring-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+    }
+
+    .bg-primary-500 {
+        background-color: var(--primary-color) !important;
+    }
+
+    div.filament-tables-search-input {
+        svg {
+            path {
+                stroke: #8B8B8B !important;
+            }
+        }
+    }
+
+    .bg-gray-500\/5 {
+        background-color: #F7F6F6 !important;
+    }
+}
+
+div.filament-modal-window:has(.activity-table) {
+    min-width: 800px !important;
+    opacity: .5;
+
+    div.filament-modal-footer {
+        display: none;
+    }
+}
+
+.fi-no-notification {
+    align-items: center;
+
+    .fi-no-notification-title {
+        font-size: 14px;
+        line-height: 18px;
+    }
+}

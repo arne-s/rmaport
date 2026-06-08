@@ -1,0 +1,74 @@
+button.primary-button {
+    background-color: #3B3B3B;
+    text-align: center;
+    color: #fff;
+    width: 100%;
+    font-size: 15px;
+    display: inline-block;
+    padding: 15px 30px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+
+    @media (max-width: 1024px) {
+        padding: 10px 30px;
+    }
+
+    &[disabled],
+    &[readonly],
+    &.disabled    {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+    &.loading {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+    &.accent-color {
+        background-color: var(--primary-color);
+
+        &:hover {
+            background-color: var(--primary-color-2);
+        }
+    }
+
+    &.md {
+        border-radius: 6px;
+        padding: 11px 35px;
+        font-size: 14px;
+
+        svg, img {
+            width: 18px;
+        }
+    }
+
+    &.lg {
+        border-radius: 6px;
+        padding: 12px 35px;
+        font-size: 18px;
+
+        svg, img {
+            width: 20px;
+        }
+    }
+
+    &.xl {
+        display: block;
+        text-decoration: none;
+        border-radius: 8px;
+        padding: 18px 35px;
+        font-size: 18px;
+
+        svg, img {
+            width: 25px;
+        }
+    }
+}
+
+button.primary-button:hover {
+    background-color: #2C2C2C;
+}

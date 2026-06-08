@@ -1,0 +1,221 @@
+:root {
+    --tw-ring-color: #FEC803 !important;
+    --ring-color: #FEC803 !important;
+    --tw-ring-shadow: inset 0 0 0 calc(1px + 0px) #FECF1E !important;
+}
+
+body.layout-auth {
+    background: #F3F3F5;
+    font-size: 18px;
+
+    @media (max-width: 1024px) {
+        font-size: 16px;
+        line-height: 1.3;
+    }
+
+    div.background-wrapper {
+        background-color: #F7F6F6;
+        background-image: url('../../img/bg-circles-orange.svg');
+        background-position: center;
+        background-attachment: fixed;
+        position: relative;
+        height: 100%;
+        z-index: 0;
+        overflow: hidden;
+        padding: 10px;
+        min-height: 100svh;
+        display: flex;
+        justify-content: center;
+
+        div.inner {
+            background: #FFF;
+            z-index: 1;
+            padding: 0px 22px 22px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px 0 #00000035;
+            margin: 0;
+            overflow: unset;
+            max-width: 400px;
+
+            div.modal-head {
+                padding: 0 0 10px;
+
+                div.logoContainer {
+                    justify-content: center;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    margin-top: -45px;
+
+                    @media only screen and (max-width: 992px) {
+                        margin-top: -65px;
+                    }
+
+                    div.logo {
+                        background-color: white;
+                        padding: 25px 15px 20px;
+                        border-radius: 100%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                }
+
+                img {
+                    width: 152px;
+                }
+
+                h3 {
+                    margin-top: -7px;
+                    margin-bottom: 8px;
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 21px;
+                    padding: 0;
+                    line-height: 1.2;
+                }
+            }
+
+            &.activate-account {
+                padding: 22px;
+
+                div.modal-head {
+                    h3 {
+                        margin-top: 0px;
+                    }
+                }
+
+                .inline-message{
+                    font-size: .875rem;
+                    margin: 0 0 10px 0;
+                    background-size: 25px;
+                    background-position: left 10px center;
+                    padding: 10px 10px 10px 45px;
+                }
+
+                .fi-grid {
+                    gap: 0;
+                }
+
+                .fi-fo-field {
+                    gap: 5px;
+                }
+
+                .create-account-password input{
+                    width: 100%;
+                    padding: 10px 12px 6px;
+                    border-radius: 5px;
+                    border: 2px solid #D6D6D6;
+                    box-shadow: none;
+                    font-size: 15px;
+                    line-height: 1.2;
+                    transition: all .2s;
+                    background-color: #f7f6f6;
+
+                    &:focus-visible {
+                        outline: -webkit-focus-ring-color auto 1px;
+                    }
+                }
+
+                .activateAccountButton{
+                    line-height: 1;
+                    cursor: pointer;
+                }
+            }
+
+            form, div.fi-sc-component {
+                &form > div {
+                    margin: 25px 0;
+                }
+
+                div.fi-fo-field {
+                    padding: 10px 0;
+                }
+
+                input[type=text],
+                input[type=email],
+                input[type=password] {
+                    padding: 10px 12px 6px;
+                    border-radius: 5px;
+                    border: 2px solid #D6D6D6;
+                    box-shadow: none;
+                    font-size: 14px;
+                    line-height: 1.2;
+                    transition: all .2s;
+
+                    &:focus,
+                    &:active {
+                        box-shadow: 0 0 0 4px #d0e1fe;
+                        transition: all .2s;
+                    }
+                }
+
+                .flex.items-center.justify-between.mt-0\.5 {
+
+                    @media only screen and (max-width: 992px) {
+                        margin-top: 10px;
+                    }
+                }
+
+                #remember_me {
+                    margin-top: -2px;
+                }
+
+                button.primary-button {
+                    font-size: 14px;
+                    padding: 7px 30px 6px 30px;
+
+                    @media only screen and (max-width: 992px) {
+                        padding: 10px 30px;
+                    }
+                }
+
+                button.eye {
+                    top: 19px;
+                    border-left: 2px solid #D6D6D6;
+                    padding-left: 5px;
+                    padding-right: 1px;
+
+                    @media only screen and (max-width: 992px) {
+                        top: 19px;
+                    }
+                }
+
+                .forgotPassword {
+                    color: var(--gray-600);
+                }
+
+                label.font-medium {
+                    color: #333333;
+                    font-size: 16px;
+                    margin: 10px 0;
+                }
+            }
+        }
+
+        @media (max-width: 768px) {
+            div.inner {
+                padding: 22px;
+
+                div.modal-head {
+                    padding: 0 0 10px 0;
+
+                    h3 {
+                        font-size: 20px;
+                    }
+                }
+            }
+        }
+
+        div.backToLogin {
+            line-height: 0;
+            margin-top: 10px;
+            margin-bottom: -8px;
+        }
+
+        p.textForgotPass {
+            line-height: 1.2;
+            font-size: 16px;
+        }
+    }
+}

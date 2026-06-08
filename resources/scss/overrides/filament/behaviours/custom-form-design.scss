@@ -1,0 +1,120 @@
+/*
+    2 columns form design with dashed line after labels
+*/
+
+@mixin inline-label-align-with-input {
+    .fi-fo-field-has-inline-label:has(.fi-fo-field-content-col .fi-sc-text) {
+        .fi-fo-field-label-col {
+            grid-row: 1 !important;
+            grid-column: 1 !important;
+            align-self: center !important;
+            height: auto !important;
+        }
+
+        .fi-fo-field-content-col {
+            display: contents;
+
+            > .fi-input-wrp,
+            > .fi-fo-field-content-ctn {
+                grid-row: 1 !important;
+                grid-column: 2 / -1 !important;
+            }
+
+            > .fi-sc:has(.fi-sc-text) {
+                grid-row: 2 !important;
+                grid-column: 2 / -1 !important;
+            }
+
+            > .fi-fo-field-wrp-error-message,
+            > .fi-fo-field-wrp-error-list {
+                grid-row: 3 !important;
+                grid-column: 2 / -1 !important;
+            }
+        }
+    }
+}
+
+div.custom-form-design {
+    @include inline-label-align-with-input;
+
+   >  div.fi-sc {
+        gap: 6px 20px !important;
+
+        div.fi-fo-field:not(.address-form-fields *, .address-contact-fields *) {
+            grid-template-columns: minmax(0, 250px) 1fr;
+            gap: 15px;
+
+            &.fi-fo-field-has-inline-label {
+                grid-template-columns: 1.25fr 1fr 1fr;
+                white-space: nowrap;
+            }
+
+            div.fi-fo-field-label-col {
+                :after {
+                    content: "";
+                    width: 100%;
+                    height: 1px;
+                    border: none;
+                    align-self: center;
+                    background: repeating-linear-gradient(to right, #A0A0A0, #A0A0A0 5px, transparent 5px, transparent 10px);
+                    opacity: 0.6;
+                }
+
+                div.fi-fo-field-label-ctn {
+                    gap: 0;
+
+                    label {
+                        align-self: center;
+
+                        span.fi-fo-field-label-content {
+                            font-size: 13px;
+                        }
+                    }
+                }
+            }
+
+            div.fi-fo-field-content-col {
+                div.fi-input-wrp {
+                    box-shadow: none;
+
+                    input,select {
+                        box-shadow: none;
+                        padding: 8px 7px;
+                        border-radius: 3px;
+                        color: #000;
+                        background-color: #fff;
+                        border: 1px solid #adadad;
+                        font-size: 13px;
+                    }
+                }
+            }
+        }
+
+       div.fi-sc-component:has(div.link-in-label) {
+           margin-top: 15px;
+       }
+
+       div.link-in-label {
+           position: relative;
+
+           label.fi-fo-field-label {
+               display: block;
+               width: auto;
+               white-space: nowrap;
+               padding-right: 10px;
+
+               span.fi-fo-field-label-content {
+                   display: block;
+
+                   a {
+                       position: absolute;
+                       right: 0;
+                       text-decoration: underline;
+                       top: -17px;
+                       font-size: 10px;
+                   }
+               }
+           }
+       }
+    }
+}

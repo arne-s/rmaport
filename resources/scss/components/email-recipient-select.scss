@@ -1,0 +1,76 @@
+.email-recipient-select {
+    min-width: 0;
+    overflow: visible;
+    white-space: normal;
+
+    .fi-input-wrp {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .fi-input-wrp-content-ctn {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    &__tags {
+        min-width: 0;
+        width: 100%;
+    }
+
+    &__chip.fi-badge {
+        display: inline-flex;
+        max-width: calc(100% - 4px);
+        min-width: 0;
+        overflow: hidden;
+        vertical-align: top;
+
+        .fi-badge-label-ctn {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .fi-badge-label {
+            display: block;
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    &__input {
+        min-width: 8rem;
+        flex: 1 1 8rem;
+    }
+
+    &__dropdown {
+        box-sizing: border-box;
+        min-width: 100%;
+        width: max-content;
+        max-width: min(36rem, calc(100vw - 2rem));
+    }
+
+    &__dropdown-item {
+        white-space: nowrap;
+    }
+}
+
+.fi-fo-field:has(.email-recipient-select) {
+    overflow: visible;
+
+    .fi-fo-field-content-col {
+        min-width: 0;
+        overflow: visible;
+    }
+}
+
+.new-appointment-modal {
+    .appointment-left-col,
+    .appointment-left-col .fi-sc-component,
+    .fi-fo-field:has(.email-recipient-select) {
+        overflow: visible !important;
+    }
+}

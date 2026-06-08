@@ -1,0 +1,99 @@
+
+.breadcrumb {
+    .backTo {
+        position: relative;
+        a {
+            font-size: 11px;
+
+            svg {
+                display: inline;
+                margin-right: 2px;
+                margin-top: -1px;
+            }
+
+            &:hover {
+                text-decoration: none;
+
+                span {
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
+}
+
+.breadcrumb-mob-production {
+    @media screen and (max-width: 425px) {
+        margin-top: -330px !important;
+    }
+}
+
+.breadcrumb-premissions {
+    margin-top: -20px !important;
+}
+
+.breadcrumb-premissions-create {
+    margin-top: 15px !important;
+    margin-bottom: -16px;
+}
+
+.breadcrumb-mob-purchase-order {
+    margin-top: 10px;
+    margin-bottom: 30px;
+
+    @media screen and (max-width: 425px) {
+        margin-top: -267px !important;
+    }
+}
+
+
+.breadcrumb-purchase-orders-list {
+    @media screen and (max-width: 425px) {
+        .backTo {
+            top: -26px !important;
+        }
+    }
+}
+
+div.fi-resource-list-records-page {
+    .breadcrumb {
+        .backTo {
+            top: -12px;
+            margin-top: -20px;
+        }
+    }
+}
+
+div.fi-resource-email-templates {
+    .breadcrumb {
+        .backTo {
+            top: 0;
+            margin-top: 0;
+        }
+    }
+}
+
+div.fi-resource-view-record-page {
+    .breadcrumb {
+        .backTo {
+            top: -3px;
+            margin-top: 7px;
+            margin-bottom: -10px;
+            margin-left: 1px;
+
+        }
+    }
+}
+
+div.fi-resource-edit-record-page,
+div.fi-resource-create-record-page {
+    .breadcrumb {
+        .backTo {
+            top: -24px;
+            margin-top: -7px;
+            margin-bottom: -10px;
+            margin-left: 1px;
+
+        }
+    }
+}

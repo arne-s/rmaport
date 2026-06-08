@@ -1,0 +1,15 @@
+div.company-logo {
+    display: flex;
+    align-items: center;
+}
+
+.footer-logo {
+    &>.company-logo {
+        max-height: 38px;
+
+        img {
+            max-height: 54px !important;
+            object-fit: contain;
+        }
+    }
+}

@@ -1,0 +1,845 @@
+html.filament header.filament-main-topbar,
+html.filament header.filament-sidebar-header {
+    max-height: 47px !important;
+}
+
+header.filament-main-topbar,
+header.filament-sidebar-header {
+    background-color: #d0e1fe !important;
+}
+
+.hide-on-mobile {
+    @media screen and (max-width: 922px) {
+        display: none !important;
+    }
+}
+
+.hide-on-desktop {
+    @media screen and (min-width: 923px) {
+        display: none !important;
+    }
+}
+
+.mobileheader-logo {
+    padding-left: 85px;
+
+    img {
+        width: 120px;
+    }
+}
+
+@media screen and (max-width: 922px) {
+    .mobileheader-logo {
+        padding-left: 75px;
+    }
+
+    .mobileheader-hasmenu {
+        gap: 8px !important;
+    }
+
+    .fi-global-search-results-ctn {
+        width: unset !important;
+    }
+}
+
+
+.mobileheader-hasmenu>div>div.fi-dropdown-panel {
+    @media screen and (max-width: 923px) {
+        top: 105px !important;
+    }
+}
+
+header>div.flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+html.filament .mobileheader-search div.fi-global-search-field .fi-input-wrp {
+
+    @media screen and (max-width: 992px) {
+        padding: 6px 0 !important;
+    }
+}
+
+.mobileheader-search {
+    position: fixed;
+    top: 40px;
+    width: 100%;
+    padding: 10px 24px;
+    z-index: 10;
+    background-color: #d0e1fe !important;
+
+    @media screen and (max-width: 639px) {
+        padding: 10px 16px !important;
+    }
+}
+
+div.customMenuHeader {
+    height: 100%;
+    background-color: white;
+    border-bottom: 1px solid #E5E7EB;
+    padding: 0px 2rem;
+    // position: sticky;
+    position: fixed;
+    top: 47px;
+    // Above .fi-main-ctn / fixed action bars (often z-10) so hovers are not stolen
+    z-index: 9;
+    // height: max-content;
+    height: 37.5px;
+
+    @media screen and (max-width: 922px) {
+        display: none;
+    }
+}
+
+.filament-main-topbar {
+    position: fixed;
+}
+
+div.fi-main-ctn {
+    padding-top: 87.5px;
+
+    @media screen and (max-width: 922px) {
+        padding-top: 104px;
+    }
+}
+
+div.filament-breadcrumbs {
+    display: flex;
+    gap: 40px;
+}
+
+.filament-sidebar-open-button {
+
+    svg {
+
+        @media screen and (max-width: 922px) {
+            stroke: black;
+            width: 32px;
+            height: 32px;
+            position: relative;
+            top: 3px;
+        }
+    }
+}
+
+div.customMenuContainer {
+    width: 100%;
+    height: 100%;
+
+    // Keeps layout stable when switching 500→700: invisible bold copy sets min width (needs data-text on label)
+    span.menuItemText[data-text] {
+        display: inline-block;
+
+        &::after {
+            content: attr(data-text);
+            display: block;
+            font-weight: 700;
+            height: 0;
+            overflow: hidden;
+            visibility: hidden;
+            pointer-events: none;
+            user-select: none;
+        }
+    }
+
+    div.customMenuInner {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        gap: 10px;
+
+        div.menuItem {
+            position: relative;
+
+            // Hide dropdown parent when permission-gated items leave no .subMenuItem (e.g. Admin)
+            &:has(> div.subMenu-new):not(:has(.subMenuItem)) {
+                display: none !important;
+            }
+
+            // Invisible hit area between tab strip and dropdown (hidden submenu is not hit-testable)
+            &:has(> div.subMenu-new)::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                width: max(100%, 180px);
+                top: 100%;
+                height: 14px;
+                z-index: 150;
+            }
+
+            // CSS-only top dropdown (replaces JS toggling .active on .subMenu-new)
+            &:hover>div.subMenu-new,
+            &:focus-within>div.subMenu-new {
+                opacity: 1;
+                visibility: visible;
+                transition: all 0.2s;
+            }
+
+            // Keep parent tab styled while cursor is over the dropdown (not only the label)
+            &:hover>a.menuItemLink.parent,
+            &:focus-within>a.menuItemLink.parent {
+                background-color: #e4e4e7;
+                border-bottom: 2px solid #c4c4c4;
+                font-weight: 700;
+                text-decoration: underline;
+                text-underline-offset: 2px;
+                transition: background-color 0.2s, border-color 0.2s, text-decoration-color 0.2s;
+            }
+
+            a.menuItemLink {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                // padding: 6px 12px 5px 12px;
+                padding: 6px 12px 7px 12px;
+                color: black;
+                text-decoration: none;
+                font-weight: 500;
+                gap: 6px;
+                transition: all .2s;
+                font-size: 13px;
+                border: 2px solid transparent;
+
+                height: 100%;
+
+                &.parent {
+                    cursor: default;
+                    border-bottom-left-radius: 0;
+                    border-bottom-right-radius: 0;
+                    border-bottom: 2px solid transparent;
+
+                    &:hover,
+                    &.active-parent {
+                        background-color: #E4E4E7;
+                        border-bottom: 2px solid #C4C4C4;
+                        font-weight: 700;
+                    }
+                }
+
+                &.pointer {
+                    cursor: pointer;
+                }
+
+                &:hover,
+                &.active-parent {
+                    font-weight: 700;
+                    transition: all .2s;
+                    text-decoration: underline;
+                    text-underline-offset: 2px;
+                }
+
+                svg {
+                    max-width: 17px;
+                    max-height: 17px;
+                    width: 100%;
+                }
+
+                &.pageActive:not(:hover) {
+                    font-weight: 500;
+                    transition: all .2s;
+                    text-decoration: underline;
+                    text-underline-offset: 2px;
+                    text-decoration-thickness: 2px;
+                }
+            }
+
+            div.subMenu-new {
+                position: absolute;
+                top: calc(100% - 2px);
+                left: 0;
+                background-color: #fff;
+
+                a {
+                    text-decoration: none;
+                }
+
+                border-top: 1px solid #EBEBEB;
+                border-radius: 0 0 5px 5px;
+                gap: 10px;
+                box-shadow: 0 0 18px 0 rgba(0, 0, 0, 0.20);
+                display: flex;
+                flex-direction: column;
+                opacity: 0;
+                visibility: hidden;
+                z-index: 160;
+                transition: all .2s;
+                width: max-content;
+                border-top-left-radius: 0;
+                min-width: 200px;
+                width: max-content;
+
+                &.active {
+                    opacity: 1;
+                    visibility: visible;
+                    transition: all .2s;
+                }
+
+                // Flyout open: adjust panel corner (replaces JS .linkactive)
+                &:has(.subMenuItem:has(> .mainItemAllLinks):hover),
+                &:has(.subMenuItem:has(> .mainItemAllLinks):focus-within) {
+                    border-radius: 0 0 0 5px;
+                }
+
+                .menuItemText {
+
+                    &.comingSoon {
+                        display: block;
+                        color: grey;
+                        font-weight: 500;
+                        font-size: 13px;
+                        transition: all .2s;
+                        width: 100%;
+                        cursor: no-drop;
+                    }
+                }
+
+                a.subMenuItemLink {
+                    display: block;
+                    color: black;
+                    font-weight: 500;
+                    font-size: 13px;
+                    transition: all .2s;
+                    width: 100%;
+                    padding: 11px 15px 6px;
+                    border-bottom: 1px solid rgba(0, 0, 0, 0);
+
+                    &:hover {
+                        font-weight: 700;
+                        text-decoration: underline;
+                        text-underline-offset: 2px;
+                        transition: all .2s;
+                        background-color: #F5F5F5;
+                    }
+
+                    &:last-child {
+                        border-bottom: none;
+                        border-bottom-right-radius: 5px;
+                    }
+
+                    &.pageActive:not(:hover) {
+                        font-weight: 500;
+                        text-decoration: underline;
+                        text-underline-offset: 2px;
+                    }
+
+                    .menuItemText {
+
+                        &.impersonate {
+
+                            &:after {
+                                content: '';
+                                background-image: url(/resources/img/icons/external-link.png);
+                                background-repeat: no-repeat;
+                                background-size: cover;
+                                background-position: center;
+                                width: 9px;
+                                height: 9px;
+                                display: inline-block;
+                                position: relative;
+                                margin-left: 6px;
+                            }
+                        }
+                    }
+                }
+
+                div.subMenuInner {
+                    position: relative;
+                    display: grid;
+                    grid-template-columns: 1fr;
+
+                    &.one-row {
+                        grid-template-rows: 1fr !important;
+                    }
+
+                    div.mainItem {
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 11px 15px 11px 8px;
+
+                        &:hover {
+                            background-color: #F5F5F5;
+                            border-bottom-left-radius: 5px;
+                            border-bottom-right-radius: 5px;
+                        }
+
+                        &.no-link {
+                            cursor: pointer;
+
+                            &:after {
+                                display: none;
+                            }
+                        }
+
+                        .mainItem-info {
+                            display: flex;
+                            align-items: center;
+                            gap: 5px;
+
+                            img.mainItem-icon {
+                                // position: absolute;
+                                // left: 0;
+                                // top: 50%;
+                                // transform: translateY(-50%);
+                                width: 15px;
+                                height: 15px;
+                            }
+
+                            span.mainItem-name {
+                                font-weight: 500;
+                                font-size: 13px;
+                            }
+                        }
+
+                        &:after {
+                            content: '';
+                            display: inline-block;
+                            width: 5px;
+                            height: 10px;
+                            background-image: url('/public/img/icons/chevron-right-2.svg');
+                            background-repeat: no-repeat;
+                            background-position: center;
+                            background-size: contain;
+                            margin-left: 8px;
+                            vertical-align: middle;
+                        }
+                    }
+
+                    .subMenuItem {
+                        display: inline-flex;
+                        flex-direction: column;
+                        gap: 9px;
+                        border-bottom: 1px solid #EBEBEB;
+                        position: relative;
+
+                        &:last-child {
+                            border-bottom: none;
+                        }
+
+                        &.pageActive .mainItem-name {
+                            font-weight: 500;
+                        }
+
+                        div.mainItemAllLinks {
+                            position: absolute;
+                            margin-left: -2px;
+                            top: 0;
+                            left: 100%;
+                            border-left: 1px solid #EBEBEB;
+                            display: none;
+                            flex-direction: column;
+                            background: white;
+                            min-height: 100%;
+                            height: max-content;
+                            min-width: 200px;
+                            width: max-content;
+                            box-shadow: 4px 5px 10px 0px rgba(0, 0, 0, 0.2);
+                            border-radius: 0 0 5px 0;
+
+                            &.border-bottom-left-radius {
+                                border-bottom-left-radius: 5px;
+                            }
+                        }
+
+                        &:hover>div.mainItemAllLinks,
+                        &:focus-within>div.mainItemAllLinks {
+                            display: flex;
+                        }
+                    }
+                }
+            }
+
+
+
+
+
+
+
+
+
+            div.subMenu {
+                position: absolute;
+                top: calc(100% + 2px);
+                left: 0;
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px #0000001a;
+                padding: 12px 16px;
+                border: 2px solid rgba(0, 0, 0, .1882352941);
+                gap: 10px;
+                display: flex;
+                flex-direction: column;
+                opacity: 0;
+                visibility: hidden;
+                z-index: 100;
+                transition: all .2s;
+                width: max-content;
+                border-top-left-radius: 0;
+                min-width: 110%;
+
+                &.active {
+                    opacity: 1;
+                    visibility: visible;
+                    transition: all .2s;
+                }
+
+                .menuItemText {
+
+                    &.comingSoon {
+                        display: block;
+                        color: grey;
+                        font-weight: 500;
+                        font-size: 13px;
+                        transition: all .2s;
+                        width: 100%;
+                        cursor: no-drop;
+                    }
+                }
+
+                a.subMenuItemLink {
+                    display: block;
+                    color: black;
+                    font-weight: 500;
+                    font-size: 13px;
+                    transition: all .2s;
+                    width: 100%;
+
+                    &:hover {
+                        color: #d0e1fe;
+                        text-decoration: underline;
+                        transition: all .2s;
+                    }
+
+                    &.pageActive:not(:hover) {
+                        font-weight: 500;
+                        text-decoration: underline;
+                    }
+
+                    .menuItemText {
+
+                        &.impersonate {
+
+                            &:after {
+                                content: '';
+                                background-image: url(/resources/img/icons/external-link.png);
+                                background-repeat: no-repeat;
+                                background-size: cover;
+                                background-position: center;
+                                width: 9px;
+                                height: 9px;
+                                display: inline-block;
+                                position: relative;
+                                margin-left: 6px;
+                            }
+                        }
+                    }
+                }
+
+                div.subMenuInner {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 42px;
+
+                    &.three-columns {
+                        grid-template-columns: 1fr 1fr 1fr !important;
+                    }
+
+                    span.mainItem {
+                        font-weight: 700;
+                        font-size: 15px;
+                    }
+
+                    div.subMenuLeft,
+                    div.subMenuRight {
+                        display: inline-flex;
+                        flex-direction: column;
+                        gap: 9px;
+
+                        div.mainItemAllLinks {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 6px;
+                        }
+                    }
+
+
+                }
+            }
+        }
+    }
+}
+
+.mobielheader-marginbottom-none {
+    margin-bottom: 0 !important;
+}
+
+div.mobileheader-sidebar {
+    width: 90%;
+    height: 100%;
+    position: fixed;
+    z-index: 99;
+
+    div.mobileheader-sidebar-header {
+        width: 100%;
+        background-color: #d0e1fe;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 50px;
+
+        h2 {
+            color: black;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px 0;
+
+            img {
+                width: 15px;
+                height: 15px;
+                object-fit: contain;
+            }
+        }
+    }
+
+    div.mobileheader-sidebar-menu {
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        overflow-y: auto;
+        flex: 1 1 0% !important;
+
+        .sidebar-menuitem {
+            padding: 0 16px;
+            min-height: 54px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #EBEBEB;
+
+            // Hide mobile category when no sub-items were rendered (e.g. Admin)
+            &:has(> div.menuitem-subitems):not(:has(.subitems-list > *)) {
+                display: none !important;
+            }
+
+            .sidebar-menuitem-wrapper {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+
+                div.sidebar-menuitem-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    width: 100%;
+
+                    img.sidebar-menuitem-icon {
+                        width: 22px;
+                        height: 22px;
+                    }
+
+                    span.sidebar-menuitem-name {
+                        font-weight: 500;
+                        font-size: 14px;
+                    }
+                }
+
+                &:after {
+                    content: '';
+                    display: inline-block;
+                    width: 8px;
+                    height: 12px;
+                    background-image: url('/public/img/icons/chevron-right-2.svg');
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: contain;
+                    margin-left: auto;
+                    vertical-align: middle;
+                }
+            }
+
+            div.menuitem-subitems {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+
+                .subitems-back {
+                    padding: 12px 0 9px 0;
+                    margin-bottom: 6px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    cursor: pointer;
+                    font-size: 12px;
+
+                    &:before {
+                        content: '';
+                        display: inline-block;
+                        width: 5px;
+                        height: 10px;
+                        background-image: url('/public/img/icons/chevron-left.svg');
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        background-size: contain;
+                        vertical-align: middle;
+                        position: relative;
+                        top: -1px;
+                    }
+                }
+
+                h2 {
+                    font-weight: 700;
+                    margin-bottom: 5px;
+                }
+
+                div.subitems-list {
+                    display: flex;
+                    flex-direction: column;
+                    margin-bottom: 10px;
+
+                    a,
+                    button,
+                    div {
+                        padding: 10px 0 10px 15px;
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: black;
+                        border-left: 2px solid #EBEBEB;
+                        display: flex;
+                        align-items: center;
+                        width: 100%;
+                        text-align: left;
+                        background: transparent;
+                        border-top: none;
+                        border-right: none;
+                        border-bottom: none;
+                        cursor: pointer;
+
+                        &:after {
+                            content: '';
+                            display: inline-block;
+                            width: 7px;
+                            height: 11px;
+                            background-image: url('/public/img/icons/chevron-right-2.svg');
+                            background-repeat: no-repeat;
+                            background-position: center;
+                            background-size: contain;
+                            margin-left: auto;
+                            vertical-align: middle;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+div.notificationMenuButton {
+    margin-left: 12px;
+
+    @media screen and (max-width: 922px) {
+        margin-left: 0 !important;
+    }
+
+    .fi-modal-trigger {
+        button {
+            // background: #d0e1fe;
+            background: #fff;
+            border: 1px solid #cacaca;
+            border-radius: 12px;
+            // border-radius: 50%;
+            // border-radius: 5px;
+            width: 32px;
+            height: 32px;
+            margin: 0;
+            transition: background .2s;
+
+            .fi-icon {
+                width: 18px;
+                height: 18px;
+            }
+
+            .fi-icon-btn-badge-ctn {
+                border-radius: 50%;
+
+                .fi-badge {
+                    background-color: #3366cc;
+                    color: #fff;
+                    font-size: 10px;
+                    font-weight: 700 !important;
+                    line-height: 1;
+                    border-radius: 50%;
+                    padding: 3px 6px;
+                }
+            }
+
+            &:hover {
+                background: #cacaca;
+
+                .fi-icon {
+                    transform: scale(1.1) rotate(15deg);
+                }
+            }
+        }
+    }
+
+    a.fi-topbar-chat-btn {
+        background: #fff;
+        border: 1px solid #cacaca;
+        border-radius: 12px;
+        width: 32px;
+        height: 32px;
+        margin: 0;
+        transition: background .2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        box-sizing: border-box;
+
+        .fi-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .fi-icon-btn-badge-ctn {
+            border-radius: 50%;
+
+            .fi-badge {
+                background-color: #3366cc;
+                color: #fff;
+                font-size: 10px;
+                font-weight: 700 !important;
+                line-height: 1;
+                border-radius: 50%;
+                padding: 3px 6px;
+            }
+        }
+
+        &:hover {
+            background: #cacaca;
+
+            .fi-icon {
+                transform: scale(1.1) rotate(15deg);
+            }
+        }
+    }
+}
+
+
+
+div.customMenuContainer div.customMenuInner div.menuItem {
+    &:hover {
+        div.subMenu-new {
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+}

@@ -1,0 +1,4 @@
+# Reverb proxy rules live in ../.htaccess (public/.htaccess).
+# This directory must exist so /ws/* is not routed to Laravel index.php.
+
+Options -Indexes

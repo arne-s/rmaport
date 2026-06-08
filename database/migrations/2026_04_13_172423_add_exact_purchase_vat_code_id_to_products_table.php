@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('products', function (Blueprint $table): void {
+            if (! Schema::hasColumn('products', 'exact_purchase_vat_code_id')) {
+                $table->foreignId('exact_purchase_vat_code_id')
+                    ->nullable()
+                    ->after('exact_sales_vat_code_id')
+                    ->constrained('exact_vat_codes')
+                    ->nullOnDelete();
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('products', function (Blueprint $table): void {
+            if (Schema::hasColumn('products', 'exact_purchase_vat_code_id')) {
+                $table->dropForeign(['exact_purchase_vat_code_id']);
+                $table->dropColumn('exact_purchase_vat_code_id');
+            }
+        });
+    }
+};

@@ -1,0 +1,10 @@
+{
+    "Reset Password Notification": "Wachtwoord opnieuw instellen",
+    "You are receiving this email because we received a password reset request for your account.": "Om je wachtwoord opnieuw in te stellen, gebruik onderstaande link.",
+    "Reset Password": "Wachtwoord opnieuw instellen",
+    "This password reset link will expire in :count minutes.": "Deze link om uw wachtwoord opnieuw in te stellen verloopt over :count minuten.",
+    "If you did not request a password reset, no further action is required.": "Als je geen wachtwoordherstelverzoek hebt ingediend, kun je deze e-mail negeren.",
+    "Email": "E-mailadres",
+    "Password": "Wachtwoord",
+    "Confirm Password": "Bevestig wachtwoord"
+}

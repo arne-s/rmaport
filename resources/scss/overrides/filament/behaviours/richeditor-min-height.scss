@@ -1,0 +1,11 @@
+/* RichEditor in notes: taller editor; min-height on the actual ProseMirror node so the whole area is clickable */
+.rich-editor-min-height.fi-fo-rich-editor-main {
+    min-height: 8rem;
+}
+.rich-editor-min-height .fi-fo-rich-editor-content {
+    min-height: 7rem;
+}
+/* TipTap mounts the contenteditable inside .fi-fo-rich-editor-content; it must fill the height */
+.rich-editor-min-height .fi-fo-rich-editor-content .ProseMirror {
+    min-height: 7rem;
+}

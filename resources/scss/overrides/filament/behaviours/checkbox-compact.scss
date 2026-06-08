@@ -1,0 +1,35 @@
+/*
+    2 columns form design with dashed line after labels
+*/
+
+div.fi-fo-field.checkbox-compact {
+
+    div.fi-fo-field-label-col {
+margin-bottom: 15px;
+    }
+
+    div.fi-fo-checkbox-list-options {
+        gap: 0;
+
+        div.fi-fo-checkbox-list-option-ctn {
+            padding-top: 0;
+        }
+    }
+}
+
+div.fi-fo-field.checkbox-compact.packing-slip-delivery-proof-options {
+    div.fi-fo-checkbox-list-options {
+        div.fi-fo-checkbox-list-option-ctn {
+            margin-bottom: 0;
+        }
+    }
+}
+
+div.fi-fo-field.checkbox-compact.packing-slip-delivery-proof-options.is-paws {
+    div.fi-fo-checkbox-list-options {
+        div.fi-fo-checkbox-list-option-ctn:nth-child(4),
+        div.fi-fo-checkbox-list-option-ctn:nth-child(5) {
+            margin-bottom: 10px;
+        }
+    }
+}
