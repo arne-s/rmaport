@@ -297,7 +297,7 @@ class ProductResource extends Resource
                                                                     ->columnSpan(6)
                                                                     ->inlineLabel(),
                                                                 Select::make('unit')
-                                                                    ->label('Producteenheid')
+                                                                    ->label('Verkoopeenheid')
                                                                     ->columnSpan(6)
                                                                     ->options(ProductUnit::labels())
                                                                     ->inlineLabel(),
