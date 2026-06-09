@@ -4,56 +4,13 @@ namespace App\Observers;
 
 use App\Enums\OrderProductStatus;
 use App\Enums\OrderType;
-use App\Enums\ProductType;
 use App\Models\Order\BaseOrder;
 use App\Models\Order\Main;
 use App\Models\OrderProduct;
 use App\Models\OrderProductStatusChange;
-use App\Models\Product;
 
 class OrderProductObserver
 {
-    /**
-     * Snapshot {@see Product::type} onto the line when a catalog product is linked
-     * (nieuwe regel, gewijzigd product, of nog leeg type).
-     */
-    public function saving(OrderProduct $orderProduct): void
-    {
-        if ($orderProduct->product_id === null) {
-            return;
-        }
-
-        $shouldSyncType = ! $orderProduct->exists
-            || $orderProduct->isDirty('product_id')
-            || $orderProduct->getAttribute('type') === null;
-
-        if (! $shouldSyncType) {
-            return;
-        }
-
-        $productType = Product::query()
-            ->whereKey($orderProduct->product_id)
-            ->value('type');
-
-        if ($productType === null || $productType === '') {
-            return;
-        }
-
-        $enum = $productType instanceof ProductType
-            ? $productType
-            : ProductType::tryFrom((string) $productType);
-
-        if ($enum !== null) {
-            $orderProduct->setAttribute('type', $enum);
-        }
-    }
-
-    /**
-     * Handle the OrderProduct "saving" event.
-     *
-     * @param OrderProduct $orderProduct
-     * @return void
-     */
     public function updating(OrderProduct $orderProduct): void
     {
         $to = $orderProduct->status;

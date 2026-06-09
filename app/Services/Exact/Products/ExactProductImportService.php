@@ -2,7 +2,6 @@
 
 namespace App\Services\Exact\Products;
 
-use App\Enums\ProductType;
 use App\Enums\ProductUnit;
 use App\Models\ExactArticleGroup;
 use App\Models\ExactVATCode;
@@ -222,7 +221,6 @@ class ExactProductImportService
 
         $product->uid = (string) ($item['Code'] ?? '');
         $product->name = trim((string) ($item['Description'] ?? ''));
-        $product->type = $this->inferProductTypeFromName($product->name);
         $product->comment = $this->nullableString($item['ExtraDescription'] ?? null);
 
         $product->company_sales_price = $this->decimalOrZero($item['StandardSalesPrice'] ?? null);
@@ -286,7 +284,7 @@ class ExactProductImportService
             $product->exact_purchase_vat_code_id = null;
         }
 
-        $product->is_stock_enabled = $this->exactTruthy($item['IsStockItem'] ?? null) ? 1 : 0;
+        $product->is_stock_enabled = 1;
         $product->is_fraction_allowed_item = $this->exactTruthy($item['IsFractionAllowedItem'] ?? null);
         $product->is_purchase_item = $this->exactTruthy($item['IsPurchaseItem'] ?? null);
         $product->is_sales_item = $this->exactTruthy($item['IsSalesItem'] ?? null);
@@ -415,19 +413,4 @@ class ExactProductImportService
         return '0';
     }
 
-    /**
-     * Default part; name contains "rolstoel" → frame; "arbeid" → service (rolstoel takes precedence over arbeid).
-     */
-    private function inferProductTypeFromName(string $name): ProductType
-    {
-        $lower = mb_strtolower($name, 'UTF-8');
-        if (str_contains($lower, 'rolstoel')) {
-            return ProductType::Frame;
-        }
-        if (str_contains($lower, 'arbeid')) {
-            return ProductType::Service;
-        }
-
-        return ProductType::Part;
-    }
 }

@@ -51,7 +51,7 @@ class ListProductStock extends ListRecords
             ]))
             ->columns([
                 TextColumn::make('name')
-                    ->label('Artikelnaam')
+                    ->label('Omschrijving')
                     ->searchable()
                     ->sortable()
                     ->url(fn (Product $record): ?string => ProductResource::editUrlFor($record))

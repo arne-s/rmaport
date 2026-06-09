@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\ProductType;
 use App\Support\Pricing\ProductPricingCalculator;
 use App\Support\ProductSelectSearchConstraints;
 use App\Enums\ProductUnit;
@@ -32,7 +31,6 @@ use Throwable;
  * @property string|null $description
  * @property string|null $comment
  * @property string|null $unit
- * @property string|null $type
  * @property numeric $company_margin RD | Marge (gross margin % of sales, same as Exact)
  * @property numeric $company_markup RD | Opslag (markup % of purchase)
  * @property numeric $company_purchase_price RD | Inkoop
@@ -45,7 +43,6 @@ use Throwable;
  * @property string|null $exact_id
  * @property Carbon|null $exact_synced_at
  * @property array<array-key, mixed>|null $config
- * @property string|null $chair_type Type unit (frame).
  * @property string|null $exact_item_group_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -109,7 +106,6 @@ class Product extends Model implements HasMedia
         'description',
         'comment',
         'unit',
-        'type',
         'company_purchase_price',
         'company_sales_price',
         'company_margin',
@@ -123,7 +119,6 @@ class Product extends Model implements HasMedia
         'exact_synced_at',
         'config',
         'additional',
-        'chair_type',
         'is_stock_enabled',
         'exact_article_group_id',
         'exact_sales_vat_code_id',
@@ -139,7 +134,6 @@ class Product extends Model implements HasMedia
     {
         return [
             'unit' => ProductUnit::class,
-            'type' => ProductType::class,
             'config' => 'array',
             'additional' => 'array',
             'exact_synced_at' => 'datetime',
@@ -154,16 +148,7 @@ class Product extends Model implements HasMedia
     protected static function booted(): void
     {
         static::saving(function (Product $product): void {
-            if ($product->isDirty('chair_type')) {
-                $additional = $product->additional ?? [];
-                $chair = $product->getChairType();
-                if ($chair !== null && $chair !== '') {
-                    $additional['chair_type'] = $chair;
-                } else {
-                    unset($additional['chair_type']);
-                }
-                $product->additional = $additional;
-            }
+            $product->is_stock_enabled = 1;
 
             if ($product->isDirty('company_purchase_price') || $product->isDirty('company_sales_price')) {
                 $purchase = (float) ($product->company_purchase_price ?? 0);
@@ -172,60 +157,6 @@ class Product extends Model implements HasMedia
                 $product->company_markup = ProductPricingCalculator::recalculateMarkupFromPurchaseAndSales($purchase, $sales);
             }
         });
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public static function frameChairTypeOptions(): array
-    {
-        return [
-            'ADL' => 'ADL',
-            'Chalenger' => 'Chalenger',
-            'e-motion' => 'e-motion',
-            'Eco Travel' => 'Eco Travel',
-            'Handbike' => 'Handbike',
-            'HAWK' => 'HAWK',
-            'IBEX' => 'IBEX',
-            'ICON' => 'ICON',
-            'Orthese' => 'Orthese',
-            'PAWS' => 'PAWS',
-            'Roadrunner' => 'Roadrunner',
-            'SMOOV' => 'SMOOV',
-            'Sportstoel' => 'Sportstoel',
-            'Swiss-Trac' => 'Swiss-Trac',
-            'Zitski' => 'Zitski',
-            'Zoom' => 'Zoom',
-        ];
-    }
-
-    public static function getFrameChairTypeLabel(?string $value): string
-    {
-        if ($value === null || $value === '') {
-            return '-';
-        }
-
-        return self::frameChairTypeOptions()[$value] ?? $value;
-    }
-
-    public function getChairType(): ?string
-    {
-        $value = $this->attributes['chair_type'] ?? null;
-        if ($value === null || $value === '') {
-            return null;
-        }
-
-        $trimmed = trim((string) $value);
-
-        return $trimmed === '' ? null : $trimmed;
-    }
-
-    public function setChairType(?string $chairType): Product
-    {
-        $normalized = $chairType === null ? null : trim($chairType);
-        $this->attributes['chair_type'] = ($normalized === null || $normalized === '') ? null : $normalized;
-
-        return $this;
     }
 
     public function shouldBeSyncedToExact(): bool
@@ -256,10 +187,7 @@ class Product extends Model implements HasMedia
      */
     public function scopeSelectableForOrderOrQuote(Builder $query): Builder
     {
-        return $query->where(function (Builder $query): void {
-            $query->whereNotNull('supplier_id')
-                ->orWhere('type', ProductType::Service->value);
-        });
+        return $query->whereNotNull('supplier_id');
     }
 
     /**
@@ -312,10 +240,6 @@ class Product extends Model implements HasMedia
 
         if ($constraints->supplierId !== null) {
             $query->where('supplier_id', $constraints->supplierId);
-        }
-
-        if ($constraints->excludeServiceProducts) {
-            $query->where('type', '!=', ProductType::Service->value);
         }
 
         if ($constraints->restrictToProductIds !== null) {
@@ -545,24 +469,6 @@ class Product extends Model implements HasMedia
     public function setUnit(?ProductUnit $unit): Product
     {
         $this->unit = $unit;
-        return $this;
-    }
-
-    /**
-     * @return ProductType|null
-     */
-    public function getType(): ?ProductType
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param ProductType|null $type
-     * @return Product
-     */
-    public function setType(?ProductType $type): Product
-    {
-        $this->type = $type;
         return $this;
     }
 

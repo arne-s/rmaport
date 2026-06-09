@@ -6,7 +6,7 @@ use App\Actions\PriceAdjustBulkAction;
 use App\Enums\ArticleGroupGlAccountType;
 use App\Enums\OrderType;
 use App\Enums\OrderSubtype;
-use App\Enums\ProductType;
+use App\Enums\OrderProductStatus;
 use App\Enums\ProductUnit;
 use App\Enums\AddressType;
 use App\Filament\Resources\ProductResource\Widgets\ProductPriceChangesWidget;
@@ -27,6 +27,7 @@ use App\Models\ExactArticleGroup;
 use App\Models\ExactVATCode;
 use App\Models\Address;
 use App\Models\Customer;
+use App\Models\OrderProduct;
 use Exception;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use App\Models\Product;
@@ -112,7 +113,7 @@ class ProductResource extends Resource
         $query = app(static::getModel())
             ->resolveRouteBindingQuery(static::getEloquentQuery(), $key, static::getRecordRouteKeyName());
         return $query
-            ->with(['exactSalesVatCode', 'exactPurchaseVatCode'])
+            ->with(['exactSalesVatCode', 'exactPurchaseVatCode', 'stock'])
             ->first();
     }
 
@@ -160,8 +161,6 @@ class ProductResource extends Resource
      */
     public static function form(Schema $schema): Schema
     {
-        $frameChairTypeOptions = Product::frameChairTypeOptions();
-
         return $schema
             ->columns(1)
             ->extraAttributes(['class' => 'companySection-wrapper'])
@@ -183,69 +182,114 @@ class ProductResource extends Resource
                                 Section::make('')
                                     ->extraAttributes(['class' => 'companySection'])
                                     ->schema([
-                                        Grid::make(1)
+                                        Grid::make(3)
                                             ->schema([
-                                                Section::make('Algemene Artikelgegevens')
-                                                    ->extraAttributes(['class' => 'beheer-algemeenSection'])
+                                                Grid::make(1)
+                                                    ->columnSpan(1)
                                                     ->schema([
-                                                        JsContent::make(<<<'JS'
-                                                            document.body.classList.add('save-button-enabled');
-                                                        JS
-                                                        ),
-                                                        TextInput::make('name')
-                                                            ->label('Artikelnaam')
-                                                            ->columnSpan(6)
-                                                            ->required()
-                                                            ->extraAttributes(['style' => 'white-space: nowrap;'])
-                                                            ->inlineLabel(),
-                                                        TextInput::make('uid')
-                                                            ->label('Artikelnummer')
-                                                            ->columnSpan(6)
-                                                            ->required()
-                                                            ->inlineLabel(),
-
-                                                        Select::make('type')
-                                                            ->label('Type artikel')
-                                                            ->columnSpan(6)
-                                                            ->options(ProductType::labels())
-                                                            ->required()
-                                                            ->inlineLabel()
-                                                            ->live()
-                                                            ->afterStateUpdated(function ($state, Set $set): void {
-                                                                $value = $state instanceof ProductType
-                                                                    ? $state->value
-                                                                    : (string) $state;
-                                                                if ($value !== ProductType::Frame->value) {
-                                                                    $set('chair_type', null);
-                                                                }
-                                                            }),
-
-                                                        Select::make('chair_type')
-                                                            ->label('Type')
-                                                            ->required()
-                                                            ->columnSpan(6)
-                                                            ->options($frameChairTypeOptions)
-                                                            ->visible(fn (Get $get): bool => (($get('type') instanceof ProductType)
-                                                                ? $get('type') === ProductType::Frame
-                                                                : (string) $get('type') === ProductType::Frame->value))
-                                                            ->inlineLabel(),
-
-                                                        Select::make('unit')
-                                                            ->label('Eenheid')
-                                                            ->columnSpan(6)
-                                                            ->options(ProductUnit::labels())
-                                                            ->required()
-                                                            ->inlineLabel(),
-
-                                                        Section::make('Specificaties (voor op offerte/order)')
-                                                            ->extraAttributes(['class' => 'spec-border'])
-                                                            ->columnSpan(6)
+                                                        Section::make('Algemene Artikelgegevens')
+                                                            ->extraAttributes(['class' => 'beheer-algemeenSection'])
                                                             ->schema([
-                                                                Textarea::make('description')
-                                                                    ->hiddenLabel()
-                                                                    ->rows(6)
-                                                                    ->columnSpanFull()
-                                                                    ->extraInputAttributes(['style' => 'width: 100%;']),
+                                                                JsContent::make(<<<'JS'
+                                                                    document.body.classList.add('save-button-enabled');
+                                                                JS
+                                                                ),
+                                                                TextInput::make('name')
+                                                                    ->label('Omschrijving')
+                                                                    ->columnSpan(6)
+                                                                    ->required()
+                                                                    ->extraAttributes(['style' => 'white-space: nowrap;'])
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('uid')
+                                                                    ->label('Artikelnummer')
+                                                                    ->columnSpan(6)
+                                                                    ->required()
+                                                                    ->inlineLabel(),
+
+                                                                Select::make('unit')
+                                                                    ->label('Eenheid')
+                                                                    ->columnSpan(6)
+                                                                    ->options(ProductUnit::labels())
+                                                                    ->required()
+                                                                    ->inlineLabel(),
+
+                                                                Section::make('Specificaties (voor op offerte/order)')
+                                                                    ->extraAttributes(['class' => 'spec-border'])
+                                                                    ->columnSpan(6)
+                                                                    ->schema([
+                                                                        Textarea::make('description')
+                                                                            ->hiddenLabel()
+                                                                            ->rows(6)
+                                                                            ->columnSpanFull()
+                                                                            ->extraInputAttributes(['style' => 'width: 100%;']),
+                                                                    ]),
+                                                            ]),
+                                                    ]),
+
+                                                Grid::make(1)
+                                                    ->columnSpan(1)
+                                                    ->schema([
+                                                        Section::make('Voorraad')
+                                                            ->extraAttributes(['class' => 'beheer-algemeenSection'])
+                                                            ->schema([
+                                                                Group::make([
+                                                                    TextInput::make('physical_stock')
+                                                                        ->label('Fysieke voorraad')
+                                                                        ->inlineLabel()
+                                                                        ->default(0)
+                                                                        ->required()
+                                                                        ->numeric()
+                                                                        ->columnSpanFull(),
+
+                                                                    TextInput::make('reserved_stock')
+                                                                        ->label('In bestelling')
+                                                                        ->inlineLabel()
+                                                                        ->extraAttributes(['style' => 'white-space: nowrap;'])
+                                                                        ->required()
+                                                                        ->default(0)
+                                                                        ->columnSpanFull()
+                                                                        ->numeric(),
+
+                                                                    TextInput::make('available_stock')
+                                                                        ->label('Beschikbare voorraad')
+                                                                        ->inlineLabel()
+                                                                        ->columnSpanFull()
+                                                                        ->disabled()
+                                                                        ->default(0)
+                                                                        ->dehydrated(false),
+
+                                                                    Select::make('allow_backorder')
+                                                                        ->label('Back-orders toestaan')
+                                                                        ->inlineLabel()
+                                                                        ->default('1')
+                                                                        ->options([
+                                                                            '1' => 'Ja',
+                                                                            '0' => 'Nee',
+                                                                        ])
+                                                                        ->formatStateUsing(function ($state): string {
+                                                                            if ($state === true || $state === 1 || $state === '1') {
+                                                                                return '1';
+                                                                            }
+
+                                                                            return '0';
+                                                                        })
+                                                                        ->dehydrateStateUsing(fn ($state): bool => (string) $state === '1')
+                                                                        ->selectablePlaceholder(false)
+                                                                        ->required()
+                                                                        ->columnSpanFull(),
+
+                                                                    TextInput::make('min_threshold')
+                                                                        ->label('Minimumvoorraad')
+                                                                        ->inlineLabel()
+                                                                        ->default(0)
+                                                                        ->columnSpanFull()
+                                                                        ->required()
+                                                                        ->numeric(),
+                                                                ])
+                                                                    ->columnSpan(6)
+                                                                    ->relationship('stock'),
+
+
                                                             ]),
                                                     ]),
                                             ]),
@@ -514,29 +558,17 @@ class ProductResource extends Resource
                     ->forceSearchCaseInsensitive(),
 
                 TextColumn::make('name')
-                    ->label('Artikelnaam RD Mobility')
+                    ->label('Omschrijving')
                     ->sortable()
                     ->searchable()
                     ->limit(40)
                     ->width(220)
                     ->tooltip(fn (Product $record): ?string => filled($record->name) ? (string) $record->name : null),
 
-                TextColumn::make('type')
-                    ->label('Type artikel')
-                    ->formatStateUsing(fn ($state): ?string => $state?->getLabel())
-                    ->sortable(),
-
-                TextColumn::make('chair_type')
-                    ->label('Type unit')
-                    ->formatStateUsing(fn (?string $state): string => Product::getFrameChairTypeLabel($state))
-                    ->sortable()
-                    ->placeholder('—'),
             ])
             ->defaultSort('name', 'asc')
             ->deferFilters(false)
             ->filters([
-                self::createStatusFilter('product_type', 'type', 'Type artikel', ProductType::labels()),
-                self::createStatusFilter('chair_type', 'chair_type', 'Type unit', Product::frameChairTypeOptions()),
                 self::getActiveFilter(),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([])

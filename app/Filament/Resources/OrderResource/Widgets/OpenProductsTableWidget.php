@@ -45,7 +45,10 @@ class OpenProductsTableWidget extends TableWidget
         }
 
         return $main->orderProducts()
-            ->whereHas('product', fn (Builder $query): Builder => $query->where('type', '!=', 'service'))
+            ->where(function (Builder $query): void {
+                $query->where('order_products.type', '!=', ProductType::Service->value)
+                    ->orWhereNull('order_products.type');
+            })
             ->with(['product.stock'])
             ->whereNotIn('status', [
                 OrderProductStatus::PickedStock->value,
@@ -66,7 +69,7 @@ class OpenProductsTableWidget extends TableWidget
                     TextColumn::make('product.name')
                         ->label('Artikelnaam'),
                 ),
-                TextColumn::make('product.type')
+                TextColumn::make('type')
                     ->label('Type')
                     ->formatStateUsing(fn ($state): string => $state instanceof ProductType
                         ? ($state->getLabel() ?? '-')
@@ -219,6 +222,6 @@ class OpenProductsTableWidget extends TableWidget
             return false;
         }
 
-        return filter_var($product->is_stock_enabled, FILTER_VALIDATE_BOOLEAN);
+        return true;
     }
 }

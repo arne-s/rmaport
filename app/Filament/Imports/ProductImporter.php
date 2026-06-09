@@ -2,7 +2,6 @@
 
 namespace App\Filament\Imports;
 
-use App\Enums\ProductType;
 use App\Enums\ProductUnit;
 use App\Models\ExactArticleGroup;
 use App\Models\ExactVATCode;
@@ -17,13 +16,12 @@ class ProductImporter extends Importer
 
     public static function getColumns(): array
     {
-        $productTypeValues = implode(',', array_column(ProductType::cases(), 'value'));
         $productUnitValues = implode(',', array_column(ProductUnit::cases(), 'value'));
 
         return [
             ImportColumn::make('name')
-                ->label('Artikelnaam')
-                ->exampleHeader('Artikelnaam')
+                ->label('Omschrijving')
+                ->exampleHeader('Omschrijving')
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
 
@@ -33,23 +31,11 @@ class ProductImporter extends Importer
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
 
-            ImportColumn::make('type')
-                ->label('Type artikel')
-                ->exampleHeader('Type artikel')
-                ->requiredMapping()
-                ->castStateUsing(fn (?string $state): ?string => self::resolveEnumValue($state, ProductType::cases()))
-                ->rules(['required', 'in:' . $productTypeValues]),
-
             ImportColumn::make('unit')
                 ->label('Eenheid')
                 ->exampleHeader('Eenheid')
                 ->castStateUsing(fn (?string $state): ?string => self::resolveEnumValue($state, ProductUnit::cases()))
                 ->rules(['nullable', 'in:' . $productUnitValues]),
-
-            ImportColumn::make('chair_type')
-                ->label('Type')
-                ->exampleHeader('Type')
-                ->rules(['nullable', 'max:255']),
 
             ImportColumn::make('description')
                 ->label('Specificaties')
@@ -94,12 +80,6 @@ class ProductImporter extends Importer
                 ->exampleHeader('Opslag %')
                 ->castStateUsing(fn (?string $state): ?float => self::parseDecimal($state))
                 ->rules(['nullable', 'numeric']),
-
-            ImportColumn::make('is_stock_enabled')
-                ->label('Voorraad product')
-                ->exampleHeader('Voorraad product')
-                ->castStateUsing(fn (?string $state): ?bool => self::parseBoolean($state))
-                ->rules(['nullable', 'boolean']),
 
             ImportColumn::make('is_fraction_allowed_item')
                 ->label('Deelbaar')

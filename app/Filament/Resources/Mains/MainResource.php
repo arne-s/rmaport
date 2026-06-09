@@ -8,7 +8,6 @@ use App\Enums\CustomerType;
 use App\Enums\OrderStatus;
 use App\Enums\OrderSubtype;
 use App\Enums\OrderType;
-use App\Enums\ProductType;
 use App\Filament\Forms\Components\ToggleFilter;
 use App\Models\Order\BaseOrder;
 use Filament\Forms\Components\CheckboxList;

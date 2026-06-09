@@ -4,16 +4,13 @@
     use App\Filament\Resources\OrderResource\Pages\ViewOrder;
     use App\Filament\Resources\OrderResource\Widgets\OrderDocsTableWidget;
     use App\Models\Order\Main;
-    use App\Models\Product;
-
        /** @var Main $record **/
        /** @var ViewOrder $this **/
 
     $frameProductForChair = ($record?->subtype?->value ?? '') === 'unit'
         ? $record?->orders?->last()?->frameProduct
         : $record?->getLastOrder()?->frameProduct;
-    $chairTypeRaw = $frameProductForChair?->getChairType();
-    $chairType = Product::getFrameChairTypeLabel(is_string($chairTypeRaw) ? $chairTypeRaw : null);
+    $chairType = '-';
 
     $quote = $record?->quote;
     $mainAdditional = $record->getAdditional() ?? [];

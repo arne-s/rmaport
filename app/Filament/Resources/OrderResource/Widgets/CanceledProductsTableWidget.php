@@ -59,7 +59,7 @@ class CanceledProductsTableWidget extends TableWidget
                         ->sortable(),
                 ),
 
-                TextColumn::make('product.type')
+                TextColumn::make('type')
                     ->label('Type')
                     ->formatStateUsing(fn ($state): string => $state instanceof ProductType
                         ? ($state->getLabel() ?? '-')

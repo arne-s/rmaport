@@ -261,8 +261,9 @@ class Order extends BaseOrder
             ->where(function (Builder $q): void {
                 $q->whereHas('order.main', function (Builder $m): void {
                     $m->where('subtype', OrderSubtype::Service->value);
-                })->orWhereHas('product', function (Builder $p): void {
-                    $p->where('type', '!=', ProductType::Service->value);
+                })->orWhere(function (Builder $line): void {
+                    $line->where('order_products.type', '!=', ProductType::Service->value)
+                        ->orWhereNull('order_products.type');
                 });
             });
     }

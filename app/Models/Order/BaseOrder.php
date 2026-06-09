@@ -716,7 +716,7 @@ class BaseOrder extends Model implements HasMedia
     public function frameProduct(): HasOneThrough
     {
         return $this->hasOneThrough(Product::class, OrderProduct::class, 'order_id', 'id', 'id', 'product_id')
-            ->where('products.type', ProductType::Frame->value);
+            ->where('order_products.type', ProductType::Frame->value);
     }
 
     public function getId(): int

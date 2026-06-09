@@ -1,8 +1,6 @@
 @php
     use App\Enums\OrderSubtype;
     use App\Models\Order\Main;
-    use App\Models\Product;
-
     /** @var Main $record */
 
     $imageMimes = config('documents.openable_mime_types', []);
@@ -12,8 +10,7 @@
     $chairColorRaw = data_get($record->getAdditional(), 'chair_color')
         ?: data_get($frameProduct?->additional, 'chair_color');
     $assemblyChairColor = (is_string($chairColorRaw) && $chairColorRaw !== '') ? $chairColorRaw : '-';
-    $chairTypeRaw = $frameProduct?->getChairType();
-    $assemblyChairTypeLabel = Product::getFrameChairTypeLabel(is_string($chairTypeRaw) ? $chairTypeRaw : null);
+    $assemblyChairTypeLabel = '-';
     $advisorName = $record->advisor?->name ?? '-';
     $fittingAttendees = $fittingNote['attendees'] ?? '-';
     $bodyLength = $fittingNote['body_length'] ?? '-';
