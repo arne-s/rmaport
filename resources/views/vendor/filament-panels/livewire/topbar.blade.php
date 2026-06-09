@@ -175,6 +175,29 @@
                             <div class="subMenuItem">
                                 <div class="mainItem">
                                     <div class="mainItem-info">
+                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/file-lines-solid.svg') }}" alt="menu-icon">
+                                        <span class="mainItem-name">Offertes</span>
+                                    </div>
+                                </div>
+
+                                <div class="mainItemAllLinks">
+                                    <a class="subMenuItemLink {{ $topMenuLinkActive(route('filament.app.resources.quotes.index')) }}" href="{{ route('filament.app.resources.quotes.index') }}">
+                                        <span class="menuItemText" data-text="Overzicht">Overzicht</span>
+                                    </a>
+                                    @can('create main orders')
+                                        <a
+                                            class="subMenuItemLink"
+                                            href="#"
+                                            x-on:click.prevent="Livewire.dispatch('open-create-main-quote')"
+                                        >
+                                            <span class="menuItemText" data-text="Offerte aanmaken">Offerte aanmaken</span>
+                                        </a>
+                                    @endcan
+                                </div>
+                            </div>
+                            <div class="subMenuItem">
+                                <div class="mainItem">
+                                    <div class="mainItem-info">
                                         <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/cart-shopping-solid.svg') }}" alt="menu-icon">
                                         <span class="mainItem-name">Orders</span>
                                     </div>
