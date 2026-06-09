@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\ProductBattery;
 use App\Support\Pricing\ProductPricingCalculator;
 use App\Support\ProductSelectSearchConstraints;
 use App\Enums\ProductUnit;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Traits\ActiveTrait;
 use Barryvdh\LaravelIdeHelper\Eloquent;
 use Exception;
@@ -27,8 +29,27 @@ use Throwable;
 /**
  * @property int $id
  * @property string $uid
+ * @property bool $is_eol
  * @property string $name
  * @property string|null $description
+ * @property string|null $description2
+ * @property string|null $search_code
+ * @property-read string|null $search_text
+ * @property string|null $brand
+ * @property string|null $sub_group
+ * @property string|null $manufacturer
+ * @property string|null $stock_location
+ * @property string|null $mediamarkt_nr_nl
+ * @property string|null $mediamarkt_nr_bnl
+ * @property string|null $ean_1
+ * @property string|null $ean_2
+ * @property string|null $dl_code
+ * @property string|null $hs_code
+ * @property string|null $krefel_nr
+ * @property string|null $bol_nr
+ * @property string|null $coolblue_nr
+ * @property ProductBattery|null $battery
+ * @property string|null $pcb
  * @property string|null $comment
  * @property string|null $unit
  * @property numeric $company_margin RD | Marge (gross margin % of sales, same as Exact)
@@ -102,8 +123,26 @@ class Product extends Model implements HasMedia
 
     protected $fillable = [
         'uid',
+        'is_eol',
         'name',
         'description',
+        'description2',
+        'search_code',
+        'brand',
+        'sub_group',
+        'manufacturer',
+        'stock_location',
+        'mediamarkt_nr_nl',
+        'mediamarkt_nr_bnl',
+        'ean_1',
+        'ean_2',
+        'dl_code',
+        'hs_code',
+        'krefel_nr',
+        'bol_nr',
+        'coolblue_nr',
+        'battery',
+        'pcb',
         'comment',
         'unit',
         'company_purchase_price',
@@ -134,15 +173,26 @@ class Product extends Model implements HasMedia
     {
         return [
             'unit' => ProductUnit::class,
+            'battery' => ProductBattery::class,
+            'pcb' => 'decimal:6',
             'config' => 'array',
             'additional' => 'array',
             'exact_synced_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'is_eol' => 'boolean',
             'is_fraction_allowed_item' => 'boolean',
             'is_purchase_item' => 'boolean',
             'is_sales_item' => 'boolean',
             'is_on_demand_item' => 'boolean',
         ];
+    }
+
+    protected function searchText(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?string => $this->search_code,
+            set: fn (?string $value): array => ['search_code' => $value],
+        );
     }
 
     protected static function booted(): void

@@ -3,10 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Actions\PriceAdjustBulkAction;
-use App\Enums\ArticleGroupGlAccountType;
 use App\Enums\OrderType;
 use App\Enums\OrderSubtype;
 use App\Enums\OrderProductStatus;
+use App\Enums\ProductBattery;
 use App\Enums\ProductUnit;
 use App\Enums\AddressType;
 use App\Filament\Resources\ProductResource\Widgets\ProductPriceChangesWidget;
@@ -34,6 +34,7 @@ use App\Models\Product;
 use App\Support\Pricing\ProductPricingCalculator;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -194,25 +195,51 @@ class ProductResource extends Resource
                                                                     document.body.classList.add('save-button-enabled');
                                                                 JS
                                                                 ),
-                                                                TextInput::make('name')
-                                                                    ->label('Omschrijving')
+                                                                Checkbox::make('is_eol')
+                                                                    ->label('EOL')
                                                                     ->columnSpan(6)
-                                                                    ->required()
-                                                                    ->extraAttributes(['style' => 'white-space: nowrap;'])
                                                                     ->inlineLabel(),
                                                                 TextInput::make('uid')
                                                                     ->label('Artikelnummer')
                                                                     ->columnSpan(6)
-                                                                    ->required()
+                                                                    ->extraAttributes(['style' => 'white-space: nowrap;'])
                                                                     ->inlineLabel(),
-
-                                                                Select::make('unit')
-                                                                    ->label('Eenheid')
+                                                                TextInput::make('name')
+                                                                    ->label('Omschrijving')
                                                                     ->columnSpan(6)
-                                                                    ->options(ProductUnit::labels())
-                                                                    ->required()
+                                                                    ->extraAttributes(['style' => 'white-space: nowrap;'])
                                                                     ->inlineLabel(),
-
+                                                                TextInput::make('description2')
+                                                                    ->label('Omschrijving 2')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('search_code')
+                                                                    ->label('Zoekgegeven')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                Select::make('brand')
+                                                                    ->label('Merk')
+                                                                    ->columnSpan(6)
+                                                                    ->options([
+                                                                        'JL' => 'JL - JLAB',
+                                                                    ])
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('product_group')
+                                                                    ->label('Productgroep')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('sub_group')
+                                                                    ->label('Subgroep')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('manufacturer')
+                                                                    ->label('Fabrikant')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('stock_location')
+                                                                    ->label('Magazijnlokatie')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
                                                                 Section::make('Specificaties (voor op offerte/order)')
                                                                     ->extraAttributes(['class' => 'spec-border'])
                                                                     ->columnSpan(6)
@@ -229,12 +256,73 @@ class ProductResource extends Resource
                                                 Grid::make(1)
                                                     ->columnSpan(1)
                                                     ->schema([
+                                                        Section::make('Algemene Artikelgegevens2')
+                                                            ->extraAttributes(['class' => 'beheer-algemeenSection'])
+                                                            ->schema([
+                                                                TextInput::make('mediamarkt_nr_nl')
+                                                                    ->label('MediaMarktnummer NL')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('mediamarkt_nr_bnl')
+                                                                    ->label('MeidMarktnummer: Belu')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('ean_1')
+                                                                    ->label('EANcode1')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('ean_2')
+                                                                    ->label('EANcode2')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('dl_code')
+                                                                    ->label('DLcode')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('hs_code')
+                                                                    ->label('HScode')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('krefel_nr')
+                                                                    ->label('Krefelnummer')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('bol_nr')
+                                                                    ->label('BOLnummer')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('coolblue_nr')
+                                                                    ->label('Coolbluenummer')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                Select::make('unit')
+                                                                    ->label('Producteenheid')
+                                                                    ->columnSpan(6)
+                                                                    ->options(ProductUnit::labels())
+                                                                    ->inlineLabel(),
+                                                                Select::make('battery')
+                                                                    ->label('Batterij')
+                                                                    ->columnSpan(6)
+                                                                    ->options(ProductBattery::labels())
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('pcb')
+                                                                    ->label('PCB')
+                                                                    ->columnSpan(6)
+                                                                    ->numeric()
+                                                                    ->step(0.001)
+                                                                    ->inlineLabel(),
+                                                            ]),
+                                                    ]),
+
+                                                Grid::make(1)
+                                                    ->columnSpan(1)
+                                                    ->schema([
                                                         Section::make('Voorraad')
                                                             ->extraAttributes(['class' => 'beheer-algemeenSection'])
                                                             ->schema([
                                                                 Group::make([
                                                                     TextInput::make('physical_stock')
-                                                                        ->label('Fysieke voorraad')
+                                                                        ->label('Voorraad')
                                                                         ->inlineLabel()
                                                                         ->default(0)
                                                                         ->required()
@@ -490,8 +578,6 @@ class ProductResource extends Resource
                                                                     ->toArray()
                                                             ),
 
-                                                        ...self::makeGlAccountFields(),
-
                                                         Select::make('exact_sales_vat_code_id')
                                                             ->label('Verkoop-BTW')
                                                             ->options(function (): array {
@@ -649,35 +735,6 @@ class ProductResource extends Resource
     public function isActive(): bool
     {
         return (bool)$this->active;
-    }
-
-    /**
-     * @return array<int, \Filament\Forms\Components\TextInput>
-     */
-    private static function makeGlAccountFields(): array
-    {
-        $resolveLabel = function (Get $get, ArticleGroupGlAccountType $type): ?string {
-            $groupId = $get('exact_article_group_id');
-            if (!$groupId) {
-                return null;
-            }
-
-            return ExactArticleGroup::query()
-                ->with('glAccountLinks.glAccount')
-                ->find($groupId)
-                ?->getGlAccountLabel($type);
-        };
-
-        return array_map(
-            fn(ArticleGroupGlAccountType $type) => TextInput::make('gl_account_' . $type->value)
-                ->label($type->getLabel())
-                ->columnSpan(4)
-                ->inlineLabel()
-                ->placeholder(fn(Get $get): ?string => $resolveLabel($get, $type))
-                ->disabled()
-                ->dehydrated(false),
-            ArticleGroupGlAccountType::cases(),
-        );
     }
 
     public static function getRelations(): array

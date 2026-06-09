@@ -9,23 +9,15 @@ enum ProductUnit: string
     case Meter = 'meter';
     case Kilogram = 'kilogram';
     case Liter = 'liter';
-    case SquareMeter = 'square_meter';
-    case Hour = 'hour';
-    case Pair = 'pair';
-    case Box = 'box';
 
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Pieces => 'Stuks',
-            self::Set => 'Set',
-            self::Meter => 'Meter',
-            self::Kilogram => 'Kilogram',
-            self::Liter => 'Liter',
-            self::SquareMeter => 'Vierkante meter',
-            self::Hour => 'Uur',
-            self::Pair => 'Paar',
-            self::Box => 'Doos',
+            self::Pieces => '01 - per 1 stuk',
+            self::Set => '02 - per 2 stuks',
+            self::Meter => '03 - per 3 stuks',
+            self::Kilogram => '04 - per 4 stuks',
+            self::Liter => '05 - per 5 stuks',
         };
     }
 
