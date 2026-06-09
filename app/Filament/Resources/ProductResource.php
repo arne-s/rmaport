@@ -639,7 +639,7 @@ class ProductResource extends Resource
             ->extraAttributes(['class' => 'searchAlignLeft'])
             ->columns([
                 TextColumn::make('uid')
-                    ->label('Artikelnummer RD Mobility')
+                    ->label('Artikelnummer')
                     ->sortable()
                     ->searchable()
                     ->forceSearchCaseInsensitive(),
