@@ -302,7 +302,7 @@ class ProductResource extends Resource
                                                                     ->options(ProductUnit::labels())
                                                                     ->inlineLabel(),
                                                                 Select::make('battery')
-                                                                    ->label('Batterij')
+                                                                    ->label('Accu')
                                                                     ->columnSpan(6)
                                                                     ->options(ProductBattery::labels())
                                                                     ->inlineLabel(),
