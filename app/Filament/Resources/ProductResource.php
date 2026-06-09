@@ -206,6 +206,7 @@ class ProductResource extends Resource
                                                                     ->inlineLabel(),
                                                                 TextInput::make('name')
                                                                     ->label('Omschrijving')
+                                                                    ->required()
                                                                     ->columnSpan(6)
                                                                     ->extraAttributes(['style' => 'white-space: nowrap;'])
                                                                     ->inlineLabel(),
