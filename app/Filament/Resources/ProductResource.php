@@ -252,7 +252,7 @@ class ProductResource extends Resource
                                                                             ->hiddenLabel()
                                                                             ->rows(6)
                                                                             ->columnSpanFull()
-                                                                            ->extraInputAttributes(['style' => 'width: 100%; max-height: 93px;']),
+                                                                            ->extraInputAttributes(['style' => 'width: 100%; max-height: 98px;']),
                                                                     ]),
                                                             ]),
                                                     ]),
