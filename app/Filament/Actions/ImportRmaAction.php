@@ -40,7 +40,7 @@ class ImportRmaAction extends Action
         $this->schema([
             FileUpload::make('file')
                 ->label('Bestand')
-                ->helperText('MediaMarkt Excel-export (.xlsx) of CSV (;)')
+                ->helperText('Excel-bestand (.xlsx) of CSV (;)')
                 ->acceptedFileTypes([
                     'text/csv',
                     'text/plain',
