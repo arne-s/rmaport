@@ -8380,7 +8380,8 @@ div.manage-notifications-form {
                 }
             }
 
-            div.spec-border > .fi-section > .fi-section-header {
+            div.spec-border > .fi-section > .fi-section-header,
+            div.spec-border > section > .fi-section-header {
                 border-bottom: none !important;
 
                 h3.fi-section-header-heading {
