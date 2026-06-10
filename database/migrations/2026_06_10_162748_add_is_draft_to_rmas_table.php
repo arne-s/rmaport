@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('rmas', 'is_draft')) {
+            return;
+        }
+
         Schema::table('rmas', function (Blueprint $table) {
             $table->boolean('is_draft')->default(false)->after('status');
             $table->index('is_draft');
@@ -16,6 +20,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasColumn('rmas', 'is_draft')) {
+            return;
+        }
+
         Schema::table('rmas', function (Blueprint $table) {
             $table->dropIndex(['is_draft']);
             $table->dropColumn('is_draft');
