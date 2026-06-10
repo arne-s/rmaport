@@ -284,11 +284,11 @@ class ProductResource extends Resource
                                                                     ->columnSpanFull(),
 
                                                                 TextInput::make('mediamarkt_nr_nl')
-                                                                    ->label('MediaMarktnummer NL')
+                                                                    ->label('MediaMarktnummer: NL')
                                                                     ->columnSpan(6)
                                                                     ->inlineLabel(),
                                                                 TextInput::make('mediamarkt_nr_bnl')
-                                                                    ->label('MeidMarktnummer: Belu')
+                                                                    ->label('MediaMarktnummer: Belu')
                                                                     ->columnSpan(6)
                                                                     ->inlineLabel(),
 
