@@ -8082,6 +8082,14 @@ div.manage-notifications-form {
             }
         }
 
+        .product-voorraad-leverancier-kolom {
+            .product-leverancier-section {
+                @media screen and (min-width: 922px) {
+                    margin-top: 25px;
+                }
+            }
+        }
+
         .beheer-algemeenSection,
         .beheer-bedrijfsgegevensSection {
             .fi-section-header {

@@ -101,7 +101,6 @@ class ListProductionDelivered extends ListProduction
             ->deferFilters(false)
             ->filters([
                 Resource::getDateFilter(),
-                Resource::getDealerFilter('orders'),
                 Resource::getOrderStatusFilterForSubStatuses(OrderStatus::Delivery),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([

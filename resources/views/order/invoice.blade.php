@@ -3,7 +3,7 @@
     use App\Models\Customer;
     use App\Models\ExactPaymentCondition;
 
-    $avCustomer = Customer::getRdMobilityCustomer();
+    $avCustomer = Customer::getAvCustomer();
     $avAddr = $avCustomer?->billingAddress;
     $customer = $order->customer;
     $parentOrder = $order->order;

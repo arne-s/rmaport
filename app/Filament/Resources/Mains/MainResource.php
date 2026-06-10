@@ -240,10 +240,9 @@ class MainResource extends Resource
                 $billing = Customer::query()->find((int) $billingCustomerId);
                 if ($billing !== null) {
                     $typeLabel = match ($billing->getType()) {
-                        CustomerType::Dealer => 'Dealer',
                         CustomerType::B2B => 'B2B',
                         CustomerType::B2C => 'Klant',
-                        CustomerType::UniekSporten => 'UniekSporten',
+                        CustomerType::AV => 'AV',
                         default => 'Factuurklant',
                     };
                     $options['dealer'] = $typeLabel . ': ' . $billing->getName();
@@ -261,10 +260,9 @@ class MainResource extends Resource
             $billing = Customer::query()->find((int) $billingCustomerId);
             if ($billing !== null) {
                 $typeLabel = match ($billing->getType()) {
-                    CustomerType::Dealer => 'Dealer',
                     CustomerType::B2B => 'B2B',
                     CustomerType::B2C => 'Klant',
-                    CustomerType::UniekSporten => 'UniekSporten',
+                    CustomerType::AV => 'AV',
                     default => 'Factuurklant',
                 };
                 $options['dealer'] = $typeLabel . ': ' . $billing->getName();
@@ -274,7 +272,7 @@ class MainResource extends Resource
         if ($customerId) {
             $customer = Customer::query()->find($customerId);
             if ($customer) {
-                $prefix = $customer->getType() === CustomerType::Dealer ? 'Dealer' : 'Klant';
+                $prefix = 'Klant';
                 $options['customer'] = $prefix . ': ' . $customer->getName();
             }
         }
@@ -346,7 +344,7 @@ class MainResource extends Resource
             }
 
             $billing = Customer::query()->find((int) $billingCustomerId);
-            if ($billing?->getType() === CustomerType::Dealer) {
+            if ($billing?->getType() === CustomerType::B2B) {
                 return 'dealer';
             }
         }
@@ -355,28 +353,14 @@ class MainResource extends Resource
     }
 
     /**
-     * UniekSporten customers only appear when the request subtype is Unit.
+     * Base query for visible customers on the new-main form.
      */
-    private static function applyCreateMainCustomerSubtypeFilter(Builder $query, ?string $subtype): void
+    private static function baseCustomerQueryForCreateMain(?string $subtype): Builder
     {
-        if (($subtype ?? '') !== OrderSubtype::Unit->value) {
-            $query->where('type', '!=', CustomerType::UniekSporten->value);
-        }
-    }
-
-    /**
-     * Base query for visible non-dealer customers on the new-main form (subtype filter applied).
-     */
-    private static function baseNonDealerCustomerQueryForCreateMain(?string $subtype): Builder
-    {
-        $query = Customer::query()
+        return Customer::query()
             ->active()
             ->with(['shippingAddress'])
-            ->whereIn('type', array_keys(CustomerType::visibleLabels()))
-            ->where('type', '!=', CustomerType::Dealer->value);
-        static::applyCreateMainCustomerSubtypeFilter($query, $subtype);
-
-        return $query;
+            ->whereIn('type', array_keys(CustomerType::visibleLabels()));
     }
 
     /**
@@ -386,7 +370,7 @@ class MainResource extends Resource
      */
     private static function buildCreateMainCustomerOrDealerOptions(?string $subtype, ?string $search = null): array
     {
-        $query = static::baseNonDealerCustomerQueryForCreateMain($subtype);
+        $query = static::baseCustomerQueryForCreateMain($subtype);
 
         if (is_string($search) && $search !== '') {
             $query->where(function ($q) use ($search): void {
@@ -410,7 +394,7 @@ class MainResource extends Resource
         $options = [];
         foreach ($customers as $customer) {
             $type = $customer->getType();
-            if ($type === null || ! $type->isVisible() || $type === CustomerType::Dealer) {
+            if ($type === null || ! $type->isVisible()) {
                 continue;
             }
             $options['customer-' . $customer->id] = $customer->getName() ?? '';
@@ -423,35 +407,11 @@ class MainResource extends Resource
             }
         }
 
-        $dealersQuery = Customer::query()
-            ->active()
-            ->with(['shippingAddress'])
-            ->where('type', CustomerType::Dealer->value);
-
-        if (is_string($search) && $search !== '') {
-            $dealersQuery->where(function ($q) use ($search): void {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhereHas('shippingAddress', fn ($a) => $a->where('location_name', 'like', "%{$search}%"));
-            });
-        }
-
-        foreach ($dealersQuery->orderBy('name')->limit(50)->get() as $dealer) {
-            $options['dealer-' . $dealer->id] = $dealer->getName();
-
-            $shippingLocationName = $dealer->shippingAddress?->getLocationName();
-            if (filled($shippingLocationName)) {
-                $options['dealer-' . $dealer->id . '-shipping'] = $shippingLocationName . ' (locatie)';
-            }
-        }
-
         return self::prependNewCustomerOption($options);
     }
 
     /**
-     * Customers allowed in the optional Factuurgegevens field when creating a main: all active types except RD Mobility.
+     * Customers allowed in the optional Factuurgegevens field when creating a main: all active types except AV.
      */
     public static function queryBillingCustomersForNewMainSelect(): Builder
     {
@@ -501,19 +461,6 @@ class MainResource extends Resource
                 ->columnSpanFull()
                 ->extraFieldWrapperAttributes(['class' => 'whitespace-nowrap'])
                 ->afterStateUpdated(function (Get $get, Set $set, mixed $state): void {
-                    if (is_string($state) && $state !== OrderSubtype::Unit->value) {
-                        $cord = $get('customer_or_dealer');
-                        if (is_string($cord) && str_starts_with($cord, 'customer-')) {
-                            $customerId = (int) str_replace('customer-', '', $cord);
-                            $customer = Customer::query()->find($customerId);
-                            if ($customer !== null && $customer->getType() === CustomerType::UniekSporten) {
-                                $set('customer_or_dealer', null);
-                                $set('customer_id', null);
-                                $set('billing_customer_id', null);
-                            }
-                        }
-                    }
-
                     $customerId = $get('customer_id');
                     $billingCustomerId = $get('billing_customer_id');
                     static::syncCreateMainDeliveryAddressType(
@@ -909,7 +856,6 @@ class MainResource extends Resource
             ->deferFilters(false)
             ->filters([
                 self::getDateFilter(),
-                Resource::getDealerFilter(),
                 self::getAdvisorFilter(),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([])

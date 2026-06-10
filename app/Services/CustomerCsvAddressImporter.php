@@ -19,12 +19,8 @@ class CustomerCsvAddressImporter
 
         $type = $customer->getType();
         $deliveryAddressType = $this->resolveDeliveryAddressType($customer, $data, $type);
-        $companyName = trim((string) ($customer->name ?? ''));
 
-        if ($type === CustomerType::Dealer) {
-            $deliveryAddressType = 'custom';
-            $customer->delivery_address_type = 'custom';
-        } elseif ($deliveryAddressType !== null) {
+        if ($deliveryAddressType !== null) {
             $customer->delivery_address_type = $deliveryAddressType;
         }
 
@@ -47,8 +43,7 @@ class CustomerCsvAddressImporter
         }
 
         if ($deliveryAddressType === 'custom') {
-            $locationName = $this->nullableString($data['shipping_location_name'] ?? null)
-                ?? ($type === CustomerType::Dealer && $companyName !== '' ? $companyName : null);
+            $locationName = $this->nullableString($data['shipping_location_name'] ?? null);
             $shippingFields = $this->extractAddressFields($data, 'shipping', $locationName);
 
             if (! $this->isAddressEmpty($shippingFields)) {
@@ -98,10 +93,6 @@ class CustomerCsvAddressImporter
 
         if ($customer->delivery_address_type !== null) {
             return $customer->delivery_address_type;
-        }
-
-        if ($type === CustomerType::Dealer) {
-            return 'custom';
         }
 
         return 'contact';

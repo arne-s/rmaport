@@ -24,7 +24,7 @@ return new class extends Migration
         });
 
         $avCustomerId = DB::table('customers')
-            ->where('type', 'rd')
+            ->where('type', 'av')
             ->value('id');
 
         $orders = DB::table('orders')
@@ -45,7 +45,7 @@ return new class extends Migration
 
             $shippingCustomerId = match (true) {
                 $shippingKey === 'custom'            => null,
-                $shippingKey === 'rd'                => $avCustomerId,
+                $shippingKey === 'av'                => $avCustomerId,
                 str_starts_with((string) $shippingKey, 'company-') => $this->dealerCustomerIdFromKey($shippingKey),
                 default                              => $order->customer_id,
             };
@@ -113,7 +113,7 @@ return new class extends Migration
         ?int $companyId,
         ?int $avCustomerId
     ): ?int {
-        if ($billingKey === 'rd') {
+        if ($billingKey === 'av') {
             return $avCustomerId;
         }
 

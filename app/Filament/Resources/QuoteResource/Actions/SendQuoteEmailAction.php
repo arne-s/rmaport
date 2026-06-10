@@ -207,7 +207,7 @@ class SendQuoteEmailAction extends Action
         }
 
         $quote->loadMissing('billingCustomer');
-        if ($quote->billingCustomer?->getType() === CustomerType::Dealer) {
+        if ($quote->billingCustomer?->getType() === CustomerType::B2B) {
             $email = self::resolveInvoiceDealerEmail($quote, $livewire);
             if ($email !== null && $email !== '') {
                 return ['dealer'];

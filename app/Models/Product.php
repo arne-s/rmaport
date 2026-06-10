@@ -229,6 +229,11 @@ class Product extends Model implements HasMedia
         return $this->belongsTo(ExactVATCode::class, 'exact_purchase_vat_code_id');
     }
 
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
     /**
      * Order/quote lines: require a supplier except for service products.
      *
@@ -256,7 +261,8 @@ class Product extends Model implements HasMedia
                     ->orWhere('name', 'like', $term)
                     ->orWhere('supplier_product_uid', 'like', $term)
                     ->orWhere('supplier_product_name', 'like', $term)
-                    ->orWhere('description', 'like', $term);
+                    ->orWhere('description', 'like', $term)
+                    ->orWhereHas('supplier', fn (Builder $supplierQuery): Builder => $supplierQuery->where('name', 'like', $term));
             });
         }
 
@@ -286,7 +292,7 @@ class Product extends Model implements HasMedia
     {
         $constraints ??= new ProductSelectSearchConstraints();
 
-        $query = static::query();
+        $query = static::query()->with('supplier');
 
         if ($constraints->supplierId !== null) {
             $query->where('supplier_id', $constraints->supplierId);
@@ -357,7 +363,7 @@ class Product extends Model implements HasMedia
             return '';
         }
 
-        $product = static::query()->withTrashed()->find((int) $value);
+        $product = static::query()->withTrashed()->with('supplier')->find((int) $value);
 
         return $product instanceof Product ? $product->getSelectOptionLabel() : '';
     }
@@ -465,7 +471,14 @@ class Product extends Model implements HasMedia
      */
     public function getSelectOptionLabel(): string
     {
-        return $this->getUid().' | '.$this->getName();
+        $supplier = $this->supplier?->name ?? 'Zonder leverancier';
+
+        return $this->getUid().' | '.$this->getName().' | '.$supplier;
+    }
+
+    public function getSupplier(): ?Supplier
+    {
+        return $this->supplier;
     }
 
     /**

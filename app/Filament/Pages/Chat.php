@@ -319,8 +319,7 @@ class Chat extends Page
             ];
         }
 
-        $customerQuery = self::chatMentionCustomersQuery()
-            ->where('type', '!=', CustomerType::Dealer->value);
+        $customerQuery = self::chatMentionCustomersQuery();
         if ($query !== '') {
             $needle = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $query);
             $likeContains = '%'.$needle.'%';
@@ -346,32 +345,6 @@ class Chat extends Page
                 'id' => (int) $customer->getKey(),
                 'label' => $label,
                 'kind_label' => __('Klant'),
-            ];
-        }
-
-        $dealerQuery = self::chatMentionCustomersQuery()
-            ->where('type', CustomerType::Dealer->value);
-        if ($query !== '') {
-            $needle = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $query);
-            $likeContains = '%'.$needle.'%';
-            $dealerQuery->where('name', 'like', $likeContains);
-        }
-        $dealers = $dealerQuery
-            ->orderBy('name')
-            ->limit($perType)
-            ->get();
-
-        foreach ($dealers as $dealer) {
-            $label = trim((string) ($dealer->getName() ?? ''));
-            if ($label === '') {
-                continue;
-            }
-
-            $rows[] = [
-                'kind' => 'dealer',
-                'id' => (int) $dealer->getKey(),
-                'label' => $label,
-                'kind_label' => __('Dealer'),
             ];
         }
 

@@ -3,7 +3,7 @@
      * @var \App\Models\Order\Invoice $invoice
      * @var App\Models\Customer $avMobility
      */
-    $avMobility = \App\Models\Customer::getRdMobilityCustomer();
+    $avMobility = \App\Models\Customer::getAvCustomer();
 @endphp
 @extends('emails.layouts.default-layout')
 

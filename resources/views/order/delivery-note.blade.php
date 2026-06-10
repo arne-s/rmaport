@@ -1,7 +1,7 @@
 @php
     use App\Models\Customer;
 
-    $avCustomer = Customer::getRdMobilityCustomer();
+    $avCustomer = Customer::getAvCustomer();
     $avAddr = $avCustomer?->billingAddress;
 
     $recipientAddress = $order?->shippingCustomer?->shippingAddress ?? $order?->customer?->shippingAddress;

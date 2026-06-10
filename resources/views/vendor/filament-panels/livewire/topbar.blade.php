@@ -17,6 +17,9 @@
         'filament.app.resources.quotes.*',
         'filament.app.resources.orders.*',
     );
+    $topMenuInkoopActive = request()->routeIs(
+        'filament.app.resources.suppliers.*',
+    );
     $topMenuArtikelenActive = request()->routeIs(
         'filament.app.resources.products.*',
     );
@@ -218,6 +221,27 @@
                                     @endcan
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                @endcan
+
+                @can('manage purchases')
+                <div class="menuItem">
+                    <a class="menuItemLink parent {{ $topMenuInkoopActive ? 'pageActive' : '' }}">
+                        <span class="menuItemText" data-text="Inkoop">Inkoop</span>
+                    </a>
+
+                    <div class="subMenu-new">
+                        <div class="subMenuInner submenuitem">
+                            <a href="{{ route('filament.app.resources.suppliers.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.suppliers.index')) }}">
+                                <div class="mainItem no-link">
+                                    <div class="mainItem-info">
+                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/store-solid.svg') }}" alt="menu-icon">
+                                        <span class="mainItem-name">Leveranciers</span>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </div>

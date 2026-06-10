@@ -147,7 +147,6 @@ class ListProductionFitting extends ListProduction
             ->deferFilters(false)
             ->filters([
                 Resource::getDateFilter(),
-                Resource::getDealerFilter('orders'),
                 Resource::getOrderStatusFilterForSubStatuses(OrderStatus::Fitting),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([

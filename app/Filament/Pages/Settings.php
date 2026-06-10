@@ -46,12 +46,12 @@ class Settings extends EditRecord
 
     public function mount(int|string $record = null): void
     {
-        parent::mount(Customer::getRdMobilityCustomer()->id);
+        parent::mount(Customer::getAvCustomer()->id);
     }
 
     protected function resolveRecord(int|string $key): Customer
     {
-        return Customer::getRdMobilityCustomer();
+        return Customer::getAvCustomer();
     }
 
     protected function authorizeAccess(): void

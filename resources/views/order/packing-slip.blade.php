@@ -2,7 +2,7 @@
     use App\Models\Customer;
     use App\Support\PackingSlipChecklist;
 
-    $avCustomer = Customer::getRdMobilityCustomer();
+    $avCustomer = Customer::getAvCustomer();
     $avAddr = $avCustomer?->billingAddress;
     $companyPhone = $avCustomer?->getPhoneNumber();
     $companyVat = $avCustomer?->getVat();

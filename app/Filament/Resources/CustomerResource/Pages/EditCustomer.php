@@ -77,10 +77,6 @@ class EditCustomer extends EditRecord
             $data['status'] = CustomerStatus::Active->value;
         }
 
-        if (self::isDealerType($data['type'] ?? null)) {
-            $data['delivery_address_type'] = 'custom';
-        }
-
         if (self::isBusinessType($data['type'] ?? null)) {
             $billing = is_array($data['billingAddress'] ?? null) ? $data['billingAddress'] : [];
             $customerEmail = trim((string) ($data['email'] ?? ''));
@@ -109,10 +105,6 @@ class EditCustomer extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (self::isDealerType($data['type'] ?? null)) {
-            $data['delivery_address_type'] = 'custom';
-        }
-
         if (self::isBusinessType($data['type'] ?? null)) {
             $billing = is_array($data['billingAddress'] ?? null) ? $data['billingAddress'] : [];
             $billingEmail = trim((string) ($billing['email'] ?? ''));
@@ -138,11 +130,6 @@ class EditCustomer extends EditRecord
         $case = CustomerType::tryFrom($type);
 
         return $case !== null && $case->isBusiness();
-    }
-
-    private static function isDealerType(?string $type): bool
-    {
-        return CustomerType::tryFrom($type) === CustomerType::Dealer;
     }
 
     /**
@@ -184,7 +171,7 @@ class EditCustomer extends EditRecord
     }
 
     /**
-     * Invoice/delivery newsletter (Mailchimp dealer segments): shown for eligible business types; RD excluded.
+     * Invoice/delivery newsletter (Mailchimp B2B segments): shown for eligible business types; AV excluded.
      */
     private static function usesNewsletterDealerCustomerType(?string $type): bool
     {
@@ -642,14 +629,13 @@ class EditCustomer extends EditRecord
                                                                     ->label('Leveradres')
                                                                     ->columnSpan(3)
                                                                     ->inlineLabel()
-                                                                    ->default(fn (Get $get): string => self::isDealerType($get('type')) ? 'custom' : 'contact')
+                                                                    ->default('contact')
                                                                     ->selectablePlaceholder(false)
                                                                     ->live()
                                                                     ->options([
                                                                         'contact' => 'Zelfde als factuuradres',
                                                                         'custom' => 'Afwijkend',
                                                                     ])
-                                                                    ->disabled(fn (Get $get): bool => self::isDealerType($get('type')))
                                                                     ->dehydrated()
                                                                     ->afterStateUpdated(function (Get $get, Set $set, $state, $record) {
                                                                         self::syncShippingAddress($get, $set, $record);

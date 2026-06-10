@@ -88,7 +88,6 @@ class ListProductionOrdered extends ListProduction
             ->deferFilters(false)
             ->filters([
                 Resource::getDateFilter(),
-                Resource::getDealerFilter('orders'),
                 Resource::getOrderStatusFilterForSubStatuses(OrderStatus::Order),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([

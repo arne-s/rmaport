@@ -2,7 +2,6 @@
 
 namespace App\Filament\Support;
 
-use App\Enums\CustomerType;
 use App\Models\Customer;
 use App\Models\User;
 
@@ -18,10 +17,6 @@ final class EmailRecipientResolver
         foreach (User::query()->whereNotNull('email')->orderBy('first_name')->orderBy('last_name')->get() as $user) {
             $name = trim(($user->first_name ?? '').' '.($user->last_name ?? '')) ?: $user->email;
             $options['user_'.$user->id] = 'Gebruiker: '.$name.' <'.$user->email.'>';
-        }
-
-        foreach (Customer::query()->where('type', CustomerType::Dealer->value)->whereNotNull('email')->orderBy('name')->get() as $dealer) {
-            $options['dealer_'.$dealer->id] = 'Dealer: '.$dealer->getName().' <'.$dealer->getEmail().'>';
         }
 
         return $options;

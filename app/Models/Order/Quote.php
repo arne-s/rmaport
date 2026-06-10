@@ -490,7 +490,6 @@ class Quote extends BaseOrder
 
 
             if ($this->main?->getSubtype() !== OrderSubtype::Service
-                && $this->main?->billingCustomer?->getType() !== CustomerType::UniekSporten
                 && PaymentTerms::requiresDepositInvoice(
                     $order->payment_terms ?? PaymentTerms::tryFrom($order->getPaymentTermsValueForBillingContext()),
                 )) {
@@ -748,7 +747,7 @@ class Quote extends BaseOrder
         }
 
         if ($primaryRecipientKey === 'customer') {
-            if ($this->billingCustomer?->getType() !== CustomerType::Dealer) {
+            if ($this->billingCustomer?->getType() !== CustomerType::B2B) {
                 return false;
             }
 
@@ -760,7 +759,7 @@ class Quote extends BaseOrder
                 || $billingId === $customerId;
         }
 
-        return $this->billingCustomer?->getType() === CustomerType::Dealer;
+        return $this->billingCustomer?->getType() === CustomerType::B2B;
     }
 
     public function normalizeQuoteMailPrimaryRecipientKey(?string $primaryRecipientKey): ?string
@@ -806,13 +805,13 @@ class Quote extends BaseOrder
                 $query
                     ->whereHas(
                         'billingCustomer',
-                        fn (Builder $customerQuery): Builder => $customerQuery->where('type', CustomerType::Dealer->value),
+                        fn (Builder $customerQuery): Builder => $customerQuery->where('type', CustomerType::B2B->value),
                     )
                     ->orWhereHas(
                         'main',
                         fn (Builder $mainQuery): Builder => $mainQuery->whereHas(
                             'billingCustomer',
-                            fn (Builder $customerQuery): Builder => $customerQuery->where('type', CustomerType::Dealer->value),
+                            fn (Builder $customerQuery): Builder => $customerQuery->where('type', CustomerType::B2B->value),
                         ),
                     );
             });
@@ -870,10 +869,10 @@ class Quote extends BaseOrder
         $subtype ??= OrderSubtype::Part;
 
         $dealerCustomer = static::makeEmailPreviewCustomer(
-            name: 'Voorbeeld Dealer B.V.',
-            type: CustomerType::Dealer,
+            name: 'Voorbeeld B2B B.V.',
+            type: CustomerType::B2B,
             debtorNumber: '12345',
-            email: 'offerte@voorbeeld-dealer.nl',
+            email: 'offerte@voorbeeld-b2b.nl',
             firstName: 'Jan',
             lastName: 'de Vries',
         );

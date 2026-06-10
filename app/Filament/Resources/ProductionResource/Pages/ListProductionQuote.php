@@ -133,7 +133,6 @@ class ListProductionQuote extends ListProduction
             ->deferFilters(false)
             ->filters([
                 Resource::getDateFilter(),
-                Resource::getDealerFilter('orders'),
                 Resource::getOrderStatusFilterForSubStatuses(OrderStatus::Quote),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([

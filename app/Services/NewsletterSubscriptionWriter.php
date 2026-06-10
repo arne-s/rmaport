@@ -54,7 +54,7 @@ class NewsletterSubscriptionWriter
     }
 
     /**
-     * RD and other non-visible business types: geen Mailchimp dealer-/B2C-rijen.
+     * AV and other non-visible business types: geen Mailchimp B2B-/B2C-rijen.
      */
     private static function deactivateAllNewsletterSegmentsForCustomer(Customer $customer): void
     {

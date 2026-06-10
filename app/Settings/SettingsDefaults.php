@@ -15,9 +15,7 @@ final class SettingsDefaults
 {
     private const SEGMENTS = [
         'b2c' => 'Particulier',
-        'dealer' => 'Dealer',
         'b2b' => 'B2B',
-        'uniek_sporten' => 'Uniek Sporten',
     ];
 
     private const SUBTYPES = [
@@ -72,27 +70,21 @@ final class SettingsDefaults
         $defaults = [
             'unit' => [
                 'b2c' => PaymentTerms::Split50_50->value,
-                'dealer' => PaymentTerms::Postpay->value,
                 'b2b' => PaymentTerms::Advance100->value,
-                'uniek_sporten' => PaymentTerms::Split50_50->value,
             ],
             'part' => [
                 'b2c' => PaymentTerms::Advance100->value,
-                'dealer' => PaymentTerms::PostpayShipping->value,
                 'b2b' => PaymentTerms::PostpayShipping->value,
-                'uniek_sporten' => PaymentTerms::Advance100->value,
             ],
             'service' => [
                 'b2c' => PaymentTerms::DirectService->value,
-                'dealer' => PaymentTerms::PostpayService->value,
                 'b2b' => PaymentTerms::PostpayService->value,
-                'uniek_sporten' => PaymentTerms::DirectService->value,
             ],
         ];
 
         $rows = [];
         $sortBase = ['unit' => 100, 'part' => 104, 'service' => 108];
-        $segmentOffset = ['b2c' => 0, 'dealer' => 1, 'b2b' => 2, 'uniek_sporten' => 3];
+        $segmentOffset = ['b2c' => 0, 'b2b' => 1];
 
         foreach ($defaults as $subtype => $segments) {
             foreach ($segments as $segment => $value) {
@@ -134,9 +126,7 @@ final class SettingsDefaults
     {
         $defaults = [
             'b2c' => '14',
-            'dealer' => '45',
             'b2b' => '30',
-            'uniek_sporten' => '30',
         ];
 
         $rows = [];

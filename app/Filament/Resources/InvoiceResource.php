@@ -168,7 +168,6 @@ class InvoiceResource extends Resource
             ->filters(
                 [
                     Resource::getDateFilter(),
-                    Resource::getDealerFilter('invoices'),
                 ],
                 layout: FiltersLayout::AboveContent
             )

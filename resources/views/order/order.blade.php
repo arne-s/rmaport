@@ -1,7 +1,7 @@
 @php
     use App\Models\Customer;
 
-    $avCustomer = Customer::getRdMobilityCustomer();
+    $avCustomer = Customer::getAvCustomer();
     $avAddr = $avCustomer?->billingAddress;
     $customer = $order->customer;
     $parentOrder = $order->order;

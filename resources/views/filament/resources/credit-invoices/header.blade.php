@@ -1,5 +1,5 @@
 @php
-    $company = App\Models\Customer::getRdMobilityCustomer();
+    $company = App\Models\Customer::getAvCustomer();
     $invoice = $this->record;
     $parentInvoice = $invoice->invoice;
     $parentOrder = $invoice->order;

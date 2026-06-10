@@ -711,7 +711,7 @@ class ViewOrder extends ViewRecord implements HasActions, HasForms
     public function getCompanyOptionsForSelect(): array
     {
         $options = ['' => 'N.v.t.'];
-        foreach (Customer::where('type', CustomerType::Dealer)->orderBy('name')->get() as $dealer) {
+        foreach (Customer::where('type', CustomerType::B2B)->orderBy('name')->get() as $dealer) {
             $options[(string)$dealer->id] = $dealer->getName() ?? (string)$dealer->id;
         }
 

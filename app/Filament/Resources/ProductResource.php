@@ -115,8 +115,13 @@ class ProductResource extends Resource
         $query = app(static::getModel())
             ->resolveRouteBindingQuery(static::getEloquentQuery(), $key, static::getRecordRouteKeyName());
         return $query
-            ->with(['exactSalesVatCode', 'exactPurchaseVatCode', 'stock'])
+            ->with(['supplier', 'exactSalesVatCode', 'exactPurchaseVatCode', 'stock'])
             ->first();
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('stock');
     }
 
     public static function getGlobalSearchEloquentQuery(): Builder
@@ -153,6 +158,14 @@ class ProductResource extends Resource
         $details = [
             'Artikelnummer' => $record->uid,
         ];
+
+        if (filled($record->supplier_product_uid)) {
+            $details['Artikelnummer leverancier'] = $record->supplier_product_uid;
+        }
+
+        if ($record->supplier !== null && filled($record->supplier->name)) {
+            $details['Leverancier'] = $record->supplier->name;
+        }
 
         return array_filter($details, fn (string $v): bool => $v !== '');
     }
@@ -336,6 +349,7 @@ class ProductResource extends Resource
 
                                                 Grid::make(1)
                                                     ->columnSpan(1)
+                                                    ->extraAttributes(['class' => 'product-voorraad-leverancier-kolom'])
                                                     ->schema([
                                                         Section::make('Voorraad')
                                                             ->extraAttributes(['class' => 'beheer-algemeenSection'])
@@ -406,8 +420,39 @@ class ProductResource extends Resource
                                                                     ->label('Magazijnlokatie')
                                                                     ->columnSpan(6)
                                                                     ->inlineLabel(),
-
-
+                                                            ]),
+                                                        Section::make('Leverancier')
+                                                            ->extraAttributes(['class' => 'beheer-algemeenSection product-leverancier-section'])
+                                                            ->schema([
+                                                                Select::make('supplier_id')
+                                                                    ->relationship('supplier', 'name')
+                                                                    ->label('Leverancier')
+                                                                    ->inlineLabel()
+                                                                    ->columnSpan(6)
+                                                                    ->searchable()
+                                                                    ->preload(),
+                                                                TextInput::make('supplier_product_name')
+                                                                    ->label('Artikelnaam leverancier')
+                                                                    ->inlineLabel()
+                                                                    ->columnSpan(6),
+                                                                TextInput::make('supplier_product_uid')
+                                                                    ->label('Artikelnummer leverancier')
+                                                                    ->extraAttributes(['style' => 'white-space: nowrap;'])
+                                                                    ->inlineLabel()
+                                                                    ->columnSpan(6),
+                                                                Select::make('exact_purchase_vat_code_id')
+                                                                    ->label('Inkoop-BTW')
+                                                                    ->options(function (): array {
+                                                                        return ExactVATCode::getPurchaseVatCodes()
+                                                                            ->mapWithKeys(fn (ExactVATCode $v): array => [
+                                                                                $v->id => $v->code . ' : ' . $v->name,
+                                                                            ])
+                                                                            ->all();
+                                                                    })
+                                                                    ->searchable()
+                                                                    ->nullable()
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
                                                             ]),
                                                     ]),
                                             ]),
@@ -671,20 +716,41 @@ class ProductResource extends Resource
                     ->label('Artikelnummer')
                     ->sortable()
                     ->searchable()
-                    ->forceSearchCaseInsensitive(),
+                    ->forceSearchCaseInsensitive()
+                    ->width('100px'),
+
+                TextColumn::make('brand')
+                    ->label('Merk')
+                    ->sortable()
+                    ->searchable()
+                    ->placeholder('—'),
 
                 TextColumn::make('name')
                     ->label('Omschrijving')
                     ->sortable()
                     ->searchable()
                     ->limit(40)
-                    ->width(220)
+                    ->width('300px')
                     ->tooltip(fn (Product $record): ?string => filled($record->name) ? (string) $record->name : null),
+
+                TextColumn::make('description2')
+                    ->label('Omschrijving2')
+                    ->sortable()
+                    ->searchable()
+                    ->placeholder('—'),
+
+                TextColumn::make('stock.available_stock')
+                    ->label('Beschikbare voorraad')
+                    ->numeric(0)
+                    ->sortable()
+                    ->width('150px')
+                    ->placeholder('0'),
 
             ])
             ->defaultSort('name', 'asc')
             ->deferFilters(false)
             ->filters([
+                self::getSupplierFilter('supplier'),
                 self::getActiveFilter(),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([])

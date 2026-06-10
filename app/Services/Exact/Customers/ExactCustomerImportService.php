@@ -316,30 +316,11 @@ class ExactCustomerImportService
 
     private function resolveImportedCustomerType(string $name, ?string $accountEmail, ?string $contactEmail): CustomerType
     {
-        if ($this->importEmailsContainUniekKeyword($accountEmail, $contactEmail)) {
-            return CustomerType::UniekSporten;
-        }
-
         if ($this->importIndicatesBusiness($name, $accountEmail, $contactEmail)) {
-            return CustomerType::Dealer;
+            return CustomerType::B2B;
         }
 
         return CustomerType::B2C;
-    }
-
-    private function importEmailsContainUniekKeyword(?string $accountEmail, ?string $contactEmail): bool
-    {
-        foreach ([$accountEmail, $contactEmail] as $email) {
-            if ($email === null || $email === '') {
-                continue;
-            }
-
-            if (str_contains(mb_strtolower($email, 'UTF-8'), 'uniek')) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function importIndicatesBusiness(string $name, ?string $accountEmail, ?string $contactEmail): bool

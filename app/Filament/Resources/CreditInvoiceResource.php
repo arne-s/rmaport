@@ -124,7 +124,6 @@ class CreditInvoiceResource extends Resource
             ->deferFilters(false)
             ->filters([
                 Resource::getDateFilter(),
-                Resource::getDealerFilter('invoices'),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([]);
     }

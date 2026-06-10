@@ -1747,8 +1747,8 @@ class EditOrder extends EditRecord
             return $this->trimmedOrNull($this->record->customer?->getName());
         }
 
-        if ($key === 'rd') {
-            return $this->trimmedOrNull(Customer::getRdMobilityCustomer()->getName());
+        if ($key === 'av') {
+            return $this->trimmedOrNull(Customer::getAvCustomer()->getName());
         }
 
         if (str_starts_with($key, 'customer-') || str_starts_with($key, 'company-')) {
@@ -1776,8 +1776,8 @@ class EditOrder extends EditRecord
             return null;
         }
 
-        if ($key === 'rd') {
-            $av = Customer::getRdMobilityCustomer();
+        if ($key === 'av') {
+            $av = Customer::getAvCustomer();
 
             return $forDelivery ? $av->getPhysicalDeliveryAddress() : $av->billingAddress;
         }
@@ -2025,22 +2025,14 @@ class EditOrder extends EditRecord
 
     private function getCustomerOrDealerOptions(bool $forKlantSelect = false): array
     {
-        $customers = Customer::query()
+        return Customer::query()
             ->active()
             ->whereIn('type', array_keys(CustomerType::visibleLabels()))
-            ->where('type', '!=', CustomerType::Dealer->value)
             ->orderBy('name')
-            ->limit(100)->get()
-            ->mapWithKeys(fn (Customer $c): array => [$c->id => $this->labelForCustomerOrDealerOption($c, $forKlantSelect)]);
-
-        $dealers = Customer::query()
-            ->active()
-            ->where('type', CustomerType::Dealer->value)
-            ->orderBy('name')
-            ->limit(100)->get()
-            ->mapWithKeys(fn (Customer $c): array => [$c->id => $this->labelForCustomerOrDealerOption($c, $forKlantSelect)]);
-
-        return $customers->all() + $dealers->all();
+            ->limit(100)
+            ->get()
+            ->mapWithKeys(fn (Customer $c): array => [$c->id => $this->labelForCustomerOrDealerOption($c, $forKlantSelect)])
+            ->all();
     }
 
     /**
@@ -2077,28 +2069,18 @@ class EditOrder extends EditRecord
 
     private function searchCustomerOrDealerOptions(string $search, bool $forKlantSelect = false): array
     {
-        $customers = Customer::query()
+        return Customer::query()
             ->active()
             ->whereIn('type', array_keys(CustomerType::visibleLabels()))
-            ->where('type', '!=', CustomerType::Dealer->value)
             ->where(fn ($q) => $q->where('first_name', 'like', "%{$search}%")
                 ->orWhere('last_name', 'like', "%{$search}%")
                 ->orWhere('name', 'like', "%{$search}%")
                 ->orWhere('email', 'like', "%{$search}%"))
             ->orderBy('name')
-            ->limit(50)->get()
-            ->mapWithKeys(fn (Customer $c): array => [$c->id => $this->labelForCustomerOrDealerOption($c, $forKlantSelect)]);
-
-        $dealers = Customer::query()
-            ->active()
-            ->where('type', CustomerType::Dealer->value)
-            ->where(fn ($q) => $q->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%"))
-            ->orderBy('name')
-            ->limit(50)->get()
-            ->mapWithKeys(fn (Customer $c): array => [$c->id => $this->labelForCustomerOrDealerOption($c, $forKlantSelect)]);
-
-        return $customers->all() + $dealers->all();
+            ->limit(50)
+            ->get()
+            ->mapWithKeys(fn (Customer $c): array => [$c->id => $this->labelForCustomerOrDealerOption($c, $forKlantSelect)])
+            ->all();
     }
 
     /**
@@ -2223,7 +2205,7 @@ class EditOrder extends EditRecord
 
         if ((int) $this->record->customer_id === $customerId) {
             $deliveryMode = self::DELIVERY_ADDRESS_MODE_CUSTOMER;
-        } elseif ($customer->getType() === CustomerType::Dealer) {
+        } elseif ($customer->getType() === CustomerType::B2B) {
             $deliveryMode = self::DELIVERY_ADDRESS_MODE_DEALER;
         } else {
             $deliveryMode = self::DELIVERY_ADDRESS_MODE_INVOICE;

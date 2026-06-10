@@ -49,14 +49,18 @@ class QuickLinksWidget extends BaseWidget implements HasActions
 
         $links = array_merge($links, [
             ...(CreateMainAction::canCreate() ? [
-                Action::make('Passing')
+                Action::make('rma')
+                    ->label('RMA')
                     ->button()
                     ->color('black')
                     ->icon('heroicon-s-plus-circle')
-                    ->url('#')
-                    ->extraAttributes([
-                        'wire:click.prevent' => "\$dispatch('open-create-main-dashboard-passing')",
-                    ]),
+                    ->url('#'),
+
+                Action::make('Excel uploaden')
+                    ->button()
+                    ->color('black')
+                    ->icon('heroicon-s-plus-circle')
+                    ->url('#'),
 
                 Action::make('Offerte')
                     ->button()

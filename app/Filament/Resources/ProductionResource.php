@@ -180,7 +180,6 @@ class ProductionResource extends Resource
             ->deferFilters(false)
             ->filters([
                 Resource::getDateFilter(),
-                Resource::getDealerFilter('orders'),
                 Resource::getOrderStatusFilter($orderStatuses),
             ], layout: FiltersLayout::AboveContent)
             ->defaultSort('sent_at', 'desc');

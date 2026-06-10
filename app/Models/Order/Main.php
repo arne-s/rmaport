@@ -109,13 +109,13 @@ class Main extends BaseOrder
 
     /**
      * Party to use for salutation / contact fields.
-     * When 'dealer' is requested and invoice customer is a Dealer, returns the invoice customer.
+     * When 'dealer' is requested, returns the billing customer.
      * Otherwise returns the end customer or invoice customer as fallback.
      */
     public function getVirtualCustomer(?string $primaryRecipientKey = null): Customer|null
     {
         return match ($primaryRecipientKey) {
-            'dealer' => $this->billingCustomer?->type === CustomerType::Dealer ? $this->billingCustomer : null,
+            'dealer' => $this->billingCustomer,
             default  => $this->customer ?? $this->billingCustomer,
         };
     }
@@ -471,8 +471,7 @@ class Main extends BaseOrder
                 break;
 
             case OrderStatus::ReadyForAssembly:
-                if ($this->billingCustomer?->type !== CustomerType::Dealer
-                    && $this->getSubtype() !== OrderSubtype::Service
+                if ($this->getSubtype() !== OrderSubtype::Service
                     && ! ($this->getSubtype() === OrderSubtype::Unit
                         && $this->billingCustomer?->type === CustomerType::B2B)) {
                     try {
@@ -517,7 +516,7 @@ class Main extends BaseOrder
                 if ($this->getSubtype() === OrderSubtype::Part) {
                     $this->loadMissing(['billingCustomer']);
                     $partBilling = $this->billingCustomer?->getType();
-                    if (in_array($partBilling, [CustomerType::B2B, CustomerType::Dealer], true)) {
+                    if ($partBilling === CustomerType::B2B) {
                         try {
                             $this->createInvoiceIfRequired();
                         } catch (\Throwable $e) {
@@ -527,7 +526,7 @@ class Main extends BaseOrder
                             ]);
                         }
                     }
-                } elseif ($this->billingCustomer?->type === CustomerType::Dealer
+                } elseif ($this->billingCustomer?->type === CustomerType::B2B
                     && $this->getSubtype() !== OrderSubtype::Service) {
                     try {
                         $this->createInvoiceIfRequired();
@@ -585,14 +584,9 @@ class Main extends BaseOrder
         }
     }
 
-    /**
-     * Uniek Sporten: no automatic invoices (manual billing).
-     */
     public function shouldSuppressAutomaticInvoicing(): bool
     {
-        $this->loadMissing(['billingCustomer']);
-
-        return $this->billingCustomer?->getType() === CustomerType::UniekSporten;
+        return false;
     }
 
     /**
@@ -690,13 +684,13 @@ class Main extends BaseOrder
             return max(0, (int) Setting::get('mail.service_b2c_invoice_mail_delay_seconds'));
         }
 
-        if ($billingType === CustomerType::Dealer) {
+        if ($subtype === OrderSubtype::Unit && $billingType === CustomerType::B2B) {
+            return max(0, (int) Setting::get('mail.full_invoice_delay'));
+        }
+
+        if ($billingType === CustomerType::B2B) {
             if ($subtype === OrderSubtype::Service) {
                 return max(0, (int) Setting::get('mail.service_dealer_invoice_mail_delay_seconds'));
-            }
-
-            if ($subtype === OrderSubtype::Part) {
-                return max(0, (int) Setting::get('mail.part_dealer_mail_delay_seconds'));
             }
 
             return max(0, (int) Setting::get('mail.dealer_invoice_mail_delay_seconds'));
@@ -704,10 +698,6 @@ class Main extends BaseOrder
 
         if ($subtype === OrderSubtype::Part && $billingType === CustomerType::B2C) {
             return max(0, (int) Setting::get('mail.part_b2c_mail_delay_seconds'));
-        }
-
-        if ($subtype === OrderSubtype::Unit && $billingType === CustomerType::B2B) {
-            return max(0, (int) Setting::get('mail.full_invoice_delay'));
         }
 
         return max(0, (int) Setting::get('mail.invoice_mail_delay_seconds'));
@@ -905,10 +895,6 @@ class Main extends BaseOrder
     {
         $this->loadMissing(['billingCustomer', 'depositInvoice']);
 
-        if ($this->billingCustomer?->getType() === CustomerType::UniekSporten) {
-            return false;
-        }
-
         if ($this->getSubtype() === OrderSubtype::Service) {
             return false;
         }
@@ -934,11 +920,6 @@ class Main extends BaseOrder
      */
     public function needDepositInvoice(): bool
     {
-        $this->loadMissing(['billingCustomer']);
-        if ($this->billingCustomer?->getType() === CustomerType::UniekSporten) {
-            return false;
-        }
-
         if ($this->getSubtype() === OrderSubtype::Service) {
             return false;
         }

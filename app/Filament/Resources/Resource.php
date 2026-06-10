@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\CustomerType;
 use App\Enums\MailLogStatus;
 use App\Enums\NoteStatus;
 use App\Enums\OrderGeneralStatus;
@@ -10,6 +9,7 @@ use App\Enums\OrderStatus;
 use Filament\Schemas\Components\Grid;
 use App\Filament\Forms\Components\ToggleFilter;
 use App\Models\Customer;
+use App\Models\Supplier;
 use Carbon\Carbon;
 use Exception;
 use Filament\Forms\Components\CheckboxList;
@@ -252,57 +252,53 @@ abstract class Resource extends \Filament\Resources\Resource
             });
     }
 
-
     /**
-     * Get the "Dealer" filter for the resource table (filters by billing_customer_id on Dealer-type customers).
+     * Get the "Supplier" filter for the resource table.
      *
-     * @param null $fromRelation
-     * @return Filter
      * @throws Exception
      */
-    public static function getDealerFilter($fromRelation = null): Filter
+    public static function getSupplierFilter(?string $relationshipColumn = null): Filter
     {
-        return Filter::make('billing_customer_id')
-            ->label('Dealer')
+        return Filter::make('supplier_id')
+            ->label('Leverancier')
             ->indicateUsing(function (array $data): ?string {
-                if (empty($data['billing_customer_id'])) {
+                if (empty($data['supplier_id'])) {
                     return null;
                 }
-                $list = Customer::query()
-                    ->whereIn('id', $data['billing_customer_id'])
-                    ->get()
-                    ->map(fn(Customer $c) => $c->getName());
+
+                $list = Supplier::query()
+                    ->whereIn('id', $data['supplier_id'])
+                    ->pluck('name');
+
                 if (count($list) > 1) {
                     $str = $list->slice(0, 1)->join(', ') . ' (+' . (count($list) - 1) . ')';
                 } else {
                     $str = $list->join(', ');
                 }
 
-                return 'Dealer: ' . $str;
+                return 'Leverancier: ' . $str;
             })
             ->schema([
                 ToggleFilter::make()
-                    ->label('Dealer')
+                    ->label('Leverancier')
                     ->schema([
-                        CheckboxList::make('billing_customer_id')
+                        CheckboxList::make('supplier_id')
                             ->searchable(false)
                             ->label('')
-                            ->options(fn (): array => Customer::query()
-                                ->where('type', CustomerType::Dealer->value)
-                                ->orderBy('name')
-                                ->get()
-                                ->mapWithKeys(fn (Customer $c): array => [$c->getId() => $c->getName() ?? 'Dealer #'.$c->getId()])
-                                ->all()
-                            ),
+                            ->options(fn (): array => Supplier::query()
+                                ->pluck('name', 'id')
+                                ->all()),
                     ]),
             ])
-            ->query(fn(Builder $query, array $data): Builder => $query
-                ->when($data['billing_customer_id'] ?? null, fn(Builder $query, $ids) => $query
-                    ->whereIn('billing_customer_id', $ids)
-                )
-            );
+            ->query(fn (Builder $query, array $data): Builder => $query
+                ->when(
+                    ! empty($data['supplier_id']),
+                    fn (Builder $query): Builder => $query->whereHas(
+                        $relationshipColumn ?? 'product.supplier',
+                        fn (Builder $q): Builder => $q->whereIn('id', $data['supplier_id']),
+                    ),
+                ));
     }
-
 
     /**
      * Get the "OrderStatus" filter for the resource table.

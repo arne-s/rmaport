@@ -21,7 +21,7 @@ final class OrderConfirmMailRecipients
 
     public static function usesDealerBillingRecipientLayout(Order $order, mixed $livewire = null): bool
     {
-        return self::resolveBillingCustomerRecord($order, $livewire)?->getType() === CustomerType::Dealer;
+        return self::resolveBillingCustomerRecord($order, $livewire)?->getType() === CustomerType::B2B;
     }
 
     /**
@@ -30,7 +30,7 @@ final class OrderConfirmMailRecipients
     public static function resolveDealerBillingInvoiceEmail(Order $order, mixed $livewire = null): ?string
     {
         $dealer = self::resolveBillingCustomerRecord($order, $livewire);
-        if ($dealer?->getType() !== CustomerType::Dealer) {
+        if ($dealer?->getType() !== CustomerType::B2B) {
             return null;
         }
 
@@ -137,7 +137,7 @@ final class OrderConfirmMailRecipients
             return null;
         }
 
-        if ($billing->getType() === CustomerType::Dealer) {
+        if ($billing->getType() === CustomerType::B2B) {
             return self::resolveDealerBillingInvoiceEmailForCustomer($billing);
         }
 

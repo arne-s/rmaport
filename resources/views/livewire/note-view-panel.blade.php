@@ -97,7 +97,7 @@
         @endphp
         <ul class="kv">
             <li>
-                <span class="k">{{ $note->customer?->type === \App\Enums\CustomerType::Dealer ? 'Dealer:' : 'Klant:' }}</span>
+                <span class="k">{{ $note->customer?->getType() === \App\Enums\CustomerType::B2B ? 'B2B:' : 'Klant:' }}</span>
                 <span class="v">{{ $note->author ?? '-' }}</span>
             </li>
             <li>

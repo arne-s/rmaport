@@ -32,7 +32,7 @@ class SendInvoicesDownloadReminder extends Command
     public function handle(): void
     {
         $dealers = Customer::where('status', CustomerStatus::Active)
-            ->where('type', CustomerType::Dealer)
+            ->where('type', CustomerType::B2B)
             ->get();
 
         $count = 0;

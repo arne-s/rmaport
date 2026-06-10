@@ -38,7 +38,7 @@ class OrderCheckAdministrationMail extends Mailable
         $record = $main ?? $this->order;
         $record->loadMissing(['customer', 'billingCustomer']);
 
-        if ($record->billingCustomer?->getType() === CustomerType::Dealer) {
+        if ($record->billingCustomer?->getType() === CustomerType::B2B) {
             $attention = $record->resolveDealerMailSalutation();
             $customerFirstName = $attention;
             $customerName = $attention;

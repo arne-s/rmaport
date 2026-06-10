@@ -17,9 +17,7 @@ final class InvoiceReminderSettings
     {
         return [
             CustomerType::B2C->value => 'Particulier',
-            CustomerType::Dealer->value => 'Dealer',
             CustomerType::B2B->value => 'B2B',
-            CustomerType::UniekSporten->value => 'Uniek Sporten',
         ];
     }
 
@@ -48,9 +46,7 @@ final class InvoiceReminderSettings
 
         return match ($invoiceCustomer->getType()) {
             CustomerType::B2C => CustomerType::B2C->value,
-            CustomerType::Dealer => CustomerType::Dealer->value,
-            CustomerType::UniekSporten => CustomerType::UniekSporten->value,
-            CustomerType::B2B, CustomerType::RD => CustomerType::B2B->value,
+            CustomerType::B2B, CustomerType::AV => CustomerType::B2B->value,
             default => CustomerType::B2C->value,
         };
     }

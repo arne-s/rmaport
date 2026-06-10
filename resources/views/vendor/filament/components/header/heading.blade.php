@@ -10,7 +10,7 @@
 
         $isSP = isset($this->record)
         && $this->record instanceof \App\Models\Customer
-        && $this->record->getKey() === \App\Models\Customer::getRdMobilityCustomer()?->getKey();
+        && $this->record->getKey() === \App\Models\Customer::getAvCustomer()?->getKey();
 
     @endphp
 

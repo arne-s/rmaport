@@ -1174,7 +1174,7 @@ class BaseOrder extends Model implements HasMedia
     }
 
     /**
-     * Billing-party segment for payment settings: matches `CustomerType::value` for invoice customers (not {@see CustomerType::RD}).
+     * Billing-party segment for payment settings: matches `CustomerType::value` for invoice customers (not {@see CustomerType::AV}).
      */
     public function getBillingCustomerSegmentKey(): string
     {
@@ -1184,7 +1184,7 @@ class BaseOrder extends Model implements HasMedia
     }
 
     /**
-     * Billing-party segment for payment settings: matches `CustomerType::value` for invoice customers (not {@see CustomerType::RD}).
+     * Billing-party segment for payment settings: matches `CustomerType::value` for invoice customers (not {@see CustomerType::AV}).
      */
     protected function getBillingSegmentKeyForOrderProcess(?Customer $invoiceCustomer): string
     {
@@ -2960,7 +2960,7 @@ class BaseOrder extends Model implements HasMedia
             return AddressType::Custom;
         }
 
-        if ($key === 'customer' || $key === 'rd') {
+        if ($key === 'customer' || $key === 'av') {
             return AddressType::Customer;
         }
 
@@ -3002,7 +3002,7 @@ class BaseOrder extends Model implements HasMedia
     }
 
     /**
-     * Type key for delivery address (customer, customer-{id}, rd, custom, …), same as Filament {@see \App\Filament\Resources\OrderResource\Pages\EditOrder::getInitialShippingAddressTypeKey()}.
+     * Type key for delivery address (customer, customer-{id}, av, custom, …), same as Filament {@see \App\Filament\Resources\OrderResource\Pages\EditOrder::getInitialShippingAddressTypeKey()}.
      */
     public function resolveShippingAddressTypeKey(): string
     {

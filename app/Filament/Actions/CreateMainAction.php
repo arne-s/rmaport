@@ -199,7 +199,7 @@ class CreateMainAction extends Action
                             'delivery_address_type' => 'Selecteer levergegevens.',
                         ]);
                     }
-                    if (! in_array($deliveryAddressType, ['customer', 'dealer', 'rd'], true)) {
+                    if (! in_array($deliveryAddressType, ['customer', 'dealer', 'av'], true)) {
                         throw ValidationException::withMessages([
                             'delivery_address_type' => 'Ongeldige levergegevens.',
                         ]);
@@ -212,14 +212,6 @@ class CreateMainAction extends Action
                     );
 
                     $subtypeForCreate = $data['subtype'] ?? null;
-                    if ($customerId !== null && $subtypeForCreate !== OrderSubtype::Unit->value) {
-                        $customerForSubtype = Customer::query()->find((int) $customerId);
-                        if ($customerForSubtype?->getType() === CustomerType::UniekSporten) {
-                            throw ValidationException::withMessages([
-                                'subtype' => 'Een UniekSporten-klant is alleen toegestaan bij aanvraagtype Unit.',
-                            ]);
-                        }
-                    }
 
                     $billingForSubtype = Customer::query()->find((int) $billingCustomerId);
                     if (
@@ -303,7 +295,7 @@ class CreateMainAction extends Action
     private function resolveShippingCustomerId(int $customerId, int $billingCustomerId, string $deliveryAddressType): int
     {
         return match ($deliveryAddressType) {
-            'rd' => (int) Customer::getRdMobilityCustomer()->getKey(),
+            'av' => (int) Customer::getAvCustomer()->getKey(),
             'customer' => $customerId,
             'dealer' => $billingCustomerId,
         };
@@ -311,8 +303,8 @@ class CreateMainAction extends Action
 
     private function resolveShippingAddressTypeKey(int $customerId, int $shippingCustomerId, string $deliveryAddressType): string
     {
-        if ($deliveryAddressType === 'rd') {
-            return 'rd';
+        if ($deliveryAddressType === 'av') {
+            return 'av';
         }
 
         if ((int) $shippingCustomerId === (int) $customerId) {

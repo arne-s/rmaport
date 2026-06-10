@@ -5,7 +5,7 @@
     /** @var \App\Models\Order\BaseOrder $order */
     /** @var App\Models\Customer $avCustomer */
 
-    $avCustomer = Customer::getRdMobilityCustomer();
+    $avCustomer = Customer::getAvCustomer();
     $customer = $order->customer;
     $name = $order->getCustomerAddressDisplayName() ?? $customer->getName();
     $customerAddr = $order->getCustomerAddress();

@@ -76,48 +76,30 @@ class CreateOrder extends CreateRecord
 
     private function getCustomerOrDealerOptions(): array
     {
-        $customers = Customer::query()
+        return Customer::query()
             ->active()
             ->whereIn('type', array_keys(CustomerType::visibleLabels()))
-            ->where('type', '!=', CustomerType::Dealer->value)
             ->orderBy('name')
-            ->limit(100)->get()
-            ->mapWithKeys(fn(Customer $c): array => [$c->id => $c->getName()]);
-
-        $dealers = Customer::query()
-            ->active()
-            ->where('type', CustomerType::Dealer->value)
-            ->orderBy('name')
-            ->limit(100)->get()
-            ->mapWithKeys(fn(Customer $c): array => [$c->id => $c->getName()]);
-
-        return $customers->all() + $dealers->all();
+            ->limit(100)
+            ->get()
+            ->mapWithKeys(fn (Customer $c): array => [$c->id => $c->getName()])
+            ->all();
     }
 
     private function searchCustomerOrDealerOptions(string $search): array
     {
-        $customers = Customer::query()
+        return Customer::query()
             ->active()
             ->whereIn('type', array_keys(CustomerType::visibleLabels()))
-            ->where('type', '!=', CustomerType::Dealer->value)
-            ->where(fn($q) => $q->where('first_name', 'like', "%{$search}%")
+            ->where(fn ($q) => $q->where('first_name', 'like', "%{$search}%")
                 ->orWhere('last_name', 'like', "%{$search}%")
                 ->orWhere('name', 'like', "%{$search}%")
                 ->orWhere('email', 'like', "%{$search}%"))
             ->orderBy('name')
-            ->limit(50)->get()
-            ->mapWithKeys(fn(Customer $c): array => [$c->id => $c->getName()]);
-
-        $dealers = Customer::query()
-            ->active()
-            ->where('type', CustomerType::Dealer->value)
-            ->where(fn($q) => $q->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%"))
-            ->orderBy('name')
-            ->limit(50)->get()
-            ->mapWithKeys(fn(Customer $c): array => [$c->id => $c->getName()]);
-
-        return $customers->all() + $dealers->all();
+            ->limit(50)
+            ->get()
+            ->mapWithKeys(fn (Customer $c): array => [$c->id => $c->getName()])
+            ->all();
     }
 
     public function form(Schema $form): Schema
@@ -167,7 +149,7 @@ class CreateOrder extends CreateRecord
                                             return;
                                         }
 
-                                        if ($customer->type === CustomerType::Dealer->value) {
+                                        if ($customer->getType() === CustomerType::B2B) {
                                             $this->createAndRedirect(
                                                 customerId: null,
                                                 billingCustomerId: (int) $state,

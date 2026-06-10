@@ -41,7 +41,7 @@ class CreateCustomer extends CreateRecord
                     ->schema([
                         Select::make('type')
                             ->label('Type')
-                            ->options(CustomerType::visibleLabelsInCustomerTableFilterOrder())
+                            ->options(CustomerType::visibleLabelsForCreate())
                             ->columnSpan(1)
                             ->required(),
                     ]),

@@ -30,7 +30,7 @@ trait ManagesDeliveryAddressMode
         if ($billingId !== null && $shipId !== null && (int) $shipId === (int) $billingId) {
             $this->record->loadMissing('billingCustomer');
 
-            return $this->record->billingCustomer?->getType() === CustomerType::Dealer
+            return $this->record->billingCustomer?->getType() === CustomerType::B2B
                 ? self::DELIVERY_ADDRESS_MODE_DEALER
                 : self::DELIVERY_ADDRESS_MODE_INVOICE;
         }
@@ -79,7 +79,7 @@ trait ManagesDeliveryAddressMode
         }
 
         $isDealer = $billingId !== null
-            && Customer::query()->where('id', $billingId)->value('type') === CustomerType::Dealer;
+            && Customer::query()->where('id', $billingId)->value('type') === CustomerType::B2B->value;
 
         $options = [];
 

@@ -364,7 +364,7 @@ class Customer extends Model implements HasMedia
      *
      * @return ?string
      */
-    public static function getRdMobilityCustomer(): self
+    public static function getAvCustomer(): self
     {
         return static::withoutGlobalScopes()
             ->where('type', CustomerType::AV->value)

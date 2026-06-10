@@ -98,7 +98,6 @@ class ListProductionAssembled extends ListProduction
             ->deferFilters(false)
             ->filters([
                 Resource::getDateFilter(),
-                Resource::getDealerFilter('orders'),
                 Resource::getOrderStatusFilterForSubStatuses(OrderStatus::Assembly),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([
