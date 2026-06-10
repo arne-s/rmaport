@@ -104,4 +104,42 @@ enum CustomerType: string
 
         return $ordered;
     }
+
+    /**
+     * Allowed type values for CSV import validation.
+     *
+     * @return list<string>
+     */
+    public static function csvImportTypeValues(): array
+    {
+        return array_keys(self::visibleLabelsInCustomerTableFilterOrder());
+    }
+
+    /**
+     * Resolve a CSV type cell (value or label) to a {@see self} value, or null when invalid/deprecated.
+     */
+    public static function resolveCsvImportTypeValue(?string $state): ?string
+    {
+        if ($state === null || trim($state) === '') {
+            return null;
+        }
+
+        $state = trim($state);
+
+        if (in_array(strtolower($state), ['dealer', 'uniek sporten', 'unieksporten', 'uniek_sporten'], true)) {
+            return null;
+        }
+
+        if ($state === self::AV->value || $state === self::AV->getLabel()) {
+            return null;
+        }
+
+        foreach (self::visibleLabels() as $value => $label) {
+            if ($state === $value || $state === $label) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
 }

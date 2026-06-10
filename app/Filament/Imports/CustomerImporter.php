@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Validation\ValidationException;
 
 class CustomerImporter extends Importer
 {
@@ -21,7 +22,7 @@ class CustomerImporter extends Importer
 
     public static function getColumns(): array
     {
-        $customerTypeValues = implode(',', array_keys(CustomerType::visibleLabels()));
+        $customerTypeValues = implode(',', CustomerType::csvImportTypeValues());
         $customerStatusValues = implode(',', array_column(CustomerStatus::cases(), 'value'));
         $paymentTermsValues = implode(',', array_column(PaymentTerms::cases(), 'value'));
 
@@ -38,7 +39,7 @@ class CustomerImporter extends Importer
                     ->label('Type')
                     ->exampleHeader('Type')
                     ->requiredMapping()
-                    ->castStateUsing(fn (?string $state): ?string => self::resolveEnumValue($state, CustomerType::cases()))
+                    ->castStateUsing(fn (?string $state): ?string => CustomerType::resolveCsvImportTypeValue($state))
                     ->rules(['required', 'in:' . $customerTypeValues]),
 
                 ImportColumn::make('status')
@@ -173,6 +174,12 @@ class CustomerImporter extends Importer
         $id = $this->data['id'] ?? null;
 
         if (filled($id) && $existing = Customer::query()->find((int) $id)) {
+            if ($existing->getType() === CustomerType::AV) {
+                throw ValidationException::withMessages([
+                    'id' => 'De AV-klant kan niet via CSV worden bijgewerkt.',
+                ]);
+            }
+
             return $existing;
         }
 
@@ -188,6 +195,15 @@ class CustomerImporter extends Importer
         }
 
         $this->applyExactPaymentConditionDefault();
+    }
+
+    protected function beforeSave(): void
+    {
+        if ($this->record->getType() === CustomerType::AV) {
+            throw ValidationException::withMessages([
+                'type' => 'Het type AV kan niet via CSV worden geïmporteerd.',
+            ]);
+        }
     }
 
     protected function afterSave(): void

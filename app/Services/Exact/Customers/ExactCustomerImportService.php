@@ -326,7 +326,7 @@ class ExactCustomerImportService
     private function importIndicatesBusiness(string $name, ?string $accountEmail, ?string $contactEmail): bool
     {
         foreach ([$name, $accountEmail, $contactEmail] as $value) {
-            if ($this->importFieldContainsDealerBrandKeyword($value)) {
+            if ($this->importFieldContainsBusinessBrandKeyword($value)) {
                 return true;
             }
         }
@@ -334,7 +334,7 @@ class ExactCustomerImportService
         return $this->nameHasBusinessCompanyKeywords($name);
     }
 
-    private function importFieldContainsDealerBrandKeyword(?string $value): bool
+    private function importFieldContainsBusinessBrandKeyword(?string $value): bool
     {
         if ($value === null || $value === '') {
             return false;

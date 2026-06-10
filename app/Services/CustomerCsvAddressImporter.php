@@ -73,9 +73,55 @@ class CustomerCsvAddressImporter
             }
         }
 
+        $this->applyNewsletterSubscriptionFromImport($customer, $data, $type);
+
         if ($customer->isDirty(['address_id', 'billing_address_id', 'shipping_address_id', 'delivery_address_type'])) {
             $customer->save();
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function applyNewsletterSubscriptionFromImport(Customer $customer, array $data, ?CustomerType $type): void
+    {
+        $subscribed = $this->parseBoolean($data['newsletter_subscribed'] ?? null);
+
+        if ($subscribed === null) {
+            return;
+        }
+
+        if ($type?->usesNewsletterDealerSegments() === true) {
+            $customer->loadMissing(['billingAddress', 'shippingAddress']);
+
+            if ($customer->billingAddress !== null) {
+                $customer->billingAddress->newsletter_subscribed = $subscribed;
+                $customer->billingAddress->saveQuietly();
+            }
+
+            if (($customer->delivery_address_type ?? 'contact') === 'custom' && $customer->shippingAddress !== null) {
+                $customer->shippingAddress->newsletter_subscribed = $subscribed;
+                $customer->shippingAddress->saveQuietly();
+            }
+
+            return;
+        }
+
+        $customer->newsletter_subscribed = $subscribed;
+        $customer->saveQuietly();
+    }
+
+    private function parseBoolean(mixed $state): ?bool
+    {
+        if ($state === null || $state === '') {
+            return null;
+        }
+
+        return match (strtolower(trim((string) $state))) {
+            'ja', 'yes', '1', 'true' => true,
+            'nee', 'no', '0', 'false' => false,
+            default => null,
+        };
     }
 
     /**

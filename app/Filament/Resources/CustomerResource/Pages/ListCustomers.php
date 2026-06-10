@@ -82,10 +82,8 @@ class ListCustomers extends ListRecords
 
         fputcsv($handle, CustomerCsvSchema::headers(), CustomerCsvSchema::DELIMITER);
 
-        $visibleCustomerTypes = array_keys(CustomerType::visibleLabels());
-
         $query = $this->getFilteredTableQuery()
-            ->whereIn('type', $visibleCustomerTypes)
+            ->whereIn('type', CustomerType::csvImportTypeValues())
             ->with(['address.country', 'billingAddress.country', 'shippingAddress.country']);
 
         foreach ($query->orderBy('name')->cursor() as $customer) {
