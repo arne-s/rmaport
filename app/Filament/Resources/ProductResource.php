@@ -40,6 +40,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Table;
+use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\JsContent;
@@ -218,6 +219,9 @@ class ProductResource extends Resource
                                                                     ->label('Zoekgegeven')
                                                                     ->columnSpan(6)
                                                                     ->inlineLabel(),
+                                                                Html::make('<hr class="product-form-hr">')
+                                                                    ->columnSpanFull(),
+
                                                                 Select::make('brand')
                                                                     ->label('Merk')
                                                                     ->columnSpan(6)
@@ -237,10 +241,9 @@ class ProductResource extends Resource
                                                                     ->label('Fabrikant')
                                                                     ->columnSpan(6)
                                                                     ->inlineLabel(),
-                                                                TextInput::make('stock_location')
-                                                                    ->label('Magazijnlokatie')
-                                                                    ->columnSpan(6)
-                                                                    ->inlineLabel(),
+                                                                Html::make('<hr class="product-form-hr">')
+                                                                    ->columnSpanFull(),
+
                                                                 Section::make('Specificaties (voor op offerte/order)')
                                                                     ->extraAttributes(['class' => 'spec-border'])
                                                                     ->columnSpan(6)
@@ -249,7 +252,7 @@ class ProductResource extends Resource
                                                                             ->hiddenLabel()
                                                                             ->rows(6)
                                                                             ->columnSpanFull()
-                                                                            ->extraInputAttributes(['style' => 'width: 100%;']),
+                                                                            ->extraInputAttributes(['style' => 'width: 100%; max-height: 93px;']),
                                                                     ]),
                                                             ]),
                                                     ]),
@@ -257,17 +260,9 @@ class ProductResource extends Resource
                                                 Grid::make(1)
                                                     ->columnSpan(1)
                                                     ->schema([
-                                                        Section::make('Algemene Artikelgegevens2')
+                                                        Section::make('Codes, nummers en eigenschappen')
                                                             ->extraAttributes(['class' => 'beheer-algemeenSection'])
                                                             ->schema([
-                                                                TextInput::make('mediamarkt_nr_nl')
-                                                                    ->label('MediaMarktnummer NL')
-                                                                    ->columnSpan(6)
-                                                                    ->inlineLabel(),
-                                                                TextInput::make('mediamarkt_nr_bnl')
-                                                                    ->label('MeidMarktnummer: Belu')
-                                                                    ->columnSpan(6)
-                                                                    ->inlineLabel(),
                                                                 TextInput::make('ean_1')
                                                                     ->label('EANcode1')
                                                                     ->columnSpan(6)
@@ -284,6 +279,24 @@ class ProductResource extends Resource
                                                                     ->label('HScode')
                                                                     ->columnSpan(6)
                                                                     ->inlineLabel(),
+
+                                                                Html::make('<hr class="product-form-hr">')
+                                                                    ->columnSpanFull(),
+
+                                                                TextInput::make('mediamarkt_nr_nl')
+                                                                    ->label('MediaMarktnummer NL')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+                                                                TextInput::make('mediamarkt_nr_bnl')
+                                                                    ->label('MeidMarktnummer: Belu')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
+
+
+                                                                Html::make('<hr class="product-form-hr">')
+                                                                    ->columnSpanFull(),
+
+
                                                                 TextInput::make('krefel_nr')
                                                                     ->label('Krefelnummer')
                                                                     ->columnSpan(6)
@@ -292,10 +305,15 @@ class ProductResource extends Resource
                                                                     ->label('BOLnummer')
                                                                     ->columnSpan(6)
                                                                     ->inlineLabel(),
+
+
                                                                 TextInput::make('coolblue_nr')
                                                                     ->label('Coolbluenummer')
                                                                     ->columnSpan(6)
                                                                     ->inlineLabel(),
+
+                                                                Html::make('<hr class="product-form-hr">')
+                                                                    ->columnSpanFull(),
                                                                 Select::make('unit')
                                                                     ->label('Verkoopeenheid')
                                                                     ->columnSpan(6)
@@ -327,6 +345,7 @@ class ProductResource extends Resource
                                                                         ->inlineLabel()
                                                                         ->default(0)
                                                                         ->required()
+                                                                        ->disabled()
                                                                         ->numeric()
                                                                         ->columnSpanFull(),
 
@@ -335,6 +354,7 @@ class ProductResource extends Resource
                                                                         ->inlineLabel()
                                                                         ->extraAttributes(['style' => 'white-space: nowrap;'])
                                                                         ->required()
+                                                                        ->disabled()
                                                                         ->default(0)
                                                                         ->columnSpanFull()
                                                                         ->numeric(),
@@ -346,6 +366,9 @@ class ProductResource extends Resource
                                                                         ->disabled()
                                                                         ->default(0)
                                                                         ->dehydrated(false),
+
+                                                                    Html::make('<hr>')
+                                                                        ->columnSpanFull(),
 
                                                                     Select::make('allow_backorder')
                                                                         ->label('Back-orders toestaan')
@@ -377,6 +400,11 @@ class ProductResource extends Resource
                                                                 ])
                                                                     ->columnSpan(6)
                                                                     ->relationship('stock'),
+
+                                                                TextInput::make('stock_location')
+                                                                    ->label('Magazijnlokatie')
+                                                                    ->columnSpan(6)
+                                                                    ->inlineLabel(),
 
 
                                                             ]),

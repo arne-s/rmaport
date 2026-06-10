@@ -7006,7 +7006,7 @@ div.fi-resource-form-entries {
                 font-size: 15px;
                 line-height: 25px;
                 padding-top: 5px !important;
-                font-weight: 600 !important;
+                font-weight: 700 !important;
                 color: #333333;
                 padding-bottom: 0 !important;
                 letter-spacing: .1px;
@@ -8070,6 +8070,18 @@ div.manage-notifications-form {
             }
         }
 
+        .beheer-algemeenSection {
+            .fi-sc-component > hr {
+                border: none;
+                border-top: 1px solid #e5e7eb;
+                margin: 10px 0;
+            }
+
+            .fi-sc-component > hr.product-form-hr {
+                margin-right: -30px;
+            }
+        }
+
         .beheer-algemeenSection,
         .beheer-bedrijfsgegevensSection {
             .fi-section-header {
@@ -9022,7 +9034,7 @@ a.fi-global-search-result-link {
 div.spec-border > section {
 
     > header {
-        border-bottom: 1px solid #e5e7eb !important;
+        border-bottom: none !important;
     }
 
     h3 {
