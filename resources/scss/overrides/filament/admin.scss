@@ -868,13 +868,14 @@ html.filament {
                     align-items: stretch;
                 }
 
-                .fi-wi > .fi-wi-widget:has(.dashboard-paired-table-widget) {
+                .fi-wi > .fi-wi-widget.dashboard-paired-table-widget {
                     display: flex;
                     flex-direction: column;
                     margin-top: 15px !important;
                     height: $dashboard-paired-widget-height;
                     min-height: $dashboard-paired-widget-height;
                     max-height: $dashboard-paired-widget-height;
+                    overflow: hidden;
                 }
 
                 .dashboard-paired-table-widget {
@@ -969,6 +970,7 @@ html.filament {
                         flex: 1;
                         min-height: 0;
                         height: 100%;
+                        aspect-ratio: unset !important;
                     }
                 }
             }

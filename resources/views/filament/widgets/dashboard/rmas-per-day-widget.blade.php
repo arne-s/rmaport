@@ -8,8 +8,6 @@
     $filters = $this->getFilters();
     $isCollapsible = $this->isCollapsible();
     $type = $this->getType();
-    $maxHeight = $this->getMaxHeight();
-    $hasMaxHeight = filled($maxHeight) && $maxHeight !== '100%';
     $hasData = filled($this->getCachedData()['labels'] ?? []);
 @endphp
 
@@ -40,7 +38,7 @@
                             ->color(ChartWidgetComponent::class, $color)
                             ->class([
                                 'fi-wi-chart-canvas-ctn',
-                                'fi-wi-chart-canvas-ctn-no-aspect-ratio' => $hasMaxHeight,
+                                'fi-wi-chart-canvas-ctn-no-aspect-ratio',
                             ])
                     }}
                 >
@@ -48,8 +46,7 @@
                         x-ref="canvas"
                         @style([
                             'width: 100%',
-                            'height: 100%; max-height: 100%' => ! $hasMaxHeight,
-                            ('max-height: ' . e($maxHeight)) => $hasMaxHeight,
+                            'height: 100%; max-height: 100%',
                         ])
                     ></canvas>
 
