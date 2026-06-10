@@ -42,6 +42,31 @@ $authUser->can('manage users')
         </div>
 
 
+        @can('manage sales')
+        <template x-if="activeMenu === null || activeMenu === 'retouren'">
+            <div class="sidebar-menuitem">
+                <div class="sidebar-menuitem-wrapper" x-show="activeMenu === null" x-on:click="activeMenu = 'retouren'">
+                    <div class="sidebar-menuitem-info">
+                        <img class="sidebar-menuitem-icon" src="{{ asset('/img/icons/user-menu/box-open-solid.svg') }}" alt="menu-icon">
+                        <span class="sidebar-menuitem-name">Retouren</span>
+                    </div>
+                </div>
+
+                <div class="menuitem-subitems" x-show="activeMenu === 'retouren'"
+                    x-transition:enter="transition-opacity duration-200"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100">
+                    <button class="subitems-back" x-on:click="activeMenu = null">Alle categorieën</button>
+                    <h2>Retouren</h2>
+                    <div class="subitems-list">
+                        <a href="{{ route('filament.app.resources.rmas.index') }}">Overzicht</a>
+                        <a href="{{ route('filament.app.resources.rmas.create') }}">RMA aanmaken</a>
+                    </div>
+                </div>
+            </div>
+        </template>
+        @endcan
+
         <template x-if="activeMenu === null || activeMenu === 'relaties'">
             <div class="sidebar-menuitem">
                 <a href="{{ route('filament.app.resources.customers.index') }}" class="sidebar-menuitem-wrapper">

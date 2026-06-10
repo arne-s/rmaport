@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 /*
@@ -8,13 +8,13 @@ use Tests\TestCase;
 | Test Case
 |--------------------------------------------------------------------------
 |
-| The closure you provide to your test functions is always bound to a specific PHPUnit test
-| case class. By default, that class is "PHPUnit\Framework\TestCase". Of course, you may
-| need to change it using the "uses()" function to bind a different classes or traits.
+| Feature tests use DatabaseTransactions (not RefreshDatabase) so PHPUnit/Pest
+| never runs migrate:fresh against MySQL. Each test rolls back in a transaction.
+| Use the dedicated DB from phpunit.xml (rdmobility_testing), not your dev DB.
 |
 */
 
-uses(TestCase::class, RefreshDatabase::class)->in('Feature');
+uses(TestCase::class, DatabaseTransactions::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------

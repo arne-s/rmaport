@@ -8,6 +8,7 @@ use App\Filament\Widgets\Dashboard\SupportWidget;
 use App\Filament\Widgets\Dashboard\AccountWidget;
 use App\Filament\Widgets\Dashboard\ProductionOverviewWidget;
 use App\Filament\Widgets\Dashboard\QuickLinksWidget;
+use App\Filament\Widgets\Dashboard\RmasPerDayWidget;
 use App\Filament\Widgets\NotesWidget;
 use Closure;
 use Filament\Pages\Page;
@@ -72,6 +73,7 @@ class Dashboard extends Page
 
             ProductionOverviewWidget::class,
             NotesWidget::class,
+            RmasPerDayWidget::class,
         ];
     }
 

@@ -7,6 +7,7 @@ use App\Enums\OrderType;
 use App\Enums\OrderSubtype;
 use App\Enums\OrderProductStatus;
 use App\Enums\ProductBattery;
+use App\Enums\ProductBrand;
 use App\Enums\ProductUnit;
 use App\Enums\AddressType;
 use App\Filament\Resources\ProductResource\Widgets\ProductPriceChangesWidget;
@@ -239,9 +240,7 @@ class ProductResource extends Resource
                                                                 Select::make('brand')
                                                                     ->label('Merk')
                                                                     ->columnSpan(6)
-                                                                    ->options([
-                                                                        'JL' => 'JL - JLAB',
-                                                                    ])
+                                                                    ->options(ProductBrand::labels())
                                                                     ->inlineLabel(),
                                                                 TextInput::make('product_group')
                                                                     ->label('Productgroep')
@@ -721,6 +720,7 @@ class ProductResource extends Resource
 
                 TextColumn::make('brand')
                     ->label('Merk')
+                    ->formatStateUsing(fn ($state) => $state?->getLabel())
                     ->sortable()
                     ->searchable()
                     ->placeholder('—'),

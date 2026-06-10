@@ -21,7 +21,7 @@
     "
 >
     <section class="quick-links-widget__heading status">
-        <strong>Aanvragen</strong>
+        <strong>RMA</strong>
         <p>Aantallen per status</p>
     </section>
     {{ $this->content }}

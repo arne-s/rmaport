@@ -853,20 +853,123 @@ html.filament {
     .filament-dashboard-page {
         margin-top: 10px !important;
 
-        .fi-wi > .fi-wi-widget:has(.dashboard-paired-table-widget) {
-            margin-top: 0;
+        .fi-page-content .fi-wi .fi-production-overview-widget {
+            padding-bottom: 27px !important;
+            border-bottom: 1px solid #cacaca;
         }
 
         .fi-page-content {
             row-gap: 5px !important;
 
             @media screen and (min-width: 1200px) {
-                align-items: stretch;
+                $dashboard-paired-widget-height: 350px;
 
-                > .fi-wi-widget:has(.dashboard-paired-table-widget) {
+                .fi-wi {
+                    align-items: stretch;
+                }
+
+                .fi-wi > .fi-wi-widget:has(.dashboard-paired-table-widget) {
                     display: flex;
                     flex-direction: column;
+                    margin-top: 15px !important;
+                    height: $dashboard-paired-widget-height;
+                    min-height: $dashboard-paired-widget-height;
+                    max-height: $dashboard-paired-widget-height;
+                }
+
+                .dashboard-paired-table-widget {
+                    display: flex;
+                    flex: 1;
+                    flex-direction: column;
+                    width: 100%;
+                    height: 100%;
                     min-height: 0;
+                }
+
+                .fi-wi-table.dashboard-paired-table-widget {
+                    .notes-widget-table {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        height: 100%;
+                        min-height: 0;
+
+                        .fi-ta {
+                            flex: 1;
+                            display: flex;
+                            flex-direction: column;
+                            height: 100%;
+                            min-height: 0;
+                        }
+
+                        .fi-ta-ctn {
+                            flex: 1;
+                            display: flex;
+                            flex-direction: column;
+                            height: 100%;
+                            min-height: 0;
+                            margin-top: 0 !important;
+                            margin-bottom: 0 !important;
+                            box-shadow: none;
+                            box-sizing: border-box;
+                            overflow: hidden;
+                        }
+
+                        .fi-ta-content-ctn {
+                            flex: 1;
+                            display: flex;
+                            flex-direction: column;
+                            min-height: 0;
+                        }
+
+                        .fi-ta-content {
+                            flex: 1;
+                            min-height: 0;
+                        }
+                    }
+                }
+
+                .fi-wi-chart.dashboard-paired-table-widget.rmas-per-day-widget {
+                    .fi-section-header-heading {
+                        font-size: 16px;
+                    }
+
+                    .fi-section {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        height: 100%;
+                        min-height: 0;
+                        box-sizing: border-box;
+                        overflow: hidden;
+                    }
+
+                    .fi-section-content-ctn {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        min-height: 0;
+                    }
+
+                    .fi-section-content {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        min-height: 0;
+
+                        > div {
+                            flex: 1;
+                            display: flex;
+                            flex-direction: column;
+                            min-height: 0;
+                        }
+                    }
+
+                    .fi-wi-chart-canvas-ctn {
+                        flex: 1;
+                        min-height: 0;
+                        height: 100%;
+                    }
                 }
             }
 
@@ -1413,12 +1516,20 @@ html.filament {
             }
         }
 
-        .fi-resource-customers {
+        .fi-resource-customers,
+        .fi-resource-rmas {
             padding-bottom: 92.5px !important;
 
             .customerSection {
                 .fi-fo-field {
                     row-gap: 2px !important;
+                }
+
+                .rma-purchased-at-field {
+                    .fi-fo-date-time-picker {
+                        border: 1px solid #adadad;
+                        border-radius: 3px;
+                    }
                 }
 
                 .fi-fo-date-time-picker {
@@ -4935,7 +5046,8 @@ html.filament div.fi-ta-actions {
     }
 }
 
-.fi-resource-edit-record-page.fi-resource-customers {
+.fi-resource-edit-record-page.fi-resource-customers,
+.fi-resource-edit-record-page.fi-resource-rmas {
     @media screen and (max-width: 770px) {
         .fi-grid-col {
             .fi-sc-component {
@@ -6788,6 +6900,7 @@ div.fi-resource-form-entries {
 
 
 .fi-resource-edit-record-page.fi-resource-customers,
+.fi-resource-edit-record-page.fi-resource-rmas,
 .fi-resource-edit-record-page.fi-resource-products,
 .fi-resource-edit-record-page.fi-resource-bill-of-materials,
 .fi-resource-create-record-page.fi-resource-bill-of-materials,
@@ -7122,6 +7235,7 @@ div.fi-resource-form-entries {
 .fi-resource-list-records-page.fi-resource-sproducts,
 .fi-resource-list-records-page.fi-resource-companies,
 .fi-resource-list-records-page.fi-resource-customers,
+.fi-resource-list-records-page.fi-resource-rmas,
 .fi-resource-list-records-page.fi-resource-price-tables,
 .fi-resource-list-records-page.fi-resource-invoices,
 .fi-resource-list-records-page.fi-resource-recurring-invoices,
@@ -8022,7 +8136,8 @@ div.manage-notifications-form {
 
 .fi-resource-companies,
 .fi-resource-customers,
-.fi-resource-products {
+.fi-resource-products,
+.fi-resource-rmas {
 
     &.fi-resource-edit-record-page {
         div.fi-sc-actions {

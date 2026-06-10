@@ -8,6 +8,9 @@
         return rtrim(strtok($url, '?'), '/') === $topMenuUrl ? 'pageActive' : '';
     };
 
+    $topMenuRetourenActive = request()->routeIs(
+        'filament.app.resources.rmas.*',
+    );
     $topMenuRelatiesActive = request()->routeIs(
         'filament.app.resources.customers.*',
     );
@@ -150,6 +153,35 @@
                         <span class="menuItemText" data-text="Dashboard">Dashboard</span>
                     </a>
                 </div>
+
+                @can('manage sales')
+                <div class="menuItem">
+                    <a class="menuItemLink parent {{ $topMenuRetourenActive ? 'pageActive' : '' }}">
+                        <span class="menuItemText" data-text="Retouren">Retouren</span>
+                    </a>
+
+                    <div class="subMenu-new">
+                        <div class="subMenuInner submenuitem">
+                            <a href="{{ route('filament.app.resources.rmas.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.rmas.index')) }}">
+                                <div class="mainItem no-link">
+                                    <div class="mainItem-info">
+                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/box-open-solid.svg') }}" alt="menu-icon">
+                                        <span class="mainItem-name">Overzicht</span>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="{{ route('filament.app.resources.rmas.create') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.rmas.create')) }}">
+                                <div class="mainItem no-link">
+                                    <div class="mainItem-info">
+                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/box-open-solid.svg') }}" alt="menu-icon">
+                                        <span class="mainItem-name">RMA aanmaken</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @endcan
 
                 @can('manage customers')
                 <div class="menuItem">

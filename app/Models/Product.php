@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProductBattery;
+use App\Enums\ProductBrand;
 use App\Support\Pricing\ProductPricingCalculator;
 use App\Support\ProductSelectSearchConstraints;
 use App\Enums\ProductUnit;
@@ -173,6 +174,7 @@ class Product extends Model implements HasMedia
     {
         return [
             'unit' => ProductUnit::class,
+            'brand' => ProductBrand::class,
             'battery' => ProductBattery::class,
             'pcb' => 'decimal:6',
             'config' => 'array',

@@ -2,8 +2,9 @@
 
 namespace App\Filament\Widgets\Dashboard;
 
-use App\Services\ProductionOverviewQueries;
+use App\Enums\RmaStatus;
 use App\Filament\Support\SalesAuthorization;
+use App\Services\RmaOverviewQueries;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -28,8 +29,8 @@ class ProductionOverviewWidget extends StatsOverviewWidget
     {
         return [
             'default' => 2,
-            'md' => 3,
-            'xl' => 5,
+            'md' => 4,
+            'xl' => 4,
         ];
     }
 
@@ -38,17 +39,10 @@ class ProductionOverviewWidget extends StatsOverviewWidget
      */
     protected function getStats(): array
     {
-        return [
-            Stat::make('1. Passing', ProductionOverviewQueries::fitting()->count())
-                ->url(route('filament.app.resources.production.fitting')),
-            Stat::make('2. Offerte', ProductionOverviewQueries::quote()->count())
-                ->url(route('filament.app.resources.production.quote')),
-            Stat::make('3. Order', ProductionOverviewQueries::ordered()->count())
-                ->url(route('filament.app.resources.production.ordered')),
-            Stat::make('4. Montage', ProductionOverviewQueries::assembled()->count())
-                ->url(route('filament.app.resources.production.assembled')),
-            Stat::make('5. Levering', ProductionOverviewQueries::delivered()->count())
-                ->url(route('filament.app.resources.production.delivered')),
-        ];
+        return array_map(
+            fn (RmaStatus $status): Stat => Stat::make($status->getLabel(), RmaOverviewQueries::forStatus($status)->count())
+                ->url(RmaOverviewQueries::indexUrlForStatus($status)),
+            RmaStatus::cases(),
+        );
     }
 }

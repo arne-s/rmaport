@@ -207,6 +207,11 @@ class Customer extends Model implements HasMedia
         return $this->hasMany(Note::class);
     }
 
+    public function rmas(): HasMany
+    {
+        return $this->hasMany(Rma::class)->where('is_draft', false);
+    }
+
     /**
      * @return MorphMany<NewsletterSubscription, $this>
      */

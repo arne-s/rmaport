@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\ProductBattery;
+use App\Enums\ProductBrand;
 use App\Models\Product;
 
 it('maps search_text accessor to search_code column', function (): void {
@@ -28,6 +29,14 @@ it('casts battery to ProductBattery enum', function (): void {
     ]);
 
     expect($product->battery)->toBe(ProductBattery::Aa);
+});
+
+it('casts brand to ProductBrand enum', function (): void {
+    $product = new Product([
+        'brand' => ProductBrand::Jlab->value,
+    ]);
+
+    expect($product->brand)->toBe(ProductBrand::Jlab);
 });
 
 it('includes new detail fields in fillable attributes', function (): void {

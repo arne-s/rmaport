@@ -11,10 +11,11 @@ trait CreatesApplication
      * Creates the application.
      *
      * When configuration is cached (bootstrap/cache/config.php), Laravel loads that file during tests and
-     * skips loading .env, so RefreshDatabase runs migrate:fresh against the same connection as production cache
-     * (typically the developer MySQL DB). Point APP_CONFIG_CACHE at a non-existent path so config + env apply.
+     * skips loading .env, which can point tests at the developer MySQL database. Point APP_CONFIG_CACHE
+     * at a non-existent path so config + env apply.
      *
-     * The actual test DB name/driver should be set in phpunit.xml (see DB_CONNECTION / DB_DATABASE there).
+     * The test database name/driver must be set in phpunit.xml (DB_CONNECTION / DB_DATABASE).
+     * Feature tests use DatabaseTransactions only — they must never run migrate:fresh.
      */
     public function createApplication(): Application
     {
@@ -36,7 +37,65 @@ trait CreatesApplication
 
         $app->make(Kernel::class)->bootstrap();
 
+        if ($this->isTestingEnvironment()) {
+            $this->guardAgainstDevelopmentDatabase($basePath);
+        }
+
         return $app;
+    }
+
+    /**
+     * Abort if tests are configured to use the same database as .env (dev data).
+     */
+    private function guardAgainstDevelopmentDatabase(string $basePath): void
+    {
+        $connection = (string) config('database.default');
+        $testDatabase = (string) config("database.connections.{$connection}.database");
+        $devDatabase = $this->readEnvDatabaseName($basePath);
+
+        if ($devDatabase === null || $devDatabase === '') {
+            return;
+        }
+
+        if ($testDatabase === $devDatabase) {
+            throw new \RuntimeException(
+                "Refusing to run tests against the development database [{$testDatabase}]. "
+                .'Configure a separate test database in phpunit.xml (currently rdmobility_testing).'
+            );
+        }
+    }
+
+    private function readEnvDatabaseName(string $basePath): ?string
+    {
+        $envPath = $basePath.'/.env';
+
+        if (! is_file($envPath)) {
+            return null;
+        }
+
+        $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        if ($lines === false) {
+            return null;
+        }
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            if ($line === '' || str_starts_with($line, '#')) {
+                continue;
+            }
+
+            if (! str_starts_with($line, 'DB_DATABASE=')) {
+                continue;
+            }
+
+            $value = trim(substr($line, strlen('DB_DATABASE=')));
+
+            return trim($value, " \t\n\r\0\x0B\"'");
+        }
+
+        return null;
     }
 
     private function isTestingEnvironment(): bool
