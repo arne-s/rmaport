@@ -7036,9 +7036,8 @@ div.fi-resource-form-entries {
     .fi-section-header-heading {
         font-size: 15px !important;
         line-height: 25px !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
         color: #333333;
-        margin-bottom: -5px !important;
         padding-bottom: 0 !important;
         border-bottom: 2px solid rgba(59, 52, 63, 0.8);
         letter-spacing: .1px;
@@ -9032,16 +9031,17 @@ a.fi-global-search-result-link {
     display: none;
 }
 
-div.spec-border > section {
-
-    > header {
+.fi-resource-products .companySection div.spec-border > section {
+    > .fi-section-header {
         border-bottom: none !important;
     }
 
-    h3 {
+    h3.fi-section-header-heading {
         font-size: 13px !important;
         margin-top: -1px !important;
+        margin-bottom: -5px !important;
         color: #222;
+        font-weight: 700 !important;
     }
 }
 
