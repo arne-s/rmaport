@@ -8292,7 +8292,26 @@ div.manage-notifications-form {
                         letter-spacing: .1px;
                     }
                 }
+            }
 
+            div.spec-border > .fi-section > .fi-section-header {
+                border-bottom: none !important;
+
+                h3.fi-section-header-heading {
+                    font-size: 13px !important;
+                    line-height: 25px;
+                    font-weight: 700 !important;
+                    color: #222;
+                    padding-bottom: 0;
+                    margin-top: -1px !important;
+                    margin-bottom: -5px !important;
+                    letter-spacing: .1px;
+                }
+            }
+        }
+
+        .fi-section-content-ctn {
+            .fi-section {
                 & > .fi-section-content-ctn {
                     padding: 0;
                     margin-top: 10px;
