@@ -3,6 +3,7 @@
 use App\Enums\RmaStatus;
 use App\Models\Rma;
 use App\Services\RmaOverviewQueries;
+use Illuminate\Support\Carbon;
 
 it('counts rmas per status excluding drafts', function (): void {
     Rma::query()->create(['uid' => 'OPEN-1', 'status' => RmaStatus::Open, 'is_draft' => false]);
@@ -23,6 +24,8 @@ it('builds rma index urls filtered by status', function (): void {
 });
 
 it('returns the latest purchase days with rma counts excluding drafts', function (): void {
+    Carbon::setTestNow('2026-06-03 12:00:00');
+
     Rma::query()->create([
         'uid' => 'DAY-A-1',
         'status' => RmaStatus::Open,
@@ -56,15 +59,18 @@ it('returns the latest purchase days with rma counts excluding drafts', function
 
     $days = RmaOverviewQueries::purchasedAtDayCounts();
 
-    expect($days)->toHaveCount(2)
-        ->and($days->first()['date'])->toBe('2026-06-01')
-        ->and($days->first()['value'])->toBe(2)
+    expect($days)->toHaveCount(31)
+        ->and($days->first()['date'])->toBe('2026-05-04')
         ->and($days->last()['date'])->toBe('2026-06-03')
-        ->and($days->last()['value'])->toBe(1);
+        ->and($days->firstWhere('date', '2026-06-01')['value'])->toBe(2)
+        ->and($days->firstWhere('date', '2026-06-03')['value'])->toBe(1)
+        ->and($days->firstWhere('date', '2026-06-02')['value'])->toBe(0);
 });
 
-it('limits purchase day counts to the latest fourteen days', function (): void {
-    for ($day = 1; $day <= 16; $day++) {
+it('limits purchase day counts to the latest thirty-one calendar days', function (): void {
+    Carbon::setTestNow('2026-06-16 12:00:00');
+
+    for ($day = 1; $day <= 40; $day++) {
         Rma::query()->create([
             'uid' => 'LIMIT-'.$day,
             'status' => RmaStatus::Open,
@@ -75,7 +81,9 @@ it('limits purchase day counts to the latest fourteen days', function (): void {
 
     $days = RmaOverviewQueries::purchasedAtDayCounts();
 
-    expect($days)->toHaveCount(14)
-        ->and($days->first()['date'])->toBe('2026-06-03')
-        ->and($days->last()['date'])->toBe('2026-06-16');
+    expect($days)->toHaveCount(31)
+        ->and($days->first()['date'])->toBe('2026-05-17')
+        ->and($days->last()['date'])->toBe('2026-06-16')
+        ->and($days->firstWhere('date', '2026-06-16')['value'])->toBe(1)
+        ->and($days->firstWhere('date', '2026-06-01')['value'])->toBe(0);
 });

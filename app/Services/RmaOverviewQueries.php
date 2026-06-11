@@ -23,22 +23,29 @@ final class RmaOverviewQueries
     /**
      * @return Collection<int, array{label: string, value: int, date: string}>
      */
-    public static function purchasedAtDayCounts(int $limit = 14): Collection
+    public static function purchasedAtDayCounts(int $days = 31): Collection
     {
-        return self::base()
+        $start = now()->subDays($days - 1)->startOfDay();
+        $end = now()->endOfDay();
+
+        $counts = self::base()
             ->whereNotNull('purchased_at')
+            ->whereBetween('purchased_at', [$start, $end])
             ->selectRaw('DATE(purchased_at) as purchased_day, COUNT(*) as count')
             ->groupBy('purchased_day')
-            ->orderByDesc('purchased_day')
-            ->limit($limit)
-            ->get()
-            ->reverse()
-            ->values()
-            ->map(fn (object $row): array => [
-                'label' => Carbon::parse($row->purchased_day)->translatedFormat('d M'),
-                'value' => (int) $row->count,
-                'date' => $row->purchased_day,
-            ]);
+            ->pluck('count', 'purchased_day');
+
+        return collect(range(0, $days - 1))
+            ->map(function (int $offset) use ($start, $counts): array {
+                $date = $start->copy()->addDays($offset);
+                $dateKey = $date->toDateString();
+
+                return [
+                    'label' => $date->translatedFormat('d M'),
+                    'value' => (int) ($counts[$dateKey] ?? 0),
+                    'date' => $dateKey,
+                ];
+            });
     }
 
     public static function indexUrlForStatus(RmaStatus $status): string
