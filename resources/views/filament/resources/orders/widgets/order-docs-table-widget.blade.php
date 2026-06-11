@@ -13,7 +13,7 @@
         <div class="fi-docs-header-left">
             <h3 class="card__title">Financiële documenten</h3>
             <div style="margin-bottom: -10px; margin-top: -7px; font-size: 12px">
-                Offertes, orders en facturen. Upload de PDF met Inkoopordernummer van Dealer.
+                Offertes, orders en facturen.
             </div>
         </div>
         <div class="fi-docs-header-actions">

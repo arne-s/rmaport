@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\CustomerStatus;
+use App\Enums\RmaAssessment;
 use App\Enums\RmaStatus;
 use App\Filament\Resources\RmaResource;
 use App\Filament\Resources\RmaResource\Pages\ViewRma;
@@ -55,9 +56,11 @@ it('loads the rma view page with sections and editable retour fields', function 
         ->assertSee('RMA:')
         ->assertSee('RMA-VIEW-001')
         ->assertSee('Algemeen')
-        ->assertSee('Product')
+        ->assertSee('Artikel')
+        ->assertSee('Artikelnaam')
         ->assertSee('Retour')
-        ->assertSee('Werkzaamheden')
+        ->assertSee('Financiële documenten')
+        ->assertSee('Beoordeling')
         ->assertSee('Interne notities')
         ->assertSee('Documenten en Afbeeldingen')
         ->assertSet('service', 'Bestaande werkzaamheden')
@@ -105,6 +108,24 @@ it('saves werkzaamheden and interne notities from the view page', function (): v
 
     expect(RmaEvent::query()->where('rma_id', $rma->getKey())->value('type'))
         ->toBe('Werkzaamheden/notities bijgewerkt');
+});
+
+it('saves beoordeling from the view page', function (): void {
+    actingAsSalesUser();
+
+    $rma = createVisibleRma([
+        'uid' => 'RMA-ASSESS-001',
+        'assessment' => null,
+    ]);
+
+    Livewire::test(ViewRma::class, ['record' => $rma->getKey()])
+        ->set('assessment', RmaAssessment::DefectRepair->value)
+        ->call('saveRmaWorkNotes')
+        ->assertNotified();
+
+    $rma->refresh();
+
+    expect($rma->assessment)->toBe(RmaAssessment::DefectRepair);
 });
 
 it('logs status changes from the view page', function (): void {

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PaymentMethod;
 use App\Enums\ProductBrand;
+use App\Enums\RmaAssessment;
 use App\Enums\RmaStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,6 +46,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property string|null $packing_slip_number
  * @property PaymentMethod|null $payment_method
  * @property string|null $complaint
+ * @property RmaAssessment|null $assessment
  * @property string|null $service
  * @property string|null $notes
  * @property RmaStatus $status
@@ -98,6 +100,7 @@ class Rma extends Model implements HasMedia
         'packing_slip_number',
         'payment_method',
         'complaint',
+        'assessment',
         'service',
         'notes',
         'status',
@@ -132,6 +135,7 @@ class Rma extends Model implements HasMedia
             'status' => RmaStatus::class,
             'payment_method' => PaymentMethod::class,
             'brand' => ProductBrand::class,
+            'assessment' => RmaAssessment::class,
             'quantity' => 'integer',
             'is_draft' => 'boolean',
             'reminder' => 'boolean',
