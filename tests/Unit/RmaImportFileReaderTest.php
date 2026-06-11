@@ -1,6 +1,9 @@
 <?php
 
 use App\Support\RmaImportFileReader;
+use Tests\TestCase;
+
+uses(TestCase::class);
 
 it('reads media markt csv rows with duplicate headers by column position', function (): void {
     $path = tempnam(sys_get_temp_dir(), 'rma-import-');
@@ -22,4 +25,18 @@ CSV;
         ->and($rows[0])->not->toHaveKey('ignored-ref');
 
     unlink($path);
+});
+
+it('reads consumer returns excel export rows', function (): void {
+    $fixture = base_path('tests/fixtures/rma/consumer-returns-inlees2.xlsx');
+
+    expect($fixture)->toBeReadableFile();
+
+    $rows = app(RmaImportFileReader::class)->read($fixture, 'xlsx');
+
+    expect($rows)->toHaveCount(29)
+        ->and($rows[0]['RETURN ID (RMA)'])->toBe('143526279')
+        ->and($rows[0]['CUSTOMER ORDER ID'])->toBe('C000397X67')
+        ->and($rows[0]['SHOP ORDER DATE'])->toBe('08-Apr-2026')
+        ->and($rows[0]['PRODUCT DESCRIPTION'])->toContain('JLab Go Work Headset');
 });

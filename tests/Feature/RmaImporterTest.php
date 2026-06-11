@@ -128,3 +128,34 @@ it('imports media markt excel export rows', function (): void {
         ->and(Rma::query()->where('uid', 'AD71912248')->value('location_name'))->toBe('Mediamarkt Apeldoorn')
         ->and(Rma::query()->where('uid', 'DSG71926342')->value('is_doa'))->toBeTrue();
 });
+
+it('imports consumer returns excel export rows', function (): void {
+    Permission::findOrCreate('manage sales', 'web');
+
+    $fixture = base_path('tests/fixtures/rma/consumer-returns-inlees2.xlsx');
+
+    expect($fixture)->toBeReadableFile();
+
+    $rows = app(RmaImportFileReader::class)->read($fixture, 'xlsx');
+
+    expect($rows)->toHaveCount(29);
+
+    $user = User::factory()->create();
+    $import = Import::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'consumer-returns-inlees2.xlsx',
+        'file_path' => $fixture,
+        'importer' => RmaImporter::class,
+        'total_rows' => count($rows),
+        'successful_rows' => 0,
+    ]);
+
+    foreach ($rows as $row) {
+        (new RmaImporter($import, [], []))($row);
+    }
+
+    expect(Rma::query()->where('uid', '143526279')->exists())->toBeTrue()
+        ->and(Rma::query()->where('uid', '143526279')->value('return_reason'))->toBe('Anders')
+        ->and(Rma::query()->where('uid', '143526279')->first()?->purchased_at?->toDateString())->toBe('2026-04-08')
+        ->and(Rma::query()->count())->toBe(29);
+});

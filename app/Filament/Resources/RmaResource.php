@@ -394,7 +394,7 @@ class RmaResource extends Resource
                     ->placeholder('—'),
                 TextColumn::make('received_at')
                     ->label('Ontvangen')
-                    ->dateTime('d-m-Y H:i')
+                    ->date('d-m-Y')
                     ->sortable()
                     ->placeholder('—'),
                 IconColumn::make('reminder')

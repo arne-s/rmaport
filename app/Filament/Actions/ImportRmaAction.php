@@ -40,7 +40,7 @@ class ImportRmaAction extends Action
         $this->schema([
             FileUpload::make('file')
                 ->label('Bestand')
-                ->helperText('Excel-bestand (.xlsx) of CSV (;)')
+                ->helperText('Excel (.xlsx) of CSV (;).')
                 ->acceptedFileTypes([
                     'text/csv',
                     'text/plain',
