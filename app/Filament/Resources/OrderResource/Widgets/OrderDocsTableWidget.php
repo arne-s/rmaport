@@ -57,6 +57,8 @@ class OrderDocsTableWidget extends TableWidget
 
     public ?Model $record = null;
 
+    public bool $showRmaPlaceholderButtons = false;
+
     protected int|string|array $columnSpan = 'full';
 
     protected static ?string $heading = '';

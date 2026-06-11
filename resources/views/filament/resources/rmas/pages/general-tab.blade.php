@@ -89,7 +89,10 @@
             <div class="docs-list">
                 @livewire(
                     OrderDocsTableWidget::class,
-                    ['record' => $relatedMain],
+                    [
+                        'record' => $relatedMain,
+                        'showRmaPlaceholderButtons' => true,
+                    ],
                     key('rma-financial-docs-' . $record->getKey() . '-' . ($relatedMain?->getId() ?? 'none'))
                 )
             </div>
