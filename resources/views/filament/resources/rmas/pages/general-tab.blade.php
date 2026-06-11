@@ -14,14 +14,71 @@
 
 <main class="rmasTab">
     <div class="rmasTab__top-row">
+        <div class="rmasTab__article">
+            <section class="card rmasTab__card">
+                <h3 class="card__title">Artikel</h3>
+                <ul class="kv">
+                    @foreach ($productFields as $field)
+                        <li>
+                            <span class="k">{{ $field['label'] }}:</span>
+                            <span class="v">{{ $field['value'] }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        </div>
+
         <div class="rmasTab__retour-row">
             <section class="card rmasTab__retour">
-            <h3 class="card__title">Retour</h3>
+                <h3 class="card__title">Retour</h3>
+                <ul class="kv">
+                    @foreach ($returnReadOnlyFields as $field)
+                        <li>
+                            <span class="k">{{ $field['label'] }}:</span>
+                            <span class="v whitespace-pre-wrap">{{ $field['value'] }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+
+                <hr class="rmasTab__kv-divider" aria-hidden="true">
+
+                <ul class="kv">
+                    <li>
+                        <span class="k">Beoordeling:</span>
+                        <span class="v">
+                            <select id="rma-assessment" wire:model="assessment" class="fi-select rmasTab__assessment-select">
+                                <option value="">—</option>
+                                @foreach (RmaAssessment::labels() as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </span>
+                    </li>
+                </ul>
+            </section>
+        </div>
+
+        <div class="rmasTab__documents">
+            <livewire:documents-block
+                :owner-id="$record->getKey()"
+                owner-class="{{ Rma::class }}"
+                collection="rma_documents"
+                block-title="Documenten en Afbeeldingen"
+                upload-zone-key="rma"
+                section-id="card-rma-documenten"
+                :key="'documents-rma-'.$record->getKey()"
+            />
+        </div>
+    </div>
+
+    <div class="rmasTab__columns">
+        <section class="card rmasTab__card rmasTab__general">
+            <h3 class="card__title">Algemeen</h3>
             <ul class="kv">
-                @foreach ($returnReadOnlyFields as $field)
+                @foreach ($generalPrimaryFields as $field)
                     <li>
                         <span class="k">{{ $field['label'] }}:</span>
-                        <span class="v whitespace-pre-wrap">{{ $field['value'] }}</span>
+                        <span class="v">{{ $field['value'] }}</span>
                     </li>
                 @endforeach
             </ul>
@@ -29,20 +86,14 @@
             <hr class="rmasTab__kv-divider" aria-hidden="true">
 
             <ul class="kv">
-                <li>
-                    <span class="k">Beoordeling:</span>
-                    <span class="v">
-                        <select id="rma-assessment" wire:model="assessment" class="fi-select rmasTab__assessment-select">
-                            <option value="">—</option>
-                            @foreach (RmaAssessment::labels() as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </span>
-                </li>
+                @foreach ($generalDetailFields as $field)
+                    <li>
+                        <span class="k">{{ $field['label'] }}:</span>
+                        <span class="v">{{ $field['value'] }}</span>
+                    </li>
+                @endforeach
             </ul>
         </section>
-        </div>
 
         <section
             id="card-rma-financial_docs"
@@ -97,43 +148,6 @@
                 )
             </div>
         </section>
-    </div>
-
-    <div class="rmasTab__columns">
-        <section class="card rmasTab__card">
-            <h3 class="card__title">Artikel</h3>
-            <ul class="kv">
-                @foreach ($productFields as $field)
-                    <li>
-                        <span class="k">{{ $field['label'] }}:</span>
-                        <span class="v">{{ $field['value'] }}</span>
-                    </li>
-                @endforeach
-            </ul>
-        </section>
-
-        <section class="card rmasTab__card">
-            <h3 class="card__title">Algemeen</h3>
-            <ul class="kv">
-                @foreach ($generalPrimaryFields as $field)
-                    <li>
-                        <span class="k">{{ $field['label'] }}:</span>
-                        <span class="v">{{ $field['value'] }}</span>
-                    </li>
-                @endforeach
-            </ul>
-
-            <hr class="rmasTab__kv-divider" aria-hidden="true">
-
-            <ul class="kv">
-                @foreach ($generalDetailFields as $field)
-                    <li>
-                        <span class="k">{{ $field['label'] }}:</span>
-                        <span class="v">{{ $field['value'] }}</span>
-                    </li>
-                @endforeach
-            </ul>
-        </section>
 
         <section class="card rmasTab__card rmasTab__internal-notes">
             <h3 class="card__title">Interne notities</h3>
@@ -147,17 +161,5 @@
                 ></textarea>
             </div>
         </section>
-
-        <div class="rmasTab__documents">
-            <livewire:documents-block
-                :owner-id="$record->getKey()"
-                owner-class="{{ Rma::class }}"
-                collection="rma_documents"
-                block-title="Documenten en Afbeeldingen"
-                upload-zone-key="rma"
-                section-id="card-rma-documenten"
-                :key="'documents-rma-'.$record->getKey()"
-            />
-        </div>
     </div>
 </main>

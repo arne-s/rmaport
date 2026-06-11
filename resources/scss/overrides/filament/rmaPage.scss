@@ -159,15 +159,26 @@
                 align-items: stretch;
             }
 
+            .rmasTab__article {
+                grid-column: span 1;
+                min-width: 0;
+                min-height: 0;
+            }
+
+            .rmasTab__general {
+                grid-column: span 1;
+            }
+
             .rmasTab__top-row {
                 display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-columns: repeat(4, minmax(0, 1fr));
                 gap: 15px;
                 align-items: stretch;
                 margin-bottom: 15px;
             }
 
             .rmasTab__retour-row {
+                grid-column: span 2;
                 min-width: 0;
 
                 .rmasTab__retour {
@@ -177,7 +188,12 @@
                 }
             }
 
+            .rmasTab__top-row .rmasTab__documents {
+                grid-column: span 1;
+            }
+
             .rmasTab__financial-docs {
+                grid-column: span 2;
                 min-height: 320px;
                 display: flex;
                 flex-direction: column;
@@ -290,6 +306,7 @@
             }
 
             .rmasTab__internal-notes {
+                grid-column: span 1;
                 display: flex;
                 flex-direction: column;
                 min-height: 0;
@@ -511,6 +528,12 @@
         .rmasTab .rmasTab__columns {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+
+        .rmasTab .rmasTab__financial-docs,
+        .rmasTab .rmasTab__general,
+        .rmasTab .rmasTab__internal-notes {
+            grid-column: span 1;
+        }
     }
 
     @media (max-width: 1024px) {
@@ -518,8 +541,20 @@
             grid-template-columns: 1fr;
         }
 
+        .rmasTab .rmasTab__article,
+        .rmasTab .rmasTab__retour-row,
+        .rmasTab .rmasTab__top-row .rmasTab__documents {
+            grid-column: span 1;
+        }
+
         .rmasTab .rmasTab__columns {
             grid-template-columns: 1fr;
+        }
+
+        .rmasTab .rmasTab__financial-docs,
+        .rmasTab .rmasTab__general,
+        .rmasTab .rmasTab__internal-notes {
+            grid-column: span 1;
         }
 
         .rmasTab__documents #card-rma-documenten {
