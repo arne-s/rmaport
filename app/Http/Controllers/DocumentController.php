@@ -16,6 +16,7 @@ use App\Models\Order\Invoice;
 use App\Models\Order\Order;
 use App\Models\Order\Quote;
 use App\Models\Product;
+use App\Models\Rma;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Exception;
 use Illuminate\Contracts\View\View as ViewContract;
@@ -330,10 +331,11 @@ class DocumentController extends Controller
         $isOrderMedia = is_string($modelType) && is_a($modelType, BaseOrder::class, true);
         $isProductDocument = $modelType === Product::class && $collectionName === 'documents';
         $isNoteAttachment = $modelType === Note::class && $collectionName === 'attachments';
+        $isRmaDocument = $modelType === Rma::class && $collectionName === 'rma_documents';
         $isPackingSlip = is_string($modelType) && is_a($modelType, BaseOrder::class, true) && $collectionName === 'delivery_documents';
         $isDeliveryNotePdf = $modelType === DeliveryNote::class && $collectionName === 'pdf';
 
-        if (! $isOrderMedia && ! $isProductDocument && ! $isNoteAttachment && ! $isPackingSlip && ! $isDeliveryNotePdf) {
+        if (! $isOrderMedia && ! $isProductDocument && ! $isNoteAttachment && ! $isRmaDocument && ! $isPackingSlip && ! $isDeliveryNotePdf) {
             abort(404);
         }
 

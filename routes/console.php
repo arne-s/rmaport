@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Schedule;
     Schedule::command('exact-online:sync-vat-codes')->dailyAt('00:00');
     Schedule::command('exact-online:sync-payment-conditions')->dailyAt('00:00');
     Schedule::command('mailchimp:sync-subscribers')->daily();
+    Schedule::command('form-import:sync')->cron(config('form-import.schedule_cron', '*/5 * * * *'));
 //    Schedule::command('exact-online:sync-new-products')->hourly();
 //    Schedule::command('exact-online:sync-updated-products')->hourly();
 //

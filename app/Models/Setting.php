@@ -82,8 +82,8 @@ class Setting extends Model
             return;
         }
 
-        foreach (SettingsDefaults::rows() as $row) {
-            Cache::forget(static::cacheKey($row['uid']));
+        foreach (static::query()->pluck('uid') as $cachedUid) {
+            Cache::forget(static::cacheKey($cachedUid));
         }
     }
 
@@ -94,18 +94,11 @@ class Setting extends Model
     {
         $state = [];
 
-        foreach (SettingsDefaults::rows() as $defaults) {
-            $record = static::query()->where('uid', $defaults['uid'])->first()
-                ?? static::makeFromDefaults($defaults['uid']);
-
-            if ($record === null) {
-                continue;
-            }
-
+        foreach (static::query()->orderBy('sort')->get() as $record) {
             $definition = $record->definition();
             $stored = $record->value;
 
-            $state[$defaults['uid']] = $definition->deserialize(
+            $state[$record->uid] = $definition->deserialize(
                 $stored !== null && $stored !== ''
                     ? $stored
                     : $definition->serialize($definition->default()),

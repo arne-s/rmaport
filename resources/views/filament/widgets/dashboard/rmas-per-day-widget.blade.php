@@ -8,6 +8,8 @@
     $filters = $this->getFilters();
     $isCollapsible = $this->isCollapsible();
     $type = $this->getType();
+    $maxHeight = $this->getMaxHeight();
+    $hasMaxHeight = filled($maxHeight) && $maxHeight !== '100%';
     $hasData = filled($this->getCachedData()['labels'] ?? []);
 @endphp
 
@@ -22,6 +24,7 @@
                 @if ($pollingInterval = $this->getPollingInterval())
                     wire:poll.{{ $pollingInterval }}="updateChartData"
                 @endif
+                class="rmas-per-day-widget__chart-wrap"
             >
                 <div
                     x-load
@@ -30,7 +33,6 @@
                     data-chart-type="{{ $type }}"
                     x-data="chart({
                                 cachedData: @js($this->getCachedData()),
-                                maxHeight: @js($maxHeight = $this->getMaxHeight()),
                                 options: @js($this->getOptions()),
                                 type: @js($type),
                             })"
@@ -39,15 +41,17 @@
                             ->color(ChartWidgetComponent::class, $color)
                             ->class([
                                 'fi-wi-chart-canvas-ctn',
-                                'fi-wi-chart-canvas-ctn-no-aspect-ratio' => filled($maxHeight),
+                                'fi-wi-chart-canvas-ctn-no-aspect-ratio' => $hasMaxHeight,
                             ])
                     }}
                 >
                     <canvas
                         x-ref="canvas"
-                        @if ($maxHeight)
-                            style="max-height: {{ $maxHeight }}"
-                        @endif
+                        @style([
+                            'width: 100%',
+                            'height: 100%; max-height: 100%' => ! $hasMaxHeight,
+                            ('max-height: ' . e($maxHeight)) => $hasMaxHeight,
+                        ])
                     ></canvas>
 
                     <span

@@ -26,7 +26,8 @@ class EditRma extends EditRecord
 
         return [
             RmaResource::getUrl('index') => 'Retouren',
-            RmaResource::getUrl('edit', ['record' => $record]) => $this->getRmaHeadingUid(),
+            RmaResource::getUrl('view', ['record' => $record]) => $this->getRmaHeadingUid(),
+            RmaResource::getUrl('edit', ['record' => $record]) => 'Bewerken',
         ];
     }
 

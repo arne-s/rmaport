@@ -50,9 +50,11 @@
             }
 
             .fi-resource-orders,
-            .fi-resource-mains {
+            .fi-resource-mains,
+            .fi-resource-rmas {
 
                 .ordersTab,
+                .rmasTab,
                 .tab-grid {
                     display: flex;
                     flex-direction: column;

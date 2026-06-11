@@ -111,6 +111,11 @@ class Note extends Model implements HasMedia
         return $this->morphedByMany(Product::class, 'model', 'model_has_notes');
     }
 
+    public function rmas(): MorphToMany
+    {
+        return $this->morphedByMany(Rma::class, 'model', 'model_has_notes');
+    }
+
     public function comments(): HasMany
     {
         return $this->hasMany(NoteComments::class, 'note_id');

@@ -8,6 +8,7 @@ use App\Livewire\NotePendingAttachmentsUpload;
 use App\Models\Note;
 use App\Models\Order\Main;
 use App\Models\Product;
+use App\Models\Rma;
 use App\Models\User;
 use App\View\Components\PanelNotification;
 use Filament\Actions\Action;
@@ -62,6 +63,13 @@ class CreateNoteAction extends Action
                         $order = Main::find($data['order_id']);
                         if ($order) {
                             $note->orders()->attach($order);
+                        }
+                    }
+
+                    if ($data['type'] === NoteType::Rma->value && ! empty($data['rma_id'])) {
+                        $rma = Rma::query()->find($data['rma_id']);
+                        if ($rma) {
+                            $note->rmas()->attach($rma);
                         }
                     }
 

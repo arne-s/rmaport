@@ -7,8 +7,13 @@ use App\Enums\ProductBrand;
 use App\Enums\RmaStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @property int $id
@@ -58,8 +63,10 @@ use Illuminate\Support\Str;
  * @property Carbon|null $updated_at
  * @property-read Customer|null $customer
  */
-class Rma extends Model
+class Rma extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
     protected $table = 'rmas';
 
     protected $fillable = [
@@ -141,9 +148,66 @@ class Rma extends Model
         ];
     }
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('rma_documents');
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function rmaEvents(): HasMany
+    {
+        return $this->hasMany(RmaEvent::class);
+    }
+
+    public function statusChanges(): HasMany
+    {
+        return $this->hasMany(RmaStatusChange::class);
+    }
+
+    public function linkedNotes(): MorphToMany
+    {
+        return $this->morphToMany(Note::class, 'model', 'model_has_notes');
+    }
+
+    public function changeStatus(RmaStatus $to, ?int $userId = null): void
+    {
+        $from = $this->status;
+        if ($from === $to) {
+            return;
+        }
+
+        $userId ??= Auth::id();
+
+        RmaStatusChange::query()->create([
+            'rma_id' => $this->getKey(),
+            'from_status' => $from->value,
+            'to_status' => $to->value,
+            'changed_by' => $userId,
+        ]);
+
+        $fromLabel = $from->getLabel() ?? $from->value;
+        $toLabel = $to->getLabel() ?? $to->value;
+
+        $this->rmaEvents()->create([
+            'type' => "RMA-status gewijzigd: {$fromLabel} → {$toLabel}",
+            'user_id' => $userId,
+        ]);
+
+        $this->status = $to;
+        $this->save();
+    }
+
+    public function logEvent(string $type, ?array $data = null, ?int $userId = null): RmaEvent
+    {
+        return $this->rmaEvents()->create([
+            'type' => $type,
+            'data' => $data,
+            'user_id' => $userId ?? Auth::id(),
+        ]);
     }
 
     public static function createDraft(): self

@@ -55,6 +55,8 @@ class DocumentsBlock extends Component
     /** Max file size per file in KB (default 10MB). */
     public int $maxFileSizeKb = 10240;
 
+    public bool $readOnly = false;
+
     public function mount(
         int $ownerId,
         string $ownerClass,
@@ -65,6 +67,7 @@ class DocumentsBlock extends Component
         ?string $sectionId = null,
         string $blockTitle = 'Documenten',
         ?string $acceptAttributeOverride = null,
+        bool $readOnly = false,
     ): void {
         $this->ownerId = $ownerId;
         $this->ownerClass = $ownerClass;
@@ -75,6 +78,7 @@ class DocumentsBlock extends Component
         $this->sectionId = $sectionId;
         $this->blockTitle = $blockTitle;
         $this->acceptAttributeOverride = $acceptAttributeOverride;
+        $this->readOnly = $readOnly;
     }
 
     protected function getOwner(): ?Model
@@ -147,6 +151,10 @@ class DocumentsBlock extends Component
 
     public function deleteDocument(int $mediaId): void
     {
+        if ($this->readOnly) {
+            return;
+        }
+
         $owner = $this->getOwner();
         if ($owner === null) {
             return;
@@ -179,7 +187,7 @@ class DocumentsBlock extends Component
 
     public function updatedDocumentFiles(): void
     {
-        if (empty($this->documentFiles)) {
+        if ($this->readOnly || empty($this->documentFiles)) {
             return;
         }
 

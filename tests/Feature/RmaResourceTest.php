@@ -44,6 +44,7 @@ it('allows sales users to access rma pages', function (): void {
     ]);
 
     livewire(EditRma::class, ['record' => $rma->getKey()])->assertSuccessful();
+    livewire(\App\Filament\Resources\RmaResource\Pages\ViewRma::class, ['record' => $rma->getKey()])->assertSuccessful();
 });
 
 it('creates a draft rma and redirects to edit when visiting create', function (): void {
@@ -135,7 +136,7 @@ it('clears draft status on first save', function (): void {
         ->and($draft->reference)->toBe('REF-123');
 });
 
-it('filters rmas by open status by default', function (): void {
+it('shows all rma statuses by default', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo(['access filament panel', 'manage sales']);
 
@@ -145,8 +146,7 @@ it('filters rmas by open status by default', function (): void {
     $this->actingAs($user);
 
     livewire(ListRmas::class)
-        ->assertCanSeeTableRecords(Rma::query()->where('uid', 'OPEN-1')->get())
-        ->assertCanNotSeeTableRecords(Rma::query()->where('uid', 'CLOSED-1')->get());
+        ->assertCanSeeTableRecords(Rma::query()->whereIn('uid', ['OPEN-1', 'CLOSED-1'])->get());
 });
 
 it('opens rma import modal from dashboard quick link action', function (): void {

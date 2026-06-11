@@ -14,7 +14,8 @@ div.openDocumentModal.order-events-modal {
 }
 
 /* Scoped to modal so order page styles don't override; force flex column (orderPage has .status { grid }) */
-.order-events-modal__content .order-events-modal__panel #card-status .status.status--grouped {
+.order-events-modal__content .order-events-modal__panel #card-status .status.status--grouped,
+.order-events-modal__content .order-events-modal__panel #card-rma-status .status.status--grouped {
     display: flex !important;
     flex-direction: column;
     gap: 0.75rem;
@@ -185,7 +186,8 @@ div.openDocumentModal.order-events-modal {
     }
 }
 
-#order-events-section {
+#order-events-section,
+#rma-events-section {
     margin-bottom: 1rem;
 
     .order-events-section__title {

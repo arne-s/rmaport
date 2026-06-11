@@ -61,13 +61,15 @@ class NoteResource extends Resource
 
                         Hidden::make('customer_id'),
 
+                        Hidden::make('rma_id'),
+
                         Select::make('customer_or_company')
                             ->label('Klant')
                             ->preload()
                             ->extraFieldWrapperAttributes(['class' => 'whitespace-nowrap'])
                             ->columnSpanFull()
                             ->required()
-                            ->disabled(fn(Get $get): bool => filled($get('order_id')))
+                            ->disabled(fn (Get $get): bool => filled($get('order_id')) || filled($get('rma_id')))
                             ->validationMessages([
                                 'required' => 'Selecteer een klant.',
                             ])
@@ -120,14 +122,19 @@ class NoteResource extends Resource
                             ->extraFieldWrapperAttributes(fn (?Note $record, Get $get): array => [
                                 'class' => (
                                     filled($get('order_id'))
+                                    || filled($get('rma_id'))
                                     || filled($get('product_id'))
                                     || $record?->orders()->exists() === true
+                                    || $record?->rmas()->exists() === true
                                     || $record?->products()->exists() === true
                                 ) ? 'appears-disabled' : '',
                             ])
                             ->afterStateUpdated(function ($state, Set $set): void {
                                 if ($state !== NoteType::Order->value) {
                                     $set('order_id', null);
+                                }
+                                if ($state !== NoteType::Rma->value) {
+                                    $set('rma_id', null);
                                 }
                             })
                             ->live(),
@@ -273,6 +280,7 @@ class NoteResource extends Resource
             'type' => $record->type->value,
             'status' => $record->status->value,
             'order_id' => $record->orders()->first()?->id,
+            'rma_id' => $record->rmas()->first()?->id,
             'product_id' => $record->products()->first()?->id,
             'callback_time' => $record->type === NoteType::Callback && isset($record->additional['callback_time'])
                 ? $record->additional['callback_time']

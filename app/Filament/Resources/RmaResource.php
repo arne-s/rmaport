@@ -366,7 +366,7 @@ class RmaResource extends Resource
                     ->label('RMA Nummer')
                     ->searchable()
                     ->sortable()
-                    ->url(fn (Rma $record): string => static::getUrl('edit', ['record' => $record]))
+                    ->url(fn (Rma $record): string => static::getUrl('view', ['record' => $record]))
                     ->color('primary'),
                 TextColumn::make('order_nr')
                     ->label('Ordernummer')
@@ -419,7 +419,6 @@ class RmaResource extends Resource
                     'status',
                     'Status',
                     RmaStatus::labels(),
-                    RmaStatus::Open->value,
                 ),
             ], layout: FiltersLayout::AboveContent)
             ->deferFilters(false)
@@ -433,6 +432,7 @@ class RmaResource extends Resource
         return [
             'index' => Pages\ListRmas::route('/'),
             'create' => Pages\CreateRma::route('/create'),
+            'view' => Pages\ViewRma::route('/{record}'),
             'edit' => Pages\EditRma::route('/{record}/edit'),
         ];
     }

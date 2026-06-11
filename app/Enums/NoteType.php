@@ -9,6 +9,7 @@ enum NoteType: string
     case Product = 'product';
     case Complaint = 'complaint';
     case Callback = 'callback';
+    case Rma = 'rma';
 
     public function getLabel(): ?string
     {
@@ -17,6 +18,7 @@ enum NoteType: string
             self::Order => 'Aanvraag-gerelateerd',
             self::Complaint => 'Klacht',
             self::Callback => 'Terugbelverzoek',
+            self::Rma => 'RMA-gerelateerd',
             default => null,
         };
     }

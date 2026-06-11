@@ -3,6 +3,8 @@
 @use '../../components/email-recipient-select' as *;
 @use '../../components/modals/upload-document-modal' as *;
 @use './orderPage.scss' as *;
+@use './rmaPage.scss' as *;
+@use './form-import-settings.scss' as *;
 @use './breadcrumb.scss' as *;
 @use './documents.scss' as *;
 @use './order-events.scss' as *;
@@ -958,12 +960,17 @@ html.filament {
                         flex-direction: column;
                         min-height: 0;
 
-                        > div {
+                        > div,
+                        .rmas-per-day-widget__chart-wrap {
                             flex: 1;
                             display: flex;
                             flex-direction: column;
                             min-height: 0;
                         }
+                    }
+
+                    .rmas-per-day-widget__chart-wrap {
+                        overflow: hidden;
                     }
 
                     .fi-wi-chart-canvas-ctn {
@@ -972,7 +979,14 @@ html.filament {
                         min-width: 0;
                         min-height: 0;
                         height: 100%;
+                        max-height: 100%;
                         aspect-ratio: unset !important;
+
+                        canvas {
+                            width: 100% !important;
+                            height: 100% !important;
+                            max-height: 100%;
+                        }
                     }
                 }
             }
@@ -7362,6 +7376,7 @@ div.fi-resource-form-entries {
 
 .fi-resource-quotes,
 .fi-resource-orders,
+.fi-resource-rmas,
 .fi-resource-release-orders,
 .fi-resource-stock-orders {
     .backTo {

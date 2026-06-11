@@ -37,22 +37,11 @@ final class SettingForm
      */
     public static function fieldsForSortRange(int $from, int $to): array
     {
-        $records = Setting::query()
+        return Setting::query()
             ->whereBetween('sort', [$from, $to])
             ->orderBy('sort')
-            ->get();
-
-        if ($records->isNotEmpty()) {
-            return $records
-                ->map(static fn (Setting $setting): Field => $setting->toFormComponent('settings.' . $setting->uid))
-                ->all();
-        }
-
-        return collect(SettingsDefaults::rows())
-            ->filter(static fn (array $row): bool => $row['sort'] >= $from && $row['sort'] <= $to)
-            ->sortBy('sort')
-            ->map(static fn (array $row): Field => self::field($row['uid']))
-            ->values()
+            ->get()
+            ->map(static fn (Setting $setting): Field => $setting->toFormComponent('settings.' . $setting->uid))
             ->all();
     }
 
@@ -63,7 +52,7 @@ final class SettingForm
             ->schema(self::fieldsForSortRange($sortFrom, $sortTo));
     }
 
-    public static function section(string $title, int $sortFrom, int $sortTo, int $columns = 1, ?int $dividerBeforeSort = null): Section
+    public static function section(string $title, int $sortFrom, int $sortTo, int $columns = 1, ?int $dividerBeforeSort = null): ?Section
     {
         $schema = [];
 
@@ -73,15 +62,25 @@ final class SettingForm
                 $schema[] = Grid::make($columns)->schema($beforeFields);
             }
 
-            $schema[] = Html::make('<hr class="settings-payment-section-divider" aria-hidden="true">');
-
             $afterFields = self::fieldsForSortRange($dividerBeforeSort, $sortTo);
+            if ($beforeFields !== [] && $afterFields !== []) {
+                $schema[] = Html::make('<hr class="settings-payment-section-divider" aria-hidden="true">');
+            }
+
             if ($afterFields !== []) {
                 $schema[] = Grid::make($columns)->schema($afterFields);
             }
         } else {
-            $schema[] = Grid::make($columns)
-                ->schema(self::fieldsForSortRange($sortFrom, $sortTo));
+            $fields = self::fieldsForSortRange($sortFrom, $sortTo);
+            if ($fields === []) {
+                return null;
+            }
+
+            $schema[] = Grid::make($columns)->schema($fields);
+        }
+
+        if ($schema === []) {
+            return null;
         }
 
         return Section::make($title)

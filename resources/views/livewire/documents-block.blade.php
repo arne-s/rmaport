@@ -190,7 +190,7 @@
                             @svgImg('img/icons/download.svg')
                         </span>
                     </a>
-                    @if (! empty($doc['is_readonly']))
+                    @if ($readOnly || ! empty($doc['is_readonly']))
                         <span class="icon-dl opacity-40 cursor-not-allowed"
                               title="Dit document is alleen-lezen en kan niet verwijderd worden" aria-disabled="true">
                             @svgImg('img/icons/trash.svg')
@@ -207,6 +207,7 @@
         </div>
     </div>
 
+    @if (! $readOnly)
     <div
         class="docs-list-upload docs-list-upload-{{ $uploadZoneKey }} mt-4"
         wire:loading.class="opacity-60 pointer-events-none"
@@ -229,6 +230,7 @@
             </span>
         </label>
     </div>
+    @endif
 
     {{-- Preview modal (openable files only) --}}
     <template x-teleport="body">

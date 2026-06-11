@@ -14,7 +14,7 @@ class RmasPerDayWidget extends ChartWidget
 
     protected ?string $heading = 'RMA\'s per dag';
 
-    protected ?string $maxHeight = null;
+    protected ?string $maxHeight = '100%';
 
     /**
      * @var view-string

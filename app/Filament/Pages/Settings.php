@@ -6,6 +6,7 @@ use App\Enums\CustomerStatus;
 use App\Enums\CustomerType;
 use App\Filament\Settings\PaymentSettingsTab;
 use App\Filament\Resources\CustomerResource;
+use App\Http\Livewire\FormImportSettings;
 use App\Http\Livewire\MicrosoftMailConnect;
 use App\Http\Livewire\MicrosoftMailSenderProfiles;
 use App\Models\Country;
@@ -399,6 +400,14 @@ class Settings extends EditRecord
                             ->key('payment')
                             ->icon(Heroicon::OutlinedDocumentText)
                             ->schema(PaymentSettingsTab::schema()),
+
+                        Tab::make('Formulier-import')
+                            ->key('form-import')
+                            ->icon(Heroicon::OutlinedArrowDownTray)
+                            ->schema([
+                                FilamentLivewire::make(FormImportSettings::class)
+                                    ->key('form-import-settings'),
+                            ]),
 
                         Tab::make('Outlook: e-mailaccounts')
                             ->key('outlook-mail')
