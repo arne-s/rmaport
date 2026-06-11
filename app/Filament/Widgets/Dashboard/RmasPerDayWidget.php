@@ -43,6 +43,13 @@ class RmasPerDayWidget extends ChartWidget
                 ],
             ],
             'scales' => [
+                'x' => [
+                    'ticks' => [
+                        'autoSkip' => false,
+                        'maxRotation' => 90,
+                        'minRotation' => 45,
+                    ],
+                ],
                 'y' => [
                     'ticks' => [
                         'beginAtZero' => true,

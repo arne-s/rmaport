@@ -30,6 +30,7 @@
                     data-chart-type="{{ $type }}"
                     x-data="chart({
                                 cachedData: @js($this->getCachedData()),
+                                maxHeight: @js($maxHeight = $this->getMaxHeight()),
                                 options: @js($this->getOptions()),
                                 type: @js($type),
                             })"
@@ -38,16 +39,15 @@
                             ->color(ChartWidgetComponent::class, $color)
                             ->class([
                                 'fi-wi-chart-canvas-ctn',
-                                'fi-wi-chart-canvas-ctn-no-aspect-ratio',
+                                'fi-wi-chart-canvas-ctn-no-aspect-ratio' => filled($maxHeight),
                             ])
                     }}
                 >
                     <canvas
                         x-ref="canvas"
-                        @style([
-                            'width: 100%',
-                            'height: 100%; max-height: 100%',
-                        ])
+                        @if ($maxHeight)
+                            style="max-height: {{ $maxHeight }}"
+                        @endif
                     ></canvas>
 
                     <span
