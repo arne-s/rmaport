@@ -101,6 +101,18 @@
 
     <div class="rmasTab__columns">
         <section class="card rmasTab__card">
+            <h3 class="card__title">Artikel</h3>
+            <ul class="kv">
+                @foreach ($productFields as $field)
+                    <li>
+                        <span class="k">{{ $field['label'] }}:</span>
+                        <span class="v">{{ $field['value'] }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+
+        <section class="card rmasTab__card">
             <h3 class="card__title">Algemeen</h3>
             <ul class="kv">
                 @foreach ($generalPrimaryFields as $field)
@@ -115,18 +127,6 @@
 
             <ul class="kv">
                 @foreach ($generalDetailFields as $field)
-                    <li>
-                        <span class="k">{{ $field['label'] }}:</span>
-                        <span class="v">{{ $field['value'] }}</span>
-                    </li>
-                @endforeach
-            </ul>
-        </section>
-
-        <section class="card rmasTab__card">
-            <h3 class="card__title">Artikel</h3>
-            <ul class="kv">
-                @foreach ($productFields as $field)
                     <li>
                         <span class="k">{{ $field['label'] }}:</span>
                         <span class="v">{{ $field['value'] }}</span>
