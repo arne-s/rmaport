@@ -199,7 +199,7 @@
 
                     <div class="subMenu-new">
                         <div class="subMenuInner submenuitem">
-                            <a href="{{ route('filament.app.resources.production.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.production.index')) }}">
+                            <a href="#" class="subMenuItem" x-on:click.prevent>
                                 <div class="mainItem no-link">
                                     <div class="mainItem-info">
                                         <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/arrows-rotate.svg') }}" alt="menu-icon">
