@@ -12,7 +12,9 @@ use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Tables\Table;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -40,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureViewCachePcreLimits();
+
         $this->configureFilamentEchoForRequest();
 
         Mail::extend('microsoft-graph', fn () => new MicrosoftGraphTransport(app(MicrosoftMailService::class)));
@@ -108,6 +112,29 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('global-quote-preview-placeholder', \App\Livewire\GlobalQuotePreviewPlaceholder::class);
         Livewire::component('note-documents-panel', \App\Livewire\NoteDocumentsPanel::class);
         Livewire::component('note-pending-attachments-upload', \App\Livewire\NotePendingAttachmentsUpload::class);
+    }
+
+    protected function configureViewCachePcreLimits(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
+
+        Event::listen(CommandStarting::class, function (CommandStarting $event): void {
+            if (! in_array($event->command, ['view:cache', 'optimize'], true)) {
+                return;
+            }
+
+            $minimumLimit = 2_000_000;
+
+            if ((int) ini_get('pcre.backtrack_limit') < $minimumLimit) {
+                ini_set('pcre.backtrack_limit', (string) $minimumLimit);
+            }
+
+            if ((int) ini_get('pcre.recursion_limit') < $minimumLimit) {
+                ini_set('pcre.recursion_limit', (string) $minimumLimit);
+            }
+        });
     }
 
     protected function configureFilamentEchoForRequest(): void

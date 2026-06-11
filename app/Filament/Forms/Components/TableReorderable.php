@@ -7,7 +7,7 @@ use Filament\Tables\Table;
 
 class TableReorderable extends Table
 {
-    protected string $view = 'filament.forms.resources.components.table-reorderable';
+    protected string $view = 'filament-tables::index';
 
     private function shouldShowMoveButtons(): bool
     {
