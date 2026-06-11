@@ -72,7 +72,7 @@ $usesUnitSimplifiedSalesFlow = $order instanceof Main && $order->usesUnitSimplif
         <x-filament::tabs.item
             alpine-active="activeTab === 'fitting'"
             x-on:click="activeTab = 'fitting'">
-            Passing
+            Algemeen
         </x-filament::tabs.item>
         @endif
         @if ($order && $order->getSubtype() === \App\Enums\OrderSubtype::Service)

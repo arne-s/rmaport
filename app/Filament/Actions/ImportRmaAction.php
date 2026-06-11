@@ -2,8 +2,9 @@
 
 namespace App\Filament\Actions;
 
+use App\Enums\RmaImportTemplate;
 use App\Filament\Imports\RmaImporter;
-use App\Support\RmaImportFileReader;
+use App\Support\RmaImport\RmaImportReader;
 use Filament\Actions\Action;
 use Filament\Actions\Imports\Events\ImportCompleted;
 use Filament\Actions\Imports\Events\ImportStarted;
@@ -11,6 +12,7 @@ use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +40,11 @@ class ImportRmaAction extends Action
         $this->color('gray');
 
         $this->schema([
+            Select::make('template')
+                ->label('Importtemplate')
+                ->options(RmaImportTemplate::class)
+                ->default(RmaImportTemplate::Auto)
+                ->required(),
             FileUpload::make('file')
                 ->label('Bestand')
                 ->helperText('Excel (.xlsx) of CSV (;).')
@@ -55,13 +62,16 @@ class ImportRmaAction extends Action
                 ->hiddenLabel(),
         ]);
 
-        $this->action(function (array $data, RmaImportFileReader $reader): void {
+        $this->action(function (array $data, RmaImportReader $reader): void {
             /** @var TemporaryUploadedFile $file */
             $file = $data['file'];
             $path = $file->getRealPath();
             $extension = strtolower($file->getClientOriginalExtension() ?? '');
+            $template = $data['template'] instanceof RmaImportTemplate
+                ? $data['template']
+                : RmaImportTemplate::from($data['template']);
 
-            $rows = $reader->read($path, $extension);
+            $rows = $reader->read($path, $extension, $template);
 
             if ($rows === []) {
                 throw ValidationException::withMessages([

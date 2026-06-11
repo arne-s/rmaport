@@ -5,7 +5,9 @@ use App\Enums\RmaStatus;
 use App\Filament\Imports\RmaImporter;
 use App\Models\Rma;
 use App\Models\User;
-use App\Support\RmaImportFileReader;
+use App\Support\RmaImport\ConsumerReturns\ConsumerReturnsImportMapper;
+use App\Support\RmaImport\MediaMarkt\MediaMarktImportMapper;
+use App\Support\RmaImport\RmaImportReader;
 use Filament\Actions\Imports\Models\Import;
 use Spatie\Permission\Models\Permission;
 
@@ -22,7 +24,7 @@ it('imports media markt and consumer returns rows via upsert', function (): void
         'successful_rows' => 0,
     ]);
 
-    $mediaMarktClean = [
+    $mediaMarktRow = (new MediaMarktImportMapper)->map([
         'Opdrachtnummer' => 'AD71912248',
         'Referentie' => '78906',
         'EAN' => '0846885011362',
@@ -44,10 +46,10 @@ it('imports media markt and consumer returns rows via upsert', function (): void
         'Staat van product' => '',
         'Accessoires' => 'Platenspeler',
         'Vestiging-ID' => '520',
-    ];
+    ]);
 
     $importer = new RmaImporter($import, [], []);
-    $importer($mediaMarktClean);
+    $importer($mediaMarktRow);
 
     $record = Rma::query()->where('uid', 'AD71912248')->first();
 
@@ -57,7 +59,7 @@ it('imports media markt and consumer returns rows via upsert', function (): void
         ->and($record->complaint)->toBe('Defect geluid')
         ->and($record->location_code)->toBe('2555');
 
-    $consumerRow = [
+    $consumerRow = (new ConsumerReturnsImportMapper)->map([
         'QUANTITY' => '1',
         'CUSTOMER ORDER ID' => 'C000397X67',
         'DEFECT ID' => 'RID-25199702',
@@ -74,7 +76,7 @@ it('imports media markt and consumer returns rows via upsert', function (): void
         'RETURN REASON' => 'Anders',
         'RETURN SUB REASON' => 'Anders, namelijk',
         'CONSUMER COMMENT' => 'Past niet in laptop',
-    ];
+    ]);
 
     $importer = new RmaImporter($import, [], []);
     $importer($consumerRow);
@@ -88,7 +90,7 @@ it('imports media markt and consumer returns rows via upsert', function (): void
 
     $importer = new RmaImporter($import, [], []);
     $importer(array_merge($consumerRow, [
-        'CONSUMER COMMENT' => 'Bijgewerkt',
+        'complaint' => 'Bijgewerkt',
     ]));
 
     expect(Rma::query()->where('uid', '143526279')->count())->toBe(1)
@@ -99,15 +101,9 @@ it('imports media markt excel export rows', function (): void {
     Permission::findOrCreate('manage sales', 'web');
 
     $fixture = base_path('tests/fixtures/rma/media-markt-export.xlsx');
+    $rows = app(RmaImportReader::class)->read($fixture, 'xlsx');
 
-    expect($fixture)->toBeReadableFile();
-
-    $rows = app(RmaImportFileReader::class)->read($fixture, 'xlsx');
-
-    expect($rows)->toHaveCount(8)
-        ->and($rows[0]['Opdrachtnummer'])->toBe('AD71912248')
-        ->and($rows[0]['Vestigingcode'])->toBe('2555')
-        ->and($rows[0]['Type'])->toBe('REVOLUTION SB BT TURNTABLE');
+    expect($rows)->toHaveCount(8);
 
     $user = User::factory()->create();
     $import = Import::query()->create([
@@ -133,10 +129,7 @@ it('imports consumer returns excel export rows', function (): void {
     Permission::findOrCreate('manage sales', 'web');
 
     $fixture = base_path('tests/fixtures/rma/consumer-returns-inlees2.xlsx');
-
-    expect($fixture)->toBeReadableFile();
-
-    $rows = app(RmaImportFileReader::class)->read($fixture, 'xlsx');
+    $rows = app(RmaImportReader::class)->read($fixture, 'xlsx');
 
     expect($rows)->toHaveCount(29);
 
@@ -158,4 +151,33 @@ it('imports consumer returns excel export rows', function (): void {
         ->and(Rma::query()->where('uid', '143526279')->value('return_reason'))->toBe('Anders')
         ->and(Rma::query()->where('uid', '143526279')->first()?->purchased_at?->toDateString())->toBe('2026-04-08')
         ->and(Rma::query()->count())->toBe(29);
+});
+
+it('imports autovision store excel export rows', function (): void {
+    Permission::findOrCreate('manage sales', 'web');
+
+    $fixture = base_path('tests/fixtures/rma/autovision-vanden-borre.xlsx');
+    $rows = app(RmaImportReader::class)->read($fixture, 'xlsx');
+
+    expect($rows)->toHaveCount(4);
+
+    $user = User::factory()->create();
+    $import = Import::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'autovision-vanden-borre.xlsx',
+        'file_path' => $fixture,
+        'importer' => RmaImporter::class,
+        'total_rows' => count($rows),
+        'successful_rows' => 0,
+    ]);
+
+    foreach ($rows as $row) {
+        (new RmaImporter($import, [], []))($row);
+    }
+
+    expect(Rma::query()->where('uid', '77222')->exists())->toBeTrue()
+        ->and(Rma::query()->where('uid', '77222')->value('reference'))->toBe('64750718')
+        ->and(Rma::query()->where('uid', '77222')->value('location_name'))->toBe('Vanden Borre N.V.')
+        ->and(Rma::query()->where('uid', '77223')->value('purchased_at'))->not->toBeNull()
+        ->and(Rma::query()->count())->toBe(4);
 });

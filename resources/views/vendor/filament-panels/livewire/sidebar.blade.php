@@ -97,7 +97,7 @@ $authUser->can('manage users')
 
                     <div class="subitems-list" x-show="!subMenu">
                         <a href="{{ route('filament.app.resources.production.index') }}"><strong>Verkoopproces</strong></a>
-                        <div x-on:click="subMenu = 'passing'">Passing</div>
+                        <div x-on:click="subMenu = 'passing'">Algemeen</div>
                         <div x-on:click="subMenu = 'offertes'">Offertes</div>
                         <div x-on:click="subMenu = 'orders'">Orders</div>
                     </div>

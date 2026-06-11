@@ -2,11 +2,8 @@
 
 namespace App\Filament\Imports;
 
-use App\Enums\RmaCsvFormat;
 use App\Enums\RmaStatus;
 use App\Models\Rma;
-use App\Services\RmaCsvRowMapper;
-use App\Support\RmaCsvSchema;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -33,7 +30,7 @@ class RmaImporter extends Importer
 
     public function resolveRecord(): Rma
     {
-        $this->data = $this->mapImportRow($this->originalData);
+        $this->data = $this->originalData;
 
         $uid = $this->data['uid'] ?? null;
 
@@ -48,29 +45,13 @@ class RmaImporter extends Importer
 
     protected function beforeValidate(): void
     {
-        $this->data = $this->mapImportRow($this->originalData);
+        $this->data = $this->originalData;
 
         if (blank($this->data['uid'] ?? null)) {
             throw ValidationException::withMessages([
                 'uid' => 'Geen RMA-nummer of fallback-id gevonden in deze rij.',
             ]);
         }
-    }
-
-    /**
-     * @param  array<string, mixed>  $row
-     * @return array<string, mixed>
-     */
-    private function mapImportRow(array $row): array
-    {
-        $format = RmaCsvSchema::detectFormat(array_keys($row));
-
-        $mapper = app(RmaCsvRowMapper::class);
-
-        return match ($format) {
-            RmaCsvFormat::MediaMarkt => $mapper->mapMediaMarktRow($row),
-            RmaCsvFormat::ConsumerReturns => $mapper->mapConsumerReturnsRow($row),
-        };
     }
 
     protected function beforeCreate(): void

@@ -49,7 +49,7 @@ enum ProductBrand: string
 
         return match ($normalized) {
             'jlab', 'jl' => self::Jlab,
-            'house of marley' => self::HouseOfMarley,
+            'house of marley', 'homar' => self::HouseOfMarley,
             'homedics' => self::Homedics,
             default => null,
         };
