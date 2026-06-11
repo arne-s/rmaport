@@ -7,6 +7,80 @@ use BackedEnum;
 
 final class RmaViewPresenter
 {
+    public static function combinedGeneralFields(Rma $rma): array
+    {
+        return [
+            ...self::combinedGeneralHeaderFields($rma),
+            ...self::combinedGeneralMiddleFields($rma),
+            ...self::combinedGeneralFooterFields($rma),
+        ];
+    }
+
+    /**
+     * @return list<array{label: string, value: string}>
+     */
+    public static function combinedGeneralHeaderFields(Rma $rma): array
+    {
+        return [
+            ['label' => 'Klant', 'value' => self::text($rma->customer?->getName())],
+            ['label' => 'Aankoopdatum', 'value' => self::text($rma->purchased_at?->format('d-m-Y'))],
+            ['label' => 'Betalingsmethode', 'value' => self::text($rma->payment_method?->getLabel())],
+        ];
+    }
+
+    /**
+     * @return list<array{label: string, value: string}>
+     */
+    public static function combinedGeneralMiddleFields(Rma $rma): array
+    {
+        $fields = [];
+
+        foreach (self::productFields($rma) as $field) {
+            $fields[] = $field;
+
+            if ($field['label'] === 'Serienummer') {
+                break;
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
+     * @return list<array{label: string, value: string}>
+     */
+    public static function combinedGeneralFooterFields(Rma $rma): array
+    {
+        $afterSerialNumber = false;
+        $remainingProductFields = [];
+
+        foreach (self::productFields($rma) as $field) {
+            if ($afterSerialNumber) {
+                $remainingProductFields[] = $field;
+            }
+
+            if ($field['label'] === 'Serienummer') {
+                $afterSerialNumber = true;
+            }
+        }
+
+        return [
+            ...$remainingProductFields,
+            ...self::generalDetailFields($rma),
+        ];
+    }
+
+    /**
+     * @return list<array{label: string, value: string}>
+     */
+    public static function combinedGeneralDetailFields(Rma $rma): array
+    {
+        return [
+            ...self::combinedGeneralMiddleFields($rma),
+            ...self::combinedGeneralFooterFields($rma),
+        ];
+    }
+
     /**
      * @return list<array{label: string, value: string}>
      */

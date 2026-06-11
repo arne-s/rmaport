@@ -149,36 +149,23 @@
     /* --------- Algemeen-tab --------- */
     .fi-page-content {
         .rmasTab {
-            display: block;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-rows: auto auto;
+            gap: 15px;
+            align-items: stretch;
             margin-top: 10px;
 
-            .rmasTab__columns {
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 15px;
-                align-items: stretch;
-            }
-
-            .rmasTab__article {
-                grid-column: span 1;
-                min-width: 0;
-                min-height: 0;
-            }
-
             .rmasTab__general {
-                grid-column: span 1;
-            }
-
-            .rmasTab__top-row {
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 15px;
-                align-items: stretch;
-                margin-bottom: 15px;
+                grid-column: 1;
+                grid-row: 1 / span 2;
+                min-height: 0;
+                overflow-y: auto;
             }
 
             .rmasTab__retour-row {
-                grid-column: span 2;
+                grid-column: 2 / span 2;
+                grid-row: 1;
                 min-width: 0;
 
                 .rmasTab__retour {
@@ -188,12 +175,14 @@
                 }
             }
 
-            .rmasTab__top-row .rmasTab__documents {
-                grid-column: span 1;
+            .rmasTab__documents {
+                grid-column: 4;
+                grid-row: 1;
             }
 
             .rmasTab__financial-docs {
-                grid-column: span 2;
+                grid-column: 2 / span 2;
+                grid-row: 2;
                 min-height: 320px;
                 display: flex;
                 flex-direction: column;
@@ -306,7 +295,8 @@
             }
 
             .rmasTab__internal-notes {
-                grid-column: span 1;
+                grid-column: 4;
+                grid-row: 2;
                 display: flex;
                 flex-direction: column;
                 min-height: 0;
@@ -525,36 +515,48 @@
     }
 
     @media (max-width: 1400px) {
-        .rmasTab .rmasTab__columns {
+        .rmasTab {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .rmasTab .rmasTab__financial-docs,
-        .rmasTab .rmasTab__general,
+        .rmasTab .rmasTab__general {
+            grid-column: 1;
+            grid-row: auto;
+        }
+
+        .rmasTab .rmasTab__retour-row {
+            grid-column: 2;
+            grid-row: auto;
+        }
+
+        .rmasTab .rmasTab__documents {
+            grid-column: 1 / span 2;
+            grid-row: auto;
+        }
+
+        .rmasTab .rmasTab__financial-docs {
+            grid-column: 1;
+            grid-row: auto;
+        }
+
         .rmasTab .rmasTab__internal-notes {
-            grid-column: span 1;
+            grid-column: 2;
+            grid-row: auto;
         }
     }
 
     @media (max-width: 1024px) {
-        .rmasTab .rmasTab__top-row {
+        .rmasTab {
             grid-template-columns: 1fr;
         }
 
-        .rmasTab .rmasTab__article,
-        .rmasTab .rmasTab__retour-row,
-        .rmasTab .rmasTab__top-row .rmasTab__documents {
-            grid-column: span 1;
-        }
-
-        .rmasTab .rmasTab__columns {
-            grid-template-columns: 1fr;
-        }
-
-        .rmasTab .rmasTab__financial-docs,
         .rmasTab .rmasTab__general,
+        .rmasTab .rmasTab__retour-row,
+        .rmasTab .rmasTab__documents,
+        .rmasTab .rmasTab__financial-docs,
         .rmasTab .rmasTab__internal-notes {
-            grid-column: span 1;
+            grid-column: 1;
+            grid-row: auto;
         }
 
         .rmasTab__documents #card-rma-documenten {
