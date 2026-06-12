@@ -23,6 +23,7 @@ final class RmaViewPresenter
     {
         return [
             ['label' => 'Klant', 'value' => self::text($rma->customer?->getName())],
+            ['label' => 'Invoerdatum en tijd', 'value' => self::text($rma->created_at?->format('d/m/y - H:i'))],
             ['label' => 'Aankoopdatum', 'value' => self::text($rma->purchased_at?->format('d-m-Y'))],
             ['label' => 'Betalingsmethode', 'value' => self::text($rma->payment_method?->getLabel())],
         ];

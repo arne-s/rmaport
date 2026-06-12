@@ -89,6 +89,19 @@
         />
     </div>
 
+    <section class="card rmasTab__card rmasTab__internal-notes">
+        <h3 class="card__title">Interne notities</h3>
+        <div class="rmasTab__internal-notes-field fi-input-wrp">
+            <textarea
+                id="rma-internal-notes"
+                wire:model="internalNotes"
+                rows="9"
+                aria-label="Interne notities"
+                class="fi-input block w-full"
+            ></textarea>
+        </div>
+    </section>
+
     <section
         id="card-rma-financial_docs"
         class="card rmasTab__financial-docs"
@@ -140,19 +153,6 @@
                 ],
                 key('rma-financial-docs-' . $record->getKey() . '-' . ($relatedMain?->getId() ?? 'none'))
             )
-        </div>
-    </section>
-
-    <section class="card rmasTab__card rmasTab__internal-notes">
-        <h3 class="card__title">Interne notities</h3>
-        <div class="rmasTab__internal-notes-field fi-input-wrp">
-            <textarea
-                id="rma-internal-notes"
-                wire:model="internalNotes"
-                rows="9"
-                aria-label="Interne notities"
-                class="fi-input block w-full"
-            ></textarea>
         </div>
     </section>
 </main>
