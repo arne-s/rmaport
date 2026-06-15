@@ -17,11 +17,7 @@ CSV;
     $rows = (new MediaMarktImportParser)->parse($path, 'csv');
 
     expect($rows)->toHaveCount(1)
-        ->and($rows[0]['uid'])->toBe('AD71912248')
-        ->and($rows[0]['reference'])->toBe('78906')
-        ->and($rows[0]['location_name'])->toBe('Mediamarkt Apeldoorn')
-        ->and($rows[0]['location_code'])->toBe('2555')
-        ->and($rows[0]['external_location_id'])->toBe('520');
+        ->and($rows[0]['uid'])->toBe('AD71912248');
 
     unlink($path);
 });
@@ -35,6 +31,5 @@ it('reads media markt excel export rows', function (): void {
 
     expect($rows)->toHaveCount(8)
         ->and($rows[0]['uid'])->toBe('AD71912248')
-        ->and($rows[0]['location_code'])->toBe('2555')
-        ->and($rows[0]['product_name'])->toBe('REVOLUTION SB BT TURNTABLE');
+        ->and($rows[0]['ean'])->toBe('0846885011362');
 });

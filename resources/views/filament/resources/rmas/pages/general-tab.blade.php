@@ -8,7 +8,8 @@
     $combinedGeneralHeaderFields = RmaViewPresenter::combinedGeneralHeaderFields($record);
     $combinedGeneralMiddleFields = RmaViewPresenter::combinedGeneralMiddleFields($record);
     $combinedGeneralFooterFields = RmaViewPresenter::combinedGeneralFooterFields($record);
-    $returnReadOnlyFields = RmaViewPresenter::returnReadOnlyFields($record);
+    $returnReadOnlyPrimaryFields = RmaViewPresenter::returnReadOnlyPrimaryFields($record);
+    $returnReadOnlySecondaryFields = RmaViewPresenter::returnReadOnlySecondaryFields($record);
     $relatedMain = $this->getRelatedMain();
 @endphp
 
@@ -19,7 +20,7 @@
             @foreach ($combinedGeneralHeaderFields as $field)
                 <li>
                     <span class="k">{{ $field['label'] }}:</span>
-                    <span class="v">{{ $field['value'] }}</span>
+                    <span class="v">@include('filament.resources.rmas.pages.partials.kv-field-value', ['field' => $field])</span>
                 </li>
             @endforeach
         </ul>
@@ -30,7 +31,7 @@
             @foreach ($combinedGeneralMiddleFields as $field)
                 <li>
                     <span class="k">{{ $field['label'] }}:</span>
-                    <span class="v">{{ $field['value'] }}</span>
+                    <span class="v">@include('filament.resources.rmas.pages.partials.kv-field-value', ['field' => $field])</span>
                 </li>
             @endforeach
         </ul>
@@ -41,7 +42,7 @@
             @foreach ($combinedGeneralFooterFields as $field)
                 <li>
                     <span class="k">{{ $field['label'] }}:</span>
-                    <span class="v">{{ $field['value'] }}</span>
+                    <span class="v">@include('filament.resources.rmas.pages.partials.kv-field-value', ['field' => $field])</span>
                 </li>
             @endforeach
         </ul>
@@ -51,7 +52,18 @@
         <section class="card rmasTab__retour">
             <h3 class="card__title">Retour</h3>
             <ul class="kv">
-                @foreach ($returnReadOnlyFields as $field)
+                @foreach ($returnReadOnlyPrimaryFields as $field)
+                    <li>
+                        <span class="k">{{ $field['label'] }}:</span>
+                        <span class="v whitespace-pre-wrap">{{ $field['value'] }}</span>
+                    </li>
+                @endforeach
+            </ul>
+
+            <hr class="rmasTab__kv-divider" aria-hidden="true">
+
+            <ul class="kv">
+                @foreach ($returnReadOnlySecondaryFields as $field)
                     <li>
                         <span class="k">{{ $field['label'] }}:</span>
                         <span class="v whitespace-pre-wrap">{{ $field['value'] }}</span>

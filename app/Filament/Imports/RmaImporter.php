@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Enums\RmaStatus;
+use App\Models\Concerns\ResolvesRmaProductFromEan;
 use App\Models\Rma;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -11,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class RmaImporter extends Importer
 {
+    use ResolvesRmaProductFromEan;
+
     protected static ?string $model = Rma::class;
 
     public static function getColumns(): array
@@ -20,11 +23,6 @@ class RmaImporter extends Importer
                 ->label('RMA Nummer')
                 ->exampleHeader('RMA-nummer')
                 ->rules(['nullable', 'max:20']),
-
-            ImportColumn::make('order_nr')
-                ->label('Ordernummer')
-                ->exampleHeader('Opdrachtnummer')
-                ->rules(['nullable', 'max:50']),
         ];
     }
 
@@ -65,7 +63,7 @@ class RmaImporter extends Importer
 
     public function fillRecord(): void
     {
-        $this->record->fill($this->data);
+        $this->applyRmaImportData($this->record, $this->data);
         $this->record->is_draft = false;
     }
 

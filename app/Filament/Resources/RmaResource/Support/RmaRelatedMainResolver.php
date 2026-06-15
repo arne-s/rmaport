@@ -65,7 +65,11 @@ final class RmaRelatedMainResolver
     {
         $values = [];
 
-        foreach ([$rma->order_nr, $rma->reference] as $value) {
+        foreach ([
+            $rma->importRow?->reference,
+            $rma->importRow?->assignment_nr,
+            $rma->importRow?->customer_order_id,
+        ] as $value) {
             $value = trim((string) ($value ?? ''));
 
             if ($value === '' || in_array($value, $values, true)) {

@@ -423,7 +423,24 @@
                     color: #000;
                     font-weight: 600;
                     font-size: 12px;
+                    min-width: 0;
                     word-break: break-word;
+
+                    a.rmasTab__kv-link {
+                        color: #3366cc;
+                        text-decoration: none;
+
+                        &:hover {
+                            text-decoration: underline;
+                        }
+
+                        &--truncate {
+                            display: block;
+                            max-width: 150ch;
+                            white-space: normal;
+                            word-break: break-word;
+                        }
+                    }
 
                     &.whitespace-pre-wrap {
                         white-space: pre-wrap;

@@ -2,6 +2,7 @@
 
 namespace App\Services\Import;
 
+use App\Actions\Import\CreateRmaFromImportRowAction;
 use App\Filament\Imports\RmaStagingImporter;
 use App\Models\Customer;
 use App\Models\ImportBatch;
@@ -20,6 +21,7 @@ final class ProcessImportBatchAction
 {
     public function __construct(
         private readonly ImportRowValidator $validator = new ImportRowValidator,
+        private readonly CreateRmaFromImportRowAction $createRmaFromImportRow = new CreateRmaFromImportRowAction,
     ) {}
 
     /**
@@ -56,6 +58,7 @@ final class ProcessImportBatchAction
         );
 
         $batch = DB::transaction(function () use ($parseResult, $batchData, $file, $user, $source, $validation): ImportBatch {
+            $createRmaFromImportRow = $this->createRmaFromImportRow;
             /** @var ImportBatch $batch */
             $batch = app(Import::class);
             $batch->user()->associate($user);
@@ -79,12 +82,14 @@ final class ProcessImportBatchAction
             $batch->update(['file_path' => $storedPath]);
 
             foreach ($validation->newRowAttributes() as $attributes) {
-                ImportRow::query()->create([
+                $importRow = ImportRow::query()->create([
                     ...$attributes,
                     'import_id' => $batch->id,
                     'customer_id' => $source->customer_id,
                     'source_id' => $source->id,
                 ]);
+
+                $createRmaFromImportRow($importRow);
             }
 
             $batch->update([

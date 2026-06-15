@@ -22,20 +22,12 @@ class FormImportDefaultsSeeder extends Seeder
         );
 
         $this->seedForm($connection, 1, 'RMA Reparatie', [
-            ['source_field_id' => '4', 'source_field_label' => 'Merk', 'rma_field' => 'brand'],
             ['source_field_id' => '13', 'source_field_label' => 'Probleemomschrijving', 'rma_field' => 'complaint'],
-            ['source_field_id' => '46', 'source_field_label' => 'Product', 'rma_field' => 'product_name'],
-            ['source_field_id' => '49', 'source_field_label' => 'Referentie', 'rma_field' => 'reference'],
-            ['source_field_id' => '30', 'source_field_label' => 'Aankoopdatum', 'rma_field' => 'purchased_at'],
         ]);
 
         $this->seedForm($connection, 5, 'RMA Retour zending', []);
 
-        $this->seedForm($connection, 18, 'RMA JLab vervanging', [
-            ['source_field_id' => '60', 'source_field_label' => 'Product', 'rma_field' => 'product_name'],
-            ['source_field_id' => '6', 'source_field_label' => 'Serienummer', 'rma_field' => 'serial_number'],
-            ['source_field_id' => '61', 'source_field_label' => 'EAN', 'rma_field' => 'ean'],
-        ]);
+        $this->seedForm($connection, 18, 'RMA JLab vervanging', []);
     }
 
     /**

@@ -31,7 +31,6 @@ final class ConsumerReturnsShipmentImportMapper
 
         return array_filter(array_merge($mapped, [
             'packing_slip_number' => $this->nullableString($metadata['Shipment Reference'] ?? null),
-            'location_name' => $this->nullableString($metadata['Company name'] ?? null),
             'notes' => $this->buildNotes($metadata),
         ]), fn (mixed $value): bool => $value !== null);
     }
@@ -131,6 +130,7 @@ final class ConsumerReturnsShipmentImportMapper
     private function buildNotes(array $metadata): ?string
     {
         $parts = array_filter([
+            $this->formatNoteLine('Bedrijfsnaam', $metadata['Company name'] ?? null),
             $this->formatNoteLine('Bol.com referentie', $metadata['Reference number (bol.com)'] ?? null),
             $this->formatNoteLine('Ontvanger referentie', $metadata['Reference number (recipient)'] ?? null),
             $this->formatNoteLine('Contact', $metadata['Contact'] ?? null),

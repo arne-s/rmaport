@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Enums\CustomerStatus;
 use App\Enums\CustomerType;
 use App\Enums\PaymentMethod;
-use App\Enums\ProductBrand;
 use App\Enums\RmaStatus;
 use App\Filament\Resources\RmaResource\Pages;
 use App\Filament\Support\SalesAuthorization;
@@ -70,7 +69,7 @@ class RmaResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with('customer')
+            ->with(['customer', 'product', 'importRow'])
             ->where('is_draft', false);
     }
 
@@ -82,7 +81,6 @@ class RmaResource extends Resource
                 Section::make('Algemeen')->schema(self::generalFields())->columns(2),
                 Section::make('Product')->schema(self::productFields())->columns(2),
                 Section::make('Retour')->schema(self::returnFields())->columns(2),
-                Section::make('Vestiging')->schema(self::locationFields())->columns(2),
                 Section::make('Inhoud')->schema(self::contentFields()),
                 Section::make('Flags & datums')->schema(self::flagsAndDatesFields())->columns(2),
             ]);
@@ -116,7 +114,7 @@ class RmaResource extends Resource
                                                     ->schema([
                                                         self::editSection(
                                                             'Algemeen',
-                                                            array_merge(self::generalFields(), self::locationFields()),
+                                                            self::generalFields(),
                                                             'beheer-bedrijfsgegevensSection header-bedrijfsgegevens',
                                                         ),
                                                     ]),
@@ -171,16 +169,16 @@ class RmaResource extends Resource
                 ->options(fn (): array => self::customerOptions())
                 ->getSearchResultsUsing(fn (string $search): array => self::searchCustomerOptions($search))
                 ->getOptionLabelUsing(fn ($value): string => self::customerOptionLabel($value)),
+            Select::make('import_row_id')
+                ->label('Importregel')
+                ->searchable()
+                ->relationship('importRow', 'reference')
+                ->preload(),
             Select::make('status')
                 ->label('Status')
                 ->options(RmaStatus::labels())
                 ->default(RmaStatus::Open->value)
                 ->required(),
-            TextInput::make('reference')->label('Referentie')->maxLength(100),
-            TextInput::make('order_nr')->label('Ordernummer')->maxLength(50),
-            TextInput::make('defect_id')->label('Defect ID')->maxLength(50),
-            TextInput::make('global_id')->label('Global ID')->maxLength(50),
-            TextInput::make('barcode')->label('Barcode')->maxLength(50),
             TextInput::make('quantity')
                 ->label('Aantal')
                 ->numeric()
@@ -199,22 +197,12 @@ class RmaResource extends Resource
     private static function productFields(): array
     {
         return [
-            TextInput::make('ean')->label('EAN')->maxLength(20),
-            TextInput::make('article_number')->label('Artikelnummer')->maxLength(50),
-            Select::make('brand')
-                ->label('Merk')
-                ->options(ProductBrand::labels()),
-            TextInput::make('product_group')->label('Artikelgroep')->maxLength(100),
-            Textarea::make('product_name')->label('Product')->rows(3),
-            TextInput::make('serial_number')->label('Serienummer')->maxLength(100),
-            TextInput::make('imei')->label('IMEI')->maxLength(50),
-            Textarea::make('product_condition')->label('Staat van product')->rows(2),
-            TextInput::make('graded_type')->label('Graded type')->maxLength(50),
+            Select::make('product_id')
+                ->label('Product')
+                ->searchable()
+                ->relationship('product', 'name')
+                ->preload(),
             Textarea::make('accessories')->label('Accessoires')->rows(2),
-            TextInput::make('language')->label('Taal')->maxLength(30),
-            DatePicker::make('purchased_at')
-                ->label('Aankoopdatum')
-                ->extraFieldWrapperAttributes(['class' => 'rma-purchased-at-field']),
         ];
     }
 
@@ -224,20 +212,7 @@ class RmaResource extends Resource
     private static function returnFields(): array
     {
         return [
-            TextInput::make('return_reason')->label('Retourreden')->maxLength(100),
-            TextInput::make('return_sub_reason')->label('Sub-reden')->maxLength(100),
-        ];
-    }
-
-    /**
-     * @return array<int, Field>
-     */
-    private static function locationFields(): array
-    {
-        return [
-            TextInput::make('location_name')->label('Vestiging')->maxLength(200),
-            TextInput::make('location_code')->label('Vestigingcode')->maxLength(50),
-            TextInput::make('external_location_id')->label('Vestiging-ID')->maxLength(20),
+            Textarea::make('return_reason')->label('Retourreden')->rows(4),
         ];
     }
 
@@ -276,12 +251,10 @@ class RmaResource extends Resource
             Toggle::make('is_warranty')->label('Garantie'),
             Toggle::make('is_processed')->label('Behandeld'),
             Toggle::make('is_refurbish')->label('Refurbish'),
-            Toggle::make('is_doa')->label('DOA'),
             Toggle::make('is_invoiced')->label('Gefactureerd'),
             DateTimePicker::make('received_at')->label('Ontvangen'),
             DateTimePicker::make('reminded_at')->label('Herinnering verstuurd'),
             DateTimePicker::make('processed_at')->label('Afgehandeld'),
-            DateTimePicker::make('returned_at')->label('Retour gestuurd'),
         ];
     }
 
@@ -368,7 +341,7 @@ class RmaResource extends Resource
                     ->sortable()
                     ->url(fn (Rma $record): string => static::getUrl('view', ['record' => $record]))
                     ->color('primary'),
-                TextColumn::make('order_nr')
+                TextColumn::make('importRow.assignment_nr')
                     ->label('Ordernummer')
                     ->searchable()
                     ->sortable()
@@ -388,7 +361,7 @@ class RmaResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->placeholder('—'),
-                TextColumn::make('reference')
+                TextColumn::make('importRow.reference')
                     ->label('Referentie')
                     ->searchable()
                     ->placeholder('—'),

@@ -2332,10 +2332,6 @@ html.filament {
         background: #FFF;
     }
 
-    .text-primary-600 {
-        color: var(--text-color) !important;
-    }
-
     div.filament-hr {
         display: none !important;
     }
@@ -7390,15 +7386,52 @@ div.fi-resource-form-entries {
 
 .fi-resource-list-records-page.fi-resource-import-rows {
     .import-row-artikel-column {
+        width: 200px;
         max-width: 200px;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+
+        .fi-ta-col-wrp,
+        .fi-ta-text,
+        .fi-ta-text-item,
+        a,
+        a span {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    .import-row-import-id-column {
+        color: #3366cc !important;
+        font-size: 12px !important;
+        font-weight: 600;
+
+        .fi-ta-text-item,
+        .fi-ta-text {
+            color: #3366cc !important;
+            font-size: 12px !important;
+            font-weight: 600;
+        }
     }
 
     .import-row-rma-column {
         white-space: nowrap;
         width: 1%;
+        font-size: 12px;
+        font-weight: 600;
+
+        a.import-row-rma-link {
+            color: #3366cc;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
     }
 
     .import-row-rma-column .fi-ta-actions button.fi-ac-btn-action {

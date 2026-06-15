@@ -2,7 +2,6 @@
 
 namespace App\Support\RmaImport\Universal;
 
-use App\Enums\ProductBrand;
 use App\Enums\RmaStatus;
 use App\Support\RmaImport\Concerns\MapsRmaImportRows;
 
@@ -23,28 +22,16 @@ final class UniversalImportMapper
      */
     public function map(array $metadata, array $row): array
     {
-        $productName = $this->nullableString($row['Artikel Omschrijving'] ?? null);
-        $brand = ProductBrand::resolveImportValue($this->nullableString($row['Merk'] ?? null))
-            ?? ProductBrand::resolveFromProductDescription($productName);
-
         return array_filter([
             'uid' => $this->resolveUid(
                 $this->nullableString($row['RMA NUMMER AUTOVISION'] ?? null),
                 $this->nullableString($row['RMA NUMMER AUTOVISION '] ?? null),
                 $this->nullableString($row['UW RMA Referentie'] ?? null),
             ),
-            'reference' => $this->nullableString($row['UW RMA Referentie'] ?? null),
             'ean' => $this->nullableString($row['EAN NUMMER'] ?? null),
-            'brand' => $brand?->value,
-            'article_number' => $this->nullableString($row['Artikel nummer Autovision'] ?? null),
-            'product_name' => $productName,
-            'serial_number' => $this->nullableString($row['Serienummer'] ?? null),
-            'purchased_at' => $this->parseDate($this->nullableString($row['Aankoopdatum'] ?? null), 'd.m.y'),
             'complaint' => $this->nullableString($row['Klachtomschrijving'] ?? null),
             'packing_slip_number' => $this->nullableString($metadata['Zending referentie'] ?? null),
             'received_at' => $this->parseDateTime($this->nullableString($metadata['Datum'] ?? null), 'Y-m-d'),
-            'external_location_id' => $this->nullableString($metadata['Klantnummer Autovision'] ?? null),
-            'location_name' => $this->nullableString($metadata['Bedrijfsnaam'] ?? null),
             'notes' => $this->buildNotes($metadata),
             'status' => RmaStatus::Open->value,
         ], fn (mixed $value): bool => $value !== null);
@@ -151,6 +138,7 @@ final class UniversalImportMapper
     private function buildNotes(array $metadata): ?string
     {
         $parts = array_filter([
+            $this->formatNoteLine('Bedrijfsnaam', $metadata['Bedrijfsnaam'] ?? null),
             $this->formatNoteLine('Adres', $metadata['Adres'] ?? null),
             $this->formatNoteLine('Huisnummer', $metadata['Huisnummer'] ?? null),
             $this->formatNoteLine('Postcode', isset($metadata['Postcode']) ? (string) $metadata['Postcode'] : null),

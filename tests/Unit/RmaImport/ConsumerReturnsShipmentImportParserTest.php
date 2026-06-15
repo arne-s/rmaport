@@ -18,11 +18,10 @@ it('reads consumer returns shipment sheet with bol metadata', function (): void 
 
     expect($rows)->toHaveCount(29)
         ->and($rows[0]['uid'])->toBe('143526279')
-        ->and($rows[0]['reference'])->toBe('C000397X67')
         ->and($rows[0]['packing_slip_number'])->toBe('SMT-1941121')
-        ->and($rows[0]['location_name'])->toBe('Autovision Holding B.V.')
-        ->and($rows[0]['brand'])->toBe('JL')
+        ->and($rows[0]['ean'])->toBe('0812887019569')
         ->and($rows[0]['notes'])->toContain('NCKI26077751')
+        ->and($rows[0]['notes'])->toContain('Autovision Holding B.V.')
         ->and($rows[0]['notes'])->toContain('DHL')
         ->and($rows[1]['uid'])->toBe('143743568');
 });

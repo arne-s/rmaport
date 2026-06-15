@@ -23,17 +23,16 @@ final class RmaOverviewQueries
     /**
      * @return Collection<int, array{label: string, value: int, date: string}>
      */
-    public static function purchasedAtDayCounts(int $days = 31): Collection
+    public static function createdAtDayCounts(int $days = 31): Collection
     {
         $start = now()->subDays($days - 1)->startOfDay();
         $end = now()->endOfDay();
 
         $counts = self::base()
-            ->whereNotNull('purchased_at')
-            ->whereBetween('purchased_at', [$start, $end])
-            ->selectRaw('DATE(purchased_at) as purchased_day, COUNT(*) as count')
-            ->groupBy('purchased_day')
-            ->pluck('count', 'purchased_day');
+            ->whereBetween('created_at', [$start, $end])
+            ->selectRaw('DATE(created_at) as created_day, COUNT(*) as count')
+            ->groupBy('created_day')
+            ->pluck('count', 'created_day');
 
         return collect(range(0, $days - 1))
             ->map(function (int $offset) use ($start, $counts): array {

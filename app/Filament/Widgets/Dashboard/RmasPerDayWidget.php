@@ -65,7 +65,7 @@ class RmasPerDayWidget extends ChartWidget
      */
     protected function getData(): array
     {
-        $days = RmaOverviewQueries::purchasedAtDayCounts();
+        $days = RmaOverviewQueries::createdAtDayCounts();
 
         return [
             'datasets' => [

@@ -124,7 +124,7 @@ it('clears draft status on first save', function (): void {
         ->fillForm([
             'uid' => 'FINAL-RMA-001',
             'status' => RmaStatus::Open->value,
-            'reference' => 'REF-123',
+            'complaint' => 'Scherm defect',
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -133,7 +133,7 @@ it('clears draft status on first save', function (): void {
 
     expect($draft->is_draft)->toBeFalse()
         ->and($draft->uid)->toBe('FINAL-RMA-001')
-        ->and($draft->reference)->toBe('REF-123');
+        ->and($draft->complaint)->toBe('Scherm defect');
 });
 
 it('shows all rma statuses by default', function (): void {

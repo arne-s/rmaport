@@ -5,12 +5,15 @@ namespace App\Support\FormImport;
 use App\Models\FormImport;
 use App\Models\FormImportEntryLog;
 use App\Models\FormImportState;
+use App\Models\Concerns\ResolvesRmaProductFromEan;
 use App\Models\Rma;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class ImportFormEntriesAction
 {
+    use ResolvesRmaProductFromEan;
+
     public function __construct(
         private readonly FormImportApiClient $client,
         private readonly ConfigurableFormImportEntryMapper $mapper,
@@ -113,7 +116,7 @@ class ImportFormEntriesAction
 
         DB::transaction(function () use ($formImport, $entry, $attributes): void {
             $rma = Rma::query()->firstOrNew(['uid' => $attributes['uid']]);
-            $rma->fill($attributes);
+            $this->applyRmaImportData($rma, $attributes);
             $rma->is_draft = false;
             $rma->save();
 

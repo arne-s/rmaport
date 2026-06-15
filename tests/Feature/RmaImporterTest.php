@@ -1,8 +1,9 @@
 <?php
 
-use App\Enums\ProductBrand;
+use App\Enums\ProductUnit;
 use App\Enums\RmaStatus;
 use App\Filament\Imports\RmaImporter;
+use App\Models\Product;
 use App\Models\Rma;
 use App\Models\User;
 use App\Support\RmaImport\ConsumerReturns\ConsumerReturnsImportMapper;
@@ -11,10 +12,40 @@ use App\Support\RmaImport\RmaImportReader;
 use Filament\Actions\Imports\Models\Import;
 use Spatie\Permission\Models\Permission;
 
+function createImportUser(): User
+{
+    return User::query()->create([
+        'email' => fake()->unique()->safeEmail(),
+        'password' => bcrypt('password'),
+        'first_name' => 'Import',
+        'last_name' => 'User',
+    ]);
+}
+
 it('imports media markt and consumer returns rows via upsert', function (): void {
     Permission::findOrCreate('manage sales', 'web');
 
-    $user = User::factory()->create();
+    Product::query()->create([
+        'uid' => 'IMP-MM-1',
+        'name' => 'MediaMarkt product',
+        'unit' => ProductUnit::Pieces,
+        'ean_1' => '0846885011362',
+        'company_purchase_price' => 10,
+        'company_sales_price' => 20,
+        'company_margin' => 50,
+    ]);
+
+    Product::query()->create([
+        'uid' => 'IMP-CR-1',
+        'name' => 'Consumer returns product',
+        'unit' => ProductUnit::Pieces,
+        'ean_1' => '0812887019569',
+        'company_purchase_price' => 10,
+        'company_sales_price' => 20,
+        'company_margin' => 50,
+    ]);
+
+    $user = createImportUser();
     $import = Import::query()->create([
         'user_id' => $user->id,
         'file_name' => 'rmas.csv',
@@ -54,10 +85,9 @@ it('imports media markt and consumer returns rows via upsert', function (): void
     $record = Rma::query()->where('uid', 'AD71912248')->first();
 
     expect($record)->not->toBeNull()
-        ->and($record->brand)->toBe(ProductBrand::HouseOfMarley)
         ->and($record->status)->toBe(RmaStatus::Open)
         ->and($record->complaint)->toBe('Defect geluid')
-        ->and($record->location_code)->toBe('2555');
+        ->and($record->product_id)->not->toBeNull();
 
     $consumerRow = (new ConsumerReturnsImportMapper)->map([
         'QUANTITY' => '1',
@@ -84,9 +114,8 @@ it('imports media markt and consumer returns rows via upsert', function (): void
     $consumerRecord = Rma::query()->where('uid', '143526279')->first();
 
     expect($consumerRecord)->not->toBeNull()
-        ->and($consumerRecord->brand)->toBe(ProductBrand::Jlab)
         ->and($consumerRecord->return_reason)->toBe('Anders')
-        ->and($consumerRecord->order_nr)->toBe('C000397X67');
+        ->and($consumerRecord->product_id)->not->toBeNull();
 
     $importer = new RmaImporter($import, [], []);
     $importer(array_merge($consumerRow, [
@@ -105,7 +134,7 @@ it('imports media markt excel export rows', function (): void {
 
     expect($rows)->toHaveCount(8);
 
-    $user = User::factory()->create();
+    $user = createImportUser();
     $import = Import::query()->create([
         'user_id' => $user->id,
         'file_name' => 'media-markt-export.xlsx',
@@ -121,8 +150,7 @@ it('imports media markt excel export rows', function (): void {
 
     expect(Rma::query()->where('uid', 'AD71912248')->exists())->toBeTrue()
         ->and(Rma::query()->where('uid', 'GR71914195')->exists())->toBeTrue()
-        ->and(Rma::query()->where('uid', 'AD71912248')->value('location_name'))->toBe('Mediamarkt Apeldoorn')
-        ->and(Rma::query()->where('uid', 'DSG71926342')->value('is_doa'))->toBeTrue();
+        ->and(Rma::query()->where('uid', 'AD71912248')->value('complaint'))->not->toBeNull();
 });
 
 it('imports consumer returns excel export rows', function (): void {
@@ -133,7 +161,7 @@ it('imports consumer returns excel export rows', function (): void {
 
     expect($rows)->toHaveCount(29);
 
-    $user = User::factory()->create();
+    $user = createImportUser();
     $import = Import::query()->create([
         'user_id' => $user->id,
         'file_name' => 'consumer-returns-inlees2.xlsx',
@@ -149,7 +177,6 @@ it('imports consumer returns excel export rows', function (): void {
 
     expect(Rma::query()->where('uid', '143526279')->exists())->toBeTrue()
         ->and(Rma::query()->where('uid', '143526279')->value('return_reason'))->toBe('Anders')
-        ->and(Rma::query()->where('uid', '143526279')->first()?->purchased_at?->toDateString())->toBe('2026-04-08')
         ->and(Rma::query()->count())->toBe(29);
 });
 
@@ -161,7 +188,7 @@ it('imports universal excel export rows', function (): void {
 
     expect($rows)->toHaveCount(4);
 
-    $user = User::factory()->create();
+    $user = createImportUser();
     $import = Import::query()->create([
         'user_id' => $user->id,
         'file_name' => 'autovision-vanden-borre.xlsx',
@@ -176,8 +203,6 @@ it('imports universal excel export rows', function (): void {
     }
 
     expect(Rma::query()->where('uid', '77222')->exists())->toBeTrue()
-        ->and(Rma::query()->where('uid', '77222')->value('reference'))->toBe('64750718')
-        ->and(Rma::query()->where('uid', '77222')->value('location_name'))->toBe('Vanden Borre N.V.')
-        ->and(Rma::query()->where('uid', '77223')->value('purchased_at'))->not->toBeNull()
+        ->and(Rma::query()->where('uid', '77222')->value('notes'))->toContain('Vanden Borre N.V.')
         ->and(Rma::query()->count())->toBe(4);
 });

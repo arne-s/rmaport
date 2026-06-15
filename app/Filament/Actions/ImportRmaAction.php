@@ -28,6 +28,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use RuntimeException;
 use Throwable;
 
 class ImportRmaAction extends Action
@@ -47,12 +48,6 @@ class ImportRmaAction extends Action
         $this->icon(Heroicon::OutlinedArrowUpTray);
         $this->modalHeading('RMA\'s importeren');
         $this->modalSubmitActionLabel('Importeren');
-        $importAction = $this;
-        $this->modalSubmitAction(function (Action $submitAction) use ($importAction): Action {
-            return $submitAction->disabled(function () use ($importAction): bool {
-                return ((int) ($importAction->getRawData()['import_new_count'] ?? 0)) <= 0;
-            });
-        });
         $this->modalWidth('3xl');
         $this->color('gray');
         $this->successRedirectUrl(fn (): string => ImportRowResource::getUrl('index'));
@@ -249,17 +244,27 @@ class ImportRmaAction extends Action
                 throw new Halt;
             }
 
-            $result = $processImportBatch(
-                parseResult: $parseResult,
-                batchData: [
-                    'customer_id' => (int) $customerId,
-                    'track_trace_nr' => $data['track_trace_nr'] ?? null,
-                    'reference' => $data['reference'] ?? null,
-                    'shipment_date' => $data['shipment_date'] ?? null,
-                ],
-                file: $file,
-                user: $user,
-            );
+            try {
+                $result = $processImportBatch(
+                    parseResult: $parseResult,
+                    batchData: [
+                        'customer_id' => (int) $customerId,
+                        'track_trace_nr' => $data['track_trace_nr'] ?? null,
+                        'reference' => $data['reference'] ?? null,
+                        'shipment_date' => $data['shipment_date'] ?? null,
+                    ],
+                    file: $file,
+                    user: $user,
+                );
+            } catch (RuntimeException $exception) {
+                Notification::make()
+                    ->title('Import mislukt')
+                    ->body($exception->getMessage())
+                    ->danger()
+                    ->send();
+
+                throw new Halt;
+            }
 
             $validation = $result['validation'];
 

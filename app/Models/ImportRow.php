@@ -85,6 +85,6 @@ class ImportRow extends Model
 
     public function rma(): HasOne
     {
-        return $this->hasOne(Rma::class, 'import_id');
+        return $this->hasOne(Rma::class, 'import_row_id');
     }
 }

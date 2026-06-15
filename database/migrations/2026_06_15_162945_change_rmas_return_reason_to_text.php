@@ -8,15 +8,23 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasColumn('rmas', 'return_reason')) {
+            return;
+        }
+
         Schema::table('rmas', function (Blueprint $table): void {
-            $table->foreignId('import_id')->nullable()->after('customer_id')->constrained('import_rows')->nullOnDelete();
+            $table->text('return_reason')->nullable()->change();
         });
     }
 
     public function down(): void
     {
+        if (! Schema::hasColumn('rmas', 'return_reason')) {
+            return;
+        }
+
         Schema::table('rmas', function (Blueprint $table): void {
-            $table->dropConstrainedForeignId('import_id');
+            $table->string('return_reason', 100)->nullable()->change();
         });
     }
 };

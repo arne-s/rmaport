@@ -2,21 +2,25 @@
 
 namespace App\Filament\Resources\ImportRows\Tables;
 
+use App\Actions\Import\CreateRmaFromImportRowAction;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\ImportRows\ImportRowResource;
 use App\Filament\Resources\ProductResource;
+use App\Filament\Resources\RmaResource;
 use App\Models\Customer;
 use App\Models\ImportBatch;
 use App\Models\ImportRow;
 use App\Models\Product;
 use App\Services\Import\ImportRowProductResolver;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use RuntimeException;
 
 class ImportRowsTable
 {
@@ -27,7 +31,28 @@ class ImportRowsTable
             ->icon(Heroicon::PlusCircle)
             ->color('gray')
             ->extraAttributes(['onclick' => 'event.stopPropagation()'])
-            ->action(fn (): null => null);
+            ->hidden(fn (ImportRow $record): bool => $record->rma !== null)
+            ->action(function (ImportRow $record, CreateRmaFromImportRowAction $createRma): void {
+                try {
+                    $rma = $createRma($record);
+                } catch (RuntimeException $exception) {
+                    Notification::make()
+                        ->title('RMA aanmaken mislukt')
+                        ->body($exception->getMessage())
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+
+                Notification::make()
+                    ->title('RMA aangemaakt')
+                    ->body($rma->uid)
+                    ->success()
+                    ->send();
+
+                redirect(RmaResource::getUrl('view', ['record' => $rma]));
+            });
     }
 
     public static function configure(Table $table): Table
@@ -68,6 +93,8 @@ class ImportRowsTable
                 TextColumn::make('ean_nr')
                     ->label('Artikel')
                     ->formatStateUsing(fn (?string $state, ImportRowProductResolver $productResolver): string => $productResolver->findByEan($state)?->name ?? '—')
+                    ->tooltip(fn (?string $state, ImportRowProductResolver $productResolver): ?string => $productResolver->findByEan($state)?->name)
+                    ->limit(40)
                     ->url(fn (?string $state, ImportRowProductResolver $productResolver): ?string => ($product = $productResolver->findByEan($state)) !== null
                         ? ProductResource::getUrl('edit', ['record' => $product])
                         : null)
@@ -113,7 +140,8 @@ class ImportRowsTable
                 TextColumn::make('import_id')
                     ->label('Import ID')
                     ->sortable()
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->extraCellAttributes(['class' => 'import-row-import-id-column']),
                 ViewColumn::make('rma')
                     ->label('RMA')
                     ->view('filament.tables.columns.import-row-rma')

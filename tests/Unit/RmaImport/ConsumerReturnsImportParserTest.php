@@ -14,6 +14,5 @@ it('reads consumer returns excel export rows', function (): void {
 
     expect($rows)->toHaveCount(29)
         ->and($rows[0]['uid'])->toBe('143526279')
-        ->and($rows[0]['reference'])->toBe('C000397X67')
-        ->and($rows[0]['product_name'])->toContain('JLab Go Work Headset');
+        ->and($rows[0]['ean'])->toBe('0812887019569');
 });

@@ -76,7 +76,7 @@ class ViewRma extends ViewRecord implements HasActions
 
     protected function resolveRecord(int|string $key): Rma
     {
-        return Rma::query()->with('customer')->findOrFail($key);
+        return Rma::query()->with(['customer', 'product', 'importRow.importBatch'])->findOrFail($key);
     }
 
     public function getRelatedMain(): ?Main

@@ -152,7 +152,7 @@ describe('ConfigurableFormImportEntryMapper', function (): void {
         $import->setRelation('fieldMappings', collect([
             new FormImportFieldMapping([
                 'fixed_value' => 'Autovision',
-                'rma_field' => 'location_name',
+                'rma_field' => 'notes',
             ]),
         ]));
 
@@ -162,7 +162,7 @@ describe('ConfigurableFormImportEntryMapper', function (): void {
             'date_created' => '2026-06-11 10:00:00',
         ]);
 
-        expect($result['location_name'])->toBe('Autovision')
+        expect($result['notes'])->toBe('Autovision')
             ->and($result['uid'])->toBe('FI1-42');
     });
 });

@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ProductBrand;
 use App\Enums\RmaStatus;
 use App\Support\RmaImport\Universal\UniversalImportMapper;
 use Tests\TestCase;
@@ -37,13 +36,10 @@ it('maps universal rows with metadata and homar brand alias', function (): void 
     ]);
 
     expect($mapped['uid'])->toBe('77223')
-        ->and($mapped['reference'])->toBe('64751014')
-        ->and($mapped['brand'])->toBe(ProductBrand::HouseOfMarley->value)
-        ->and($mapped['purchased_at'])->toBe('2026-01-28')
-        ->and($mapped['location_name'])->toBe('Vanden Borre N.V.')
-        ->and($mapped['external_location_id'])->toBe('19551')
+        ->and($mapped['ean'])->toBe('8715465017075')
         ->and($mapped['packing_slip_number'])->toBe('760647648')
         ->and($mapped['received_at'])->toBe('2026-02-05 00:00:00')
         ->and($mapped['status'])->toBe(RmaStatus::Open->value)
+        ->and($mapped['notes'])->toContain('Vanden Borre N.V.')
         ->and($mapped['notes'])->toContain('Slesbroekstraat');
 });

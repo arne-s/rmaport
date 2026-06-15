@@ -29,7 +29,7 @@ it('parses mediamarkt fixture and detects customer from template source', functi
         ->and($result->detectedCustomerId)->not->toBeNull();
 });
 
-it('stores staging rows without creating rmas', function (): void {
+it('creates rmas when importing new rows', function (): void {
     $fixture = base_path('tests/fixtures/rma/media-markt-export.xlsx');
     $template = ImportTemplate::query()->where('class', MediaMarktImportParser::class)->firstOrFail();
     $parseResult = app(ParseImportFileAction::class)($fixture, 'xlsx', $template);
@@ -72,7 +72,8 @@ it('stores staging rows without creating rmas', function (): void {
         ->and($batch->reference)->toBe('REF-001')
         ->and(ImportRow::query()->where('import_id', $batch->id)->count())->toBe(8)
         ->and(ImportRow::query()->where('import_id', $batch->id)->where('customer_id', $customer->id)->count())->toBe(8)
-        ->and(Rma::query()->count())->toBe(0);
+        ->and(Rma::query()->count())->toBe(8)
+        ->and(ImportRow::query()->where('import_id', $batch->id)->whereDoesntHave('rma')->count())->toBe(0);
 });
 
 it('detects universal customer via debtor number', function (): void {

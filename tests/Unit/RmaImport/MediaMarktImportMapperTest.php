@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ProductBrand;
 use App\Enums\RmaStatus;
 use App\Support\RmaImport\MediaMarkt\MediaMarktImportMapper;
 use App\Support\RmaImport\SpreadsheetTableReader;
@@ -53,9 +52,6 @@ it('maps media markt rows and falls back uid to order number', function (): void
     ]);
 
     expect($mapped['uid'])->toBe('AD71912248')
-        ->and($mapped['order_nr'])->toBe('AD71912248')
-        ->and($mapped['brand'])->toBe(ProductBrand::Jlab->value)
-        ->and($mapped['is_doa'])->toBeTrue()
-        ->and($mapped['barcode'])->toBe('000719122482')
+        ->and($mapped['ean'])->toBe('0846885011362')
         ->and($mapped['status'])->toBe(RmaStatus::Open->value);
 });

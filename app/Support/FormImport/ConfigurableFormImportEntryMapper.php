@@ -2,7 +2,6 @@
 
 namespace App\Support\FormImport;
 
-use App\Enums\ProductBrand;
 use App\Enums\RmaStatus;
 use App\Models\FormImport;
 use App\Support\RmaImport\Concerns\MapsRmaImportRows;
@@ -106,8 +105,8 @@ class ConfigurableFormImportEntryMapper
     private function castRmaField(string $field, string $value): mixed
     {
         return match ($field) {
-            'brand' => ProductBrand::resolveImportValue($value)?->value ?? $value,
-            'purchased_at', 'received_at' => $this->parseDate($value, 'Y-m-d')
+            'customer_id', 'import_row_id', 'product_id' => (int) $value,
+            'received_at' => $this->parseDate($value, 'Y-m-d')
                 ?? $this->parseDate($value, 'd.m.Y')
                 ?? $this->parseDate($value, 'd-m-Y')
                 ?? $value,

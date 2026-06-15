@@ -9,7 +9,7 @@
 @if ($record->rma)
     <a
         href="{{ RmaResource::getUrl('view', ['record' => $record->rma]) }}"
-        class="text-primary-600 hover:underline"
+        class="import-row-rma-link"
         onclick="event.stopPropagation()"
     >
         {{ $record->rma->uid }}
