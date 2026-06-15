@@ -61,6 +61,7 @@ $authUser->can('manage users')
                     <div class="subitems-list">
                         <a href="{{ route('filament.app.resources.rmas.index') }}">Overzicht</a>
                         <a href="{{ route('filament.app.resources.rmas.create') }}">RMA aanmaken</a>
+                        <a href="{{ route('filament.app.resources.import-rows.index') }}">Import-overzicht</a>
                     </div>
                 </div>
             </div>

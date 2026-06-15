@@ -153,7 +153,7 @@ it('imports consumer returns excel export rows', function (): void {
         ->and(Rma::query()->count())->toBe(29);
 });
 
-it('imports autovision store excel export rows', function (): void {
+it('imports universal excel export rows', function (): void {
     Permission::findOrCreate('manage sales', 'web');
 
     $fixture = base_path('tests/fixtures/rma/autovision-vanden-borre.xlsx');

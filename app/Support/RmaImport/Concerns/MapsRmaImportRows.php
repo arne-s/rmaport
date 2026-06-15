@@ -95,4 +95,19 @@ trait MapsRmaImportRows
 
         return $trimmed === '' ? null : $trimmed;
     }
+
+    protected function normalizeEan(mixed $value): ?string
+    {
+        $digits = preg_replace('/\D/', '', (string) ($value ?? ''));
+
+        if ($digits === null || $digits === '') {
+            return null;
+        }
+
+        if (strlen($digits) > 13) {
+            return null;
+        }
+
+        return str_pad($digits, 13, '0', STR_PAD_LEFT);
+    }
 }

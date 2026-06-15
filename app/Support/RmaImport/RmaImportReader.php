@@ -3,7 +3,7 @@
 namespace App\Support\RmaImport;
 
 use App\Enums\RmaImportTemplate;
-use App\Support\RmaImport\AutovisionStore\AutovisionStoreImportParser;
+use App\Support\RmaImport\Universal\UniversalImportParser;
 use App\Support\RmaImport\ConsumerReturns\ConsumerReturnsImportParser;
 use App\Support\RmaImport\ConsumerReturnsShipment\ConsumerReturnsShipmentImportParser;
 use App\Support\RmaImport\Contracts\RmaImportParser;
@@ -19,12 +19,12 @@ final class RmaImportReader
     {
         return match ($template) {
             RmaImportTemplate::Auto => [
-                app(AutovisionStoreImportParser::class),
+                app(UniversalImportParser::class),
                 app(ConsumerReturnsShipmentImportParser::class),
                 app(ConsumerReturnsImportParser::class),
                 app(MediaMarktImportParser::class),
             ],
-            RmaImportTemplate::AutovisionStore => [app(AutovisionStoreImportParser::class)],
+            RmaImportTemplate::Universal, RmaImportTemplate::AutovisionStore => [app(UniversalImportParser::class)],
             RmaImportTemplate::ConsumerReturns => [app(ConsumerReturnsImportParser::class)],
             RmaImportTemplate::ConsumerReturnsShipment => [app(ConsumerReturnsShipmentImportParser::class)],
             RmaImportTemplate::MediaMarkt => [app(MediaMarktImportParser::class)],

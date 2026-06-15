@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ImportBatchDownloadController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -314,6 +315,10 @@ Route::get('/invoice-download/{id}', [DocumentController::class, 'invoiceDownloa
 Route::get('/exact-documents/{id}/download', [DocumentController::class, 'exactDocumentDownload'])->name('documents.exact-document-download')->middleware(['auth', 'can:export-order']);
 Route::get('/exact-documents/{id}/preview', [DocumentController::class, 'exactDocumentPreview'])->name('documents.exact-document-preview')->middleware(['auth', 'can:export-order']);
 Route::get('/media/{id}/download', [DocumentController::class, 'mediaDownload'])->name('documents.media-download')->middleware(['auth', 'can:export-order']);
+
+Route::get('/import-batches/{importBatch}/download', ImportBatchDownloadController::class)
+    ->name('import-batches.download')
+    ->middleware(['auth']);
 
 if (app()->environment('local')) {
     include_once 'dev.php';

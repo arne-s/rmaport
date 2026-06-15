@@ -6919,6 +6919,8 @@ div.fi-resource-form-entries {
 
 .fi-resource-edit-record-page.fi-resource-customers,
 .fi-resource-edit-record-page.fi-resource-rmas,
+.fi-resource-list-records-page.fi-resource-import-rows,
+.fi-resource-view-record-page.fi-resource-import-rows,
 .fi-resource-edit-record-page.fi-resource-products,
 .fi-resource-edit-record-page.fi-resource-bill-of-materials,
 .fi-resource-create-record-page.fi-resource-bill-of-materials,
@@ -7254,6 +7256,7 @@ div.fi-resource-form-entries {
 .fi-resource-list-records-page.fi-resource-companies,
 .fi-resource-list-records-page.fi-resource-customers,
 .fi-resource-list-records-page.fi-resource-rmas,
+.fi-resource-list-records-page.fi-resource-import-rows,
 .fi-resource-list-records-page.fi-resource-price-tables,
 .fi-resource-list-records-page.fi-resource-invoices,
 .fi-resource-list-records-page.fi-resource-recurring-invoices,
@@ -7377,10 +7380,29 @@ div.fi-resource-form-entries {
 .fi-resource-quotes,
 .fi-resource-orders,
 .fi-resource-rmas,
+.fi-resource-import-rows,
 .fi-resource-release-orders,
 .fi-resource-stock-orders {
     .backTo {
         top: -8px !important;
+    }
+}
+
+.fi-resource-list-records-page.fi-resource-import-rows {
+    .import-row-artikel-column {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .import-row-rma-column {
+        white-space: nowrap;
+        width: 1%;
+    }
+
+    .import-row-rma-column .fi-ta-actions button.fi-ac-btn-action {
+        background-color: #fff !important;
     }
 }
 

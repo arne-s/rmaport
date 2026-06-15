@@ -15,6 +15,8 @@ use Filament\Tables\Table;
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
+use App\Models\ImportBatch;
+use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -27,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(Import::class, ImportBatch::class);
+
         if ($this->app->isLocal()) {
             $this->app->register(IdeHelperServiceProvider::class);
         }

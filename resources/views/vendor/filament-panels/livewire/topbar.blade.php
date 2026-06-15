@@ -10,6 +10,7 @@
 
     $topMenuRetourenActive = request()->routeIs(
         'filament.app.resources.rmas.*',
+        'filament.app.resources.import-rows.*',
     );
     $topMenuRelatiesActive = request()->routeIs(
         'filament.app.resources.customers.*',
@@ -175,6 +176,14 @@
                                     <div class="mainItem-info">
                                         <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/box-open-solid.svg') }}" alt="menu-icon">
                                         <span class="mainItem-name">RMA aanmaken</span>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="{{ route('filament.app.resources.import-rows.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.import-rows.index')) }}">
+                                <div class="mainItem no-link">
+                                    <div class="mainItem-info">
+                                        <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/box-open-solid.svg') }}" alt="menu-icon">
+                                        <span class="mainItem-name">Import-overzicht</span>
                                     </div>
                                 </div>
                             </a>

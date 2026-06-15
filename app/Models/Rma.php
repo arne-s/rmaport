@@ -115,6 +115,7 @@ class Rma extends Model implements HasMedia
         'reminded_at',
         'processed_at',
         'returned_at',
+        'import_id',
     ];
 
     protected $attributes = [
@@ -160,6 +161,11 @@ class Rma extends Model implements HasMedia
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function importRow(): BelongsTo
+    {
+        return $this->belongsTo(ImportRow::class, 'import_id');
     }
 
     public function rmaEvents(): HasMany
