@@ -176,7 +176,7 @@ class ImportRowsTable
                     ->extraCellAttributes(['class' => 'import-row-rma-column']),
             ])
             ->defaultSort('importBatch.created_at', 'desc')
-            ->recordUrl(fn (ImportRow $record): string => ImportRowResource::getUrl('view', ['record' => $record]))
+            ->recordUrl(null)
             ->filters([
                 ImportRowResource::createStatusFilter(
                     'customer_id',

@@ -8,3 +8,6 @@
 @else
     {{ $field['value'] }}
 @endif
+@if (! empty($field['internalNote']))
+    @include('filament.components.customer-internal-note-tooltip', ['comment' => $field['internalNote']])
+@endif

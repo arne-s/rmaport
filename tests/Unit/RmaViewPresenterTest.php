@@ -136,6 +136,46 @@ it('shows source description as customer link title in the main view', function 
     expect($customerField['title'] ?? null)->toBe('Mediamarkt Apeldoorn 520');
 });
 
+it('includes customer internal note on klant field when comment is present', function (): void {
+    $customer = Customer::query()->create([
+        'status' => CustomerStatus::Active,
+        'name' => 'Test Klant',
+        'comment' => 'Altijd bellen voor retour',
+    ]);
+
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-NOTE-001',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'customer_id' => $customer->id,
+    ]);
+
+    $customerField = collect(RmaViewPresenter::combinedGeneralHeaderFields($rma))
+        ->firstWhere('label', 'Klant');
+
+    expect($customerField['internalNote'] ?? null)->toBe('Altijd bellen voor retour');
+});
+
+it('omits customer internal note on klant field when comment is empty', function (): void {
+    $customer = Customer::query()->create([
+        'status' => CustomerStatus::Active,
+        'name' => 'Test Klant',
+        'comment' => null,
+    ]);
+
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-NOTE-002',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'customer_id' => $customer->id,
+    ]);
+
+    $customerField = collect(RmaViewPresenter::combinedGeneralHeaderFields($rma))
+        ->firstWhere('label', 'Klant');
+
+    expect($customerField)->not->toHaveKey('internalNote');
+});
+
 it('truncates long product names to one hundred fifty characters', function (): void {
     $longName = str_repeat('A', 160);
 

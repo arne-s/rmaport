@@ -91,6 +91,28 @@ it('shows customer name in view heading when linked', function (): void {
         ->assertSee('Test Klant BV');
 });
 
+it('shows customer internal note tooltip markup on klant field when comment is present', function (): void {
+    actingAsSalesUser();
+
+    $customer = Customer::query()->create([
+        'status' => CustomerStatus::Active,
+        'name' => 'Klant Met Notitie',
+        'comment' => 'Bel altijd eerst de vestiging',
+    ]);
+
+    $rma = createVisibleRma([
+        'uid' => 'RMA-NOTE-001',
+        'customer_id' => $customer->getKey(),
+    ]);
+
+    Livewire::test(ViewRma::class, ['record' => $rma->getKey()])
+        ->assertSuccessful()
+        ->assertSee('Klant Met Notitie')
+        ->assertSee('Interne Notitie:')
+        ->assertSee('Bel altijd eerst de vestiging')
+        ->assertSeeHtml('customer-note-tooltip');
+});
+
 it('saves werkzaamheden and interne notities from the view page', function (): void {
     actingAsSalesUser();
 

@@ -223,6 +223,12 @@ final class RmaViewPresenter
             $field['title'] = $sourceDescription;
         }
 
+        $internalNote = self::nullableString($customer?->comment);
+
+        if ($internalNote !== null) {
+            $field['internalNote'] = $internalNote;
+        }
+
         return $field;
     }
 
