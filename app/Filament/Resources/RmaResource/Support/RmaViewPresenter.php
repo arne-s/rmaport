@@ -31,7 +31,7 @@ final class RmaViewPresenter
         return [
             self::customerField($rma),
             ...self::customerContactFields($rma),
-            ['label' => 'Invoerdatum en tijd', 'value' => self::text($rma->created_at?->format('d/m/y - H:i'))],
+            ['label' => 'Invoerdatum en tijd', 'value' => self::formatOptionalLongDateTime($rma->created_at)],
             ...self::generalDetailFields($rma),
         ];
     }
@@ -190,12 +190,19 @@ final class RmaViewPresenter
     private static function customerField(Rma $rma): array
     {
         $customer = $rma->customer;
+        $sourceDescription = self::nullableString($rma->importRow?->source_description);
 
-        return self::field(
+        $field = self::field(
             'Klant',
             self::text($customer?->getName()),
             $customer !== null ? CustomerResource::getUrl('edit', ['record' => $customer]) : null,
         );
+
+        if ($sourceDescription !== null) {
+            $field['title'] = $sourceDescription;
+        }
+
+        return $field;
     }
 
     /**
@@ -258,6 +265,7 @@ final class RmaViewPresenter
     {
         return [
             self::purchaseDateField($rma),
+            self::returnDateField($rma),
         ];
     }
 
@@ -269,7 +277,6 @@ final class RmaViewPresenter
         $importRow = $rma->importRow;
 
         return [
-            self::returnDateField($rma),
             ['label' => 'Retourreden', 'value' => self::text($rma->return_reason ?? $importRow?->return_reason)],
         ];
     }
@@ -281,7 +288,7 @@ final class RmaViewPresenter
     {
         return [
             'label' => 'Aankoopdatum',
-            'value' => self::text($rma->importRow?->purchase_date?->format('d-m-Y')),
+            'value' => self::formatOptionalLongDate($rma->importRow?->purchase_date),
         ];
     }
 
@@ -335,6 +342,25 @@ final class RmaViewPresenter
 
     private static function formatReturnDate(Carbon $date): string
     {
+        return self::formatLongDate($date);
+    }
+
+    private static function formatOptionalLongDate(?Carbon $date): string
+    {
+        return $date !== null ? self::formatLongDate($date) : self::text(null);
+    }
+
+    private static function formatOptionalLongDateTime(?Carbon $date): string
+    {
+        if ($date === null) {
+            return self::text(null);
+        }
+
+        return self::formatLongDate($date).' - '.$date->format('H:i');
+    }
+
+    private static function formatLongDate(Carbon $date): string
+    {
         $month = mb_strtolower(rtrim($date->translatedFormat('M'), '.').'.');
 
         return sprintf('%s %s %s', $date->translatedFormat('j'), $month, $date->translatedFormat('Y'));
@@ -351,5 +377,16 @@ final class RmaViewPresenter
         }
 
         return (string) $value;
+    }
+
+    private static function nullableString(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
     }
 }

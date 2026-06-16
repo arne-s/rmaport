@@ -66,6 +66,7 @@ it('creates rmas when importing new rows', function (): void {
     $validation = $result['validation'];
 
     expect($batch)->toBeInstanceOf(ImportBatch::class)
+        ->and($batch->uid)->toMatch('/^IM-\d{7}$/')
         ->and($validation->summaryLabel())->toBe('8 rijen totaal, 8 nieuw, 0 bestaand, 0 ongeldig.')
         ->and($batch->successful_rows)->toBe(8)
         ->and($batch->track_trace_nr)->toBe('TT123')

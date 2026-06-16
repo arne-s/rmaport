@@ -12,9 +12,9 @@ class ListImportRows extends ListRecords
 {
     protected static string $resource = ImportRowResource::class;
 
-    protected static ?string $title = 'Import-overzicht';
+    protected static ?string $title = 'Importrijen';
 
-    protected static ?string $breadcrumb = 'Import-overzicht';
+    protected static ?string $breadcrumb = 'Importrijen';
 
     public function getDefaultTableRecordsPerPageSelectOption(): int
     {
@@ -26,6 +26,11 @@ class ListImportRows extends ListRecords
         $table = parent::table($table);
 
         return $table
+            ->header(view('filament.components.back-to-overview', [
+                'title' => 'Dashboard',
+                'url' => route('filament.app.pages.dashboard'),
+                'class' => 'quote-overview-back',
+            ]))
             ->headerActions([
                 ImportRmaAction::make()
                     ->visible(fn (): bool => SalesAuthorization::canManage()),

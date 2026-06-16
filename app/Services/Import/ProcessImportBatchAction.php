@@ -72,6 +72,7 @@ final class ProcessImportBatchAction
                 ? Carbon::parse($batchData['shipment_date'])
                 : null;
             $batch->total_rows = $validation->total;
+            $batch->uid = ImportBatch::generateNextUid();
             $batch->save();
 
             $storedPath = Storage::disk('local')->putFileAs(

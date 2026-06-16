@@ -4,6 +4,7 @@ use App\Enums\CustomerStatus;
 use App\Enums\ProductUnit;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\ImportRows\ImportRowResource;
+use App\Filament\Resources\ImportTasks\ImportTaskResource;
 use App\Filament\Resources\ImportRows\Pages\ListImportRows;
 use App\Filament\Resources\ImportRows\Pages\ViewImportRow;
 use App\Filament\Resources\ProductResource;
@@ -121,7 +122,155 @@ it('lists import rows for sales users', function (): void {
         ->assertSeeHtml(CustomerResource::getUrl('edit', ['record' => $customer]))
         ->assertSeeHtml(ProductResource::getUrl('edit', ['record' => $product]))
         ->assertSee('Aanmaken')
-        ->assertSee((string) $batch->id);
+        ->assertSee($batch->uid);
+});
+
+it('links import task uid to import tasks list filtered by search', function (): void {
+    $user = User::query()->create([
+        'email' => fake()->unique()->safeEmail(),
+        'password' => bcrypt('password'),
+        'first_name' => 'Import',
+        'last_name' => 'Linker',
+    ]);
+    $user->givePermissionTo(['access filament panel', 'manage sales']);
+
+    $template = ImportTemplate::query()->where('class', MediaMarktImportParser::class)->firstOrFail();
+    $source = Source::query()->firstOrFail();
+
+    $batch = ImportBatch::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'test.xlsx',
+        'file_path' => 'imports/test.xlsx',
+        'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+        'total_rows' => 1,
+        'successful_rows' => 1,
+        'import_template_id' => $template->id,
+    ]);
+
+    $row = ImportRow::query()->create([
+        'import_id' => $batch->id,
+        'customer_id' => $source->customer_id,
+        'source_id' => $source->id,
+        'reference' => 'REF-LINK',
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test(ListImportRows::class)
+        ->assertSuccessful()
+        ->assertSeeHtml('href="'.e(ImportTaskResource::indexUrlForImportTask($batch)).'"');
+});
+
+it('filters import rows by import task uid via native search query parameter', function (): void {
+    $user = User::query()->create([
+        'email' => fake()->unique()->safeEmail(),
+        'password' => bcrypt('password'),
+        'first_name' => 'Import',
+        'last_name' => 'Scope',
+    ]);
+    $user->givePermissionTo(['access filament panel', 'manage sales']);
+
+    $template = ImportTemplate::query()->where('class', MediaMarktImportParser::class)->firstOrFail();
+
+    $source = Source::query()->firstOrFail();
+
+    $batchA = ImportBatch::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'a.xlsx',
+        'file_path' => 'imports/a.xlsx',
+        'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+        'total_rows' => 1,
+        'successful_rows' => 1,
+        'import_template_id' => $template->id,
+    ]);
+
+    $batchB = ImportBatch::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'b.xlsx',
+        'file_path' => 'imports/b.xlsx',
+        'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+        'total_rows' => 1,
+        'successful_rows' => 1,
+        'import_template_id' => $template->id,
+    ]);
+
+    $rowA = ImportRow::query()->create([
+        'import_id' => $batchA->id,
+        'customer_id' => $source->customer_id,
+        'source_id' => $source->id,
+        'reference' => 'ROW-A',
+    ]);
+
+    ImportRow::query()->create([
+        'import_id' => $batchB->id,
+        'customer_id' => $source->customer_id,
+        'source_id' => $source->id,
+        'reference' => 'ROW-B',
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::withQueryParams(['search' => $batchA->uid])
+        ->test(ListImportRows::class)
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$rowA])
+        ->assertDontSee('ROW-B')
+        ->assertDontSee('Toon alle importrijen');
+});
+
+it('searches import rows by import task uid', function (): void {
+    $user = User::query()->create([
+        'email' => fake()->unique()->safeEmail(),
+        'password' => bcrypt('password'),
+        'first_name' => 'Import',
+        'last_name' => 'Search',
+    ]);
+    $user->givePermissionTo(['access filament panel', 'manage sales']);
+
+    $template = ImportTemplate::query()->where('class', MediaMarktImportParser::class)->firstOrFail();
+    $source = Source::query()->firstOrFail();
+
+    $batch = ImportBatch::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'search.xlsx',
+        'file_path' => 'imports/search.xlsx',
+        'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+        'total_rows' => 1,
+        'successful_rows' => 1,
+        'import_template_id' => $template->id,
+        'uid' => 'IM-0999999',
+    ]);
+
+    $row = ImportRow::query()->create([
+        'import_id' => $batch->id,
+        'customer_id' => $source->customer_id,
+        'source_id' => $source->id,
+        'reference' => 'SEARCH-ROW',
+    ]);
+
+    $otherBatch = ImportBatch::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'other.xlsx',
+        'file_path' => 'imports/other.xlsx',
+        'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+        'total_rows' => 1,
+        'successful_rows' => 1,
+        'import_template_id' => $template->id,
+    ]);
+
+    ImportRow::query()->create([
+        'import_id' => $otherBatch->id,
+        'customer_id' => $source->customer_id,
+        'source_id' => $source->id,
+        'reference' => 'UNRELATED',
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test(ListImportRows::class)
+        ->searchTable($batch->uid)
+        ->assertCanSeeTableRecords([$row])
+        ->assertDontSee('UNRELATED');
 });
 
 it('shows import row view page', function (): void {

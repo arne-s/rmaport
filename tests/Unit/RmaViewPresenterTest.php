@@ -89,7 +89,50 @@ it('links customer and product fields in the presenter', function (): void {
     $productField = collect($fields)->firstWhere('label', 'Artikelnaam');
 
     expect($customerField['url'] ?? null)->toBe(CustomerResource::getUrl('edit', ['record' => $customer]))
+        ->and($customerField['title'] ?? null)->toBeNull()
         ->and($productField['url'] ?? null)->toBe(ProductResource::getUrl('edit', ['record' => $product]));
+});
+
+it('shows source description as customer link title in the main view', function (): void {
+    $customer = Customer::query()->create([
+        'status' => CustomerStatus::Active,
+        'name' => 'Test Klant',
+    ]);
+
+    $user = \App\Models\User::query()->create([
+        'email' => fake()->unique()->safeEmail(),
+        'password' => bcrypt('password'),
+        'first_name' => 'Import',
+        'last_name' => 'Tester',
+    ]);
+
+    $batch = \App\Models\ImportBatch::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'test.xlsx',
+        'file_path' => 'imports/test.xlsx',
+        'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+        'total_rows' => 1,
+        'successful_rows' => 1,
+    ]);
+
+    $importRow = \App\Models\ImportRow::query()->create([
+        'import_id' => $batch->id,
+        'customer_id' => $customer->id,
+        'source_description' => 'Mediamarkt Apeldoorn 520',
+    ]);
+
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-PRESENTER-SOURCE-001',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'customer_id' => $customer->id,
+        'import_row_id' => $importRow->id,
+    ]);
+
+    $customerField = collect(RmaViewPresenter::combinedGeneralHeaderFields($rma->load('importRow')))
+        ->firstWhere('label', 'Klant');
+
+    expect($customerField['title'] ?? null)->toBe('Mediamarkt Apeldoorn 520');
 });
 
 it('truncates long product names to one hundred fifty characters', function (): void {
@@ -200,7 +243,7 @@ it('formats invoerdatum en tijd from created_at', function (): void {
 
     expect($headerFields[3])->toBe([
         'label' => 'Invoerdatum en tijd',
-        'value' => '11/06/26 - 12:34',
+        'value' => '11 jun. 2026 - 12:34',
     ]);
 
     Carbon::setTestNow();
@@ -263,6 +306,11 @@ it('formats return date with days since purchase date', function (): void {
         ->firstWhere('label', 'Retourdatum');
 
     expect($returnDateField['value'])->toBe('24 jun. 2026 (41 dagen na aankoop)');
+
+    $purchaseDateField = collect(RmaViewPresenter::returnReadOnlyPrimaryFields($rma->load('importRow')))
+        ->firstWhere('label', 'Aankoopdatum');
+
+    expect($purchaseDateField['value'])->toBe('14 mei 2026');
 });
 
 it('shows customer email and phone under klant in the header fields', function (): void {

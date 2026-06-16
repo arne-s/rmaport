@@ -63,4 +63,31 @@ return [
     'packing_slip' => [
         'start' => (int) env('DOCUMENT_UID_PACKING_SLIP_START', 1000),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | RMA number (numeric)
+    |--------------------------------------------------------------------------
+    |
+    | Fixed width (default 8 digits), e.g. 00000001.
+    |
+    */
+    'rma' => [
+        'start' => (int) env('DOCUMENT_UID_RMA_START', 1),
+        'digits' => 8,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Import batch UID (prefixed)
+    |--------------------------------------------------------------------------
+    |
+    | Prefix IM- with fixed-width numeric suffix, e.g. IM-0000001, IM-0413113.
+    |
+    */
+    'import' => [
+        'prefix' => env('DOCUMENT_UID_IMPORT_PREFIX', 'IM-'),
+        'start' => (int) env('DOCUMENT_UID_IMPORT_START', 1),
+        'digits' => (int) env('DOCUMENT_UID_IMPORT_DIGITS', 7),
+    ],
 ];

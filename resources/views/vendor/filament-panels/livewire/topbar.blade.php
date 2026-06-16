@@ -11,6 +11,7 @@
     $topMenuRetourenActive = request()->routeIs(
         'filament.app.resources.rmas.*',
         'filament.app.resources.import-rows.*',
+        'filament.app.resources.import-tasks.*',
     );
     $topMenuRelatiesActive = request()->routeIs(
         'filament.app.resources.customers.*',
@@ -179,14 +180,23 @@
                                     </div>
                                 </div>
                             </a>
-                            <a href="{{ route('filament.app.resources.import-rows.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.import-rows.index')) }}">
-                                <div class="mainItem no-link">
+                            <div class="subMenuItem">
+                                <div class="mainItem">
                                     <div class="mainItem-info">
                                         <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/box-open-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Import-overzicht</span>
+                                        <span class="mainItem-name">Imports</span>
                                     </div>
                                 </div>
-                            </a>
+
+                                <div class="mainItemAllLinks">
+                                    <a class="subMenuItemLink {{ $topMenuLinkActive(route('filament.app.resources.import-tasks.index')) }}" href="{{ route('filament.app.resources.import-tasks.index') }}">
+                                        <span class="menuItemText" data-text="Importtaken">Importtaken</span>
+                                    </a>
+                                    <a class="subMenuItemLink {{ $topMenuLinkActive(route('filament.app.resources.import-rows.index')) }}" href="{{ route('filament.app.resources.import-rows.index') }}">
+                                        <span class="menuItemText" data-text="Importrijen">Importrijen</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

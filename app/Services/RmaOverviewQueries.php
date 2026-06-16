@@ -7,6 +7,7 @@ use App\Filament\Resources\RmaResource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 final class RmaOverviewQueries
 {
@@ -23,6 +24,26 @@ final class RmaOverviewQueries
     /**
      * @return Collection<int, array{label: string, value: int, date: string}>
      */
+    public static function returnDateDayCounts(int $days = 31): Collection
+    {
+        $start = now()->subDays($days - 1)->startOfDay();
+        $end = now()->endOfDay();
+        $returnDayExpression = 'DATE(COALESCE(import_rows.return_date, import_rows.received_at, rmas.received_at))';
+
+        $counts = self::base()
+            ->leftJoin('import_rows', 'import_rows.id', '=', 'rmas.import_row_id')
+            ->whereNotNull(DB::raw($returnDayExpression))
+            ->whereBetween(DB::raw($returnDayExpression), [$start->toDateString(), $end->toDateString()])
+            ->selectRaw("{$returnDayExpression} as return_day, COUNT(*) as count")
+            ->groupByRaw($returnDayExpression)
+            ->pluck('count', 'return_day');
+
+        return self::buildDayCountSeries($start, $days, $counts);
+    }
+
+    /**
+     * @return Collection<int, array{label: string, value: int, date: string}>
+     */
     public static function createdAtDayCounts(int $days = 31): Collection
     {
         $start = now()->subDays($days - 1)->startOfDay();
@@ -34,6 +55,15 @@ final class RmaOverviewQueries
             ->groupBy('created_day')
             ->pluck('count', 'created_day');
 
+        return self::buildDayCountSeries($start, $days, $counts);
+    }
+
+    /**
+     * @param  Collection<string|int, int>  $counts
+     * @return Collection<int, array{label: string, value: int, date: string}>
+     */
+    private static function buildDayCountSeries(Carbon $start, int $days, Collection $counts): Collection
+    {
         return collect(range(0, $days - 1))
             ->map(function (int $offset) use ($start, $counts): array {
                 $date = $start->copy()->addDays($offset);

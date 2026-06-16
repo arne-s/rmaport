@@ -8,6 +8,7 @@ use App\Filament\Resources\ImportRows\Schemas\ImportRowInfolist;
 use App\Filament\Resources\ImportRows\Tables\ImportRowsTable;
 use App\Filament\Resources\Resource;
 use App\Filament\Support\SalesAuthorization;
+use App\Models\ImportBatch;
 use App\Models\ImportRow;
 use BackedEnum;
 use Filament\Schemas\Schema;
@@ -22,9 +23,9 @@ class ImportRowResource extends Resource
 
     protected static ?string $slug = 'import-rows';
 
-    protected static ?string $modelLabel = 'Import';
+    protected static ?string $modelLabel = 'Importrij';
 
-    protected static ?string $pluralModelLabel = 'Import-overzicht';
+    protected static ?string $pluralModelLabel = 'Importrijen';
 
     protected static ?string $breadcrumb = 'Retouren';
 
@@ -89,5 +90,12 @@ class ImportRowResource extends Resource
             'index' => ListImportRows::route('/'),
             'view' => ViewImportRow::route('/{record}'),
         ];
+    }
+
+    public static function indexUrlForImportTask(ImportBatch $batch): string
+    {
+        return static::getUrl('index', [
+            'search' => $batch->uid,
+        ]);
     }
 }

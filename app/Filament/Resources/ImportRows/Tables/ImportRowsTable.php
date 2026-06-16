@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ImportRows\Tables;
 use App\Actions\Import\CreateRmaFromImportRowAction;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\ImportRows\ImportRowResource;
+use App\Filament\Resources\ImportTasks\ImportTaskResource;
 use App\Filament\Resources\ProductResource;
 use App\Filament\Resources\RmaResource;
 use App\Models\Customer;
@@ -58,11 +59,6 @@ class ImportRowsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->header(view('filament.components.back-to-overview', [
-                'title' => 'Dashboard',
-                'url' => route('filament.app.pages.dashboard'),
-                'class' => 'quote-overview-back',
-            ]))
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with([
                 'customer',
                 'source.customer',
@@ -93,7 +89,6 @@ class ImportRowsTable
                 TextColumn::make('ean_nr')
                     ->label('Artikel')
                     ->formatStateUsing(fn (?string $state, ImportRowProductResolver $productResolver): string => $productResolver->findByEan($state)?->name ?? '—')
-                    ->tooltip(fn (?string $state, ImportRowProductResolver $productResolver): ?string => $productResolver->findByEan($state)?->name)
                     ->limit(40)
                     ->url(fn (?string $state, ImportRowProductResolver $productResolver): ?string => ($product = $productResolver->findByEan($state)) !== null
                         ? ProductResource::getUrl('edit', ['record' => $product])
@@ -137,9 +132,27 @@ class ImportRowsTable
                     ->label('Bestand')
                     ->searchable()
                     ->placeholder('—'),
-                TextColumn::make('import_id')
-                    ->label('Import ID')
-                    ->sortable()
+                TextColumn::make('importBatch.uid')
+                    ->label('Importtaak')
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query->orderBy(
+                            ImportBatch::query()
+                                ->select('uid')
+                                ->whereColumn('imports.id', 'import_rows.import_id')
+                                ->limit(1),
+                            $direction,
+                        );
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas(
+                            'importBatch',
+                            fn (Builder $batch): Builder => $batch->where('uid', 'like', "{$search}%"),
+                        );
+                    })
+                    ->url(fn (ImportRow $record): ?string => $record->importBatch !== null
+                        ? ImportTaskResource::indexUrlForImportTask($record->importBatch)
+                        : null)
+                    ->color('primary')
                     ->placeholder('—')
                     ->extraCellAttributes(['class' => 'import-row-import-id-column']),
                 ViewColumn::make('rma')

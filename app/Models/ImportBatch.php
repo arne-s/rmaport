@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Support\ImportBatchNumberSequence;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int|null $import_template_id
+ * @property string $uid
  * @property string|null $track_trace_nr
  * @property string|null $reference
  * @property Carbon|null $shipment_date
@@ -17,6 +20,15 @@ use Illuminate\Support\Carbon;
 class ImportBatch extends Import
 {
     protected $table = 'imports';
+
+    protected static function booted(): void
+    {
+        static::creating(function (ImportBatch $batch): void {
+            if (blank($batch->uid)) {
+                $batch->uid = static::generateNextUid();
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -46,5 +58,10 @@ class ImportBatch extends Import
     public function uploader(): BelongsTo
     {
         return $this->user();
+    }
+
+    public static function generateNextUid(): string
+    {
+        return DB::transaction(fn (): string => ImportBatchNumberSequence::next());
     }
 }

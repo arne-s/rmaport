@@ -90,7 +90,7 @@ it('creates an rma from an import row', function (): void {
 
     $rma = app(CreateRmaFromImportRowAction::class)($row);
 
-    expect($rma->uid)->toBe('AD999888')
+    expect($rma->uid)->toMatch('/^\d{8}$/')
         ->and($rma->status)->toBe(RmaStatus::Open)
         ->and($rma->is_draft)->toBeFalse()
         ->and($rma->customer_id)->toBe($customer->id)
@@ -123,5 +123,5 @@ it('creates an rma from the import rows table action', function (): void {
         ->assertNotified()
         ->assertRedirect(RmaResource::getUrl('view', ['record' => Rma::query()->where('import_row_id', $row->id)->first()]));
 
-    expect(Rma::query()->where('import_row_id', $row->id)->value('uid'))->toBe('AD999888');
+    expect(Rma::query()->where('import_row_id', $row->id)->value('uid'))->toMatch('/^\d{8}$/');
 });

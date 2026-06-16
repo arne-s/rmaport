@@ -6,14 +6,11 @@ use App\Enums\RmaStatus;
 use App\Models\ImportRow;
 use App\Models\Rma;
 use App\Services\Import\ImportRowProductResolver;
-use App\Support\RmaImport\Concerns\MapsRmaImportRows;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 final class CreateRmaFromImportRowAction
 {
-    use MapsRmaImportRows;
-
     public function __construct(
         private readonly ImportRowProductResolver $productResolver = new ImportRowProductResolver,
     ) {}
@@ -24,21 +21,6 @@ final class CreateRmaFromImportRowAction
 
         if ($importRow->rma !== null) {
             throw new RuntimeException('Er bestaat al een RMA voor deze importregel.');
-        }
-
-        $uid = $this->resolveUid(
-            $importRow->assignment_nr,
-            $importRow->reference,
-            $importRow->customer_order_id,
-            'IR'.$importRow->getKey(),
-        );
-
-        if ($uid === null) {
-            throw new RuntimeException('Geen RMA-nummer af te leiden uit deze importregel.');
-        }
-
-        if (Rma::query()->where('uid', $uid)->exists()) {
-            throw new RuntimeException("RMA-nummer {$uid} bestaat al.");
         }
 
         $product = $this->productResolver->findByEan($importRow->ean_nr);
@@ -53,8 +35,9 @@ final class CreateRmaFromImportRowAction
             throw new RuntimeException('Geen klant gekoppeld aan deze importregel.');
         }
 
-        return DB::transaction(function () use ($importRow, $uid, $product, $customerId): Rma {
+        return DB::transaction(function () use ($importRow, $product, $customerId): Rma {
             $batch = $importRow->importBatch;
+            $uid = Rma::generateNextUid();
 
             /** @var Rma $rma */
             $rma = Rma::query()->create([

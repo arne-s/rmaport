@@ -2,7 +2,7 @@
 
 namespace App\Filament\Actions;
 
-use App\Filament\Resources\ImportRows\ImportRowResource;
+use App\Filament\Resources\ImportTasks\ImportTaskResource;
 use App\Models\Customer;
 use App\Models\ImportTemplate;
 use App\Services\Import\ImportRowValidationResult;
@@ -50,7 +50,7 @@ class ImportRmaAction extends Action
         $this->modalSubmitActionLabel('Importeren');
         $this->modalWidth('3xl');
         $this->color('gray');
-        $this->successRedirectUrl(fn (): string => ImportRowResource::getUrl('index'));
+        $this->successRedirectUrl(fn (): string => ImportTaskResource::getUrl('index'));
 
         $this->beforeFormFilled(function (): void {
             if (ImportTemplate::query()->exists()) {
@@ -181,7 +181,7 @@ class ImportRmaAction extends Action
                         ->maxLength(255)
                         ->visible($confirmFieldsVisible),
                     TextInput::make('reference')
-                        ->label('Referentie')
+                        ->label('Zending-referentie')
                         ->extraFieldWrapperAttributes(['class' => 'whitespace-nowrap'])
                         ->maxLength(255)
                         ->visible($confirmFieldsVisible),

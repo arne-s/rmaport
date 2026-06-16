@@ -6916,6 +6916,7 @@ div.fi-resource-form-entries {
 .fi-resource-edit-record-page.fi-resource-customers,
 .fi-resource-edit-record-page.fi-resource-rmas,
 .fi-resource-list-records-page.fi-resource-import-rows,
+.fi-resource-list-records-page.fi-resource-import-tasks,
 .fi-resource-view-record-page.fi-resource-import-rows,
 .fi-resource-edit-record-page.fi-resource-products,
 .fi-resource-edit-record-page.fi-resource-bill-of-materials,
@@ -7253,6 +7254,7 @@ div.fi-resource-form-entries {
 .fi-resource-list-records-page.fi-resource-customers,
 .fi-resource-list-records-page.fi-resource-rmas,
 .fi-resource-list-records-page.fi-resource-import-rows,
+.fi-resource-list-records-page.fi-resource-import-tasks,
 .fi-resource-list-records-page.fi-resource-price-tables,
 .fi-resource-list-records-page.fi-resource-invoices,
 .fi-resource-list-records-page.fi-resource-recurring-invoices,
@@ -7377,6 +7379,7 @@ div.fi-resource-form-entries {
 .fi-resource-orders,
 .fi-resource-rmas,
 .fi-resource-import-rows,
+.fi-resource-import-tasks,
 .fi-resource-release-orders,
 .fi-resource-stock-orders {
     .backTo {
@@ -10673,4 +10676,10 @@ input[id='form.klantgegevens.dob'] {
     border: 1px solid #adadad !important;
     border-radius: 3px !important;
     padding: 13px 5px !important;
+}
+
+.view-rma-header {
+    div.backTo {
+        margin-top: 11px !important;
+    }
 }

@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Carbon;
+use App\Support\RmaNumberSequence;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -184,7 +185,7 @@ class Rma extends Model implements HasMedia
     {
         /** @var self $rma */
         $rma = static::query()->create([
-            'uid' => static::generateDraftUid(),
+            'uid' => static::generateNextUid(),
             'status' => RmaStatus::Open,
             'is_draft' => true,
         ]);
@@ -192,12 +193,8 @@ class Rma extends Model implements HasMedia
         return $rma;
     }
 
-    public static function generateDraftUid(): string
+    public static function generateNextUid(): string
     {
-        do {
-            $uid = 'DR-'.strtoupper(Str::random(17));
-        } while (static::query()->where('uid', $uid)->exists());
-
-        return $uid;
+        return DB::transaction(fn (): string => RmaNumberSequence::next());
     }
 }

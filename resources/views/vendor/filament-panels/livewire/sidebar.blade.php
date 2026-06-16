@@ -56,12 +56,26 @@ $authUser->can('manage users')
                     x-transition:enter="transition-opacity duration-200"
                     x-transition:enter-start="opacity-0"
                     x-transition:enter-end="opacity-100">
-                    <button class="subitems-back" x-on:click="activeMenu = null">Alle categorieën</button>
-                    <h2>Retouren</h2>
-                    <div class="subitems-list">
+                    <button class="subitems-back" :class="{ 'mobielheader-marginbottom-none': subMenu !== null }" x-on:click="activeMenu = null; subMenu = null">Alle categorieën</button>
+                    <h2 x-show="!subMenu">Retouren</h2>
+                    <div class="subitems-list" x-show="!subMenu">
                         <a href="{{ route('filament.app.resources.rmas.index') }}">Overzicht</a>
                         <a href="{{ route('filament.app.resources.rmas.create') }}">RMA aanmaken</a>
-                        <a href="{{ route('filament.app.resources.import-rows.index') }}">Import-overzicht</a>
+                        <div x-on:click="subMenu = 'imports'">Imports</div>
+                    </div>
+
+                    <div x-show="subMenu === 'imports'"
+                        x-transition:enter="transition-opacity duration-200"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100">
+                        <button class="subitems-back" x-on:click="subMenu = null">Terug naar Retouren</button>
+
+                        <h2>Imports</h2>
+
+                        <div class="subitems-list">
+                            <a href="{{ route('filament.app.resources.import-tasks.index') }}">Importtaken</a>
+                            <a href="{{ route('filament.app.resources.import-rows.index') }}">Importrijen</a>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -58,8 +58,7 @@ it('creates a draft rma and redirects to edit when visiting create', function ()
     $draft = Rma::query()->where('is_draft', true)->latest('id')->first();
 
     expect($draft)->not->toBeNull()
-        ->and($draft->uid)->toStartWith('DR-')
-        ->and(strlen($draft->uid))->toBeLessThanOrEqual(20)
+        ->and($draft->uid)->toMatch('/^\d{8}$/')
         ->and($draft->status)->toBe(RmaStatus::Open);
 
     $response->assertRedirect(RmaResource::getUrl('edit', ['record' => $draft]));
@@ -79,14 +78,15 @@ it('creates a draft rma from dashboard quick link action', function (): void {
     $draft = Rma::query()->where('is_draft', true)->latest('id')->first();
 
     expect($draft)->not->toBeNull()
-        ->and($draft->uid)->toStartWith('DR-');
+        ->and($draft->uid)->toMatch('/^\d{8}$/');
 });
 
 it('generates unique draft uids', function (): void {
     $first = Rma::createDraft();
     $second = Rma::createDraft();
 
-    expect($first->uid)->not->toBe($second->uid);
+    expect($first->uid)->not->toBe($second->uid)
+        ->and((int) $second->uid)->toBe((int) $first->uid + 1);
 });
 
 it('hides draft rmas from the overview', function (): void {

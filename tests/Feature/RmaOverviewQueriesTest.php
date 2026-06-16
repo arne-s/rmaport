@@ -1,7 +1,10 @@
 <?php
 
 use App\Enums\RmaStatus;
+use App\Models\ImportBatch;
+use App\Models\ImportRow;
 use App\Models\Rma;
+use App\Models\User;
 use App\Services\RmaOverviewQueries;
 use Illuminate\Support\Carbon;
 
@@ -23,35 +26,71 @@ it('builds rma index urls filtered by status', function (): void {
         ->and($url)->toContain('in_progress');
 });
 
-it('returns the latest created days with rma counts excluding drafts', function (): void {
+it('returns the latest return days with rma counts excluding drafts', function (): void {
     Carbon::setTestNow('2026-06-03 12:00:00');
+
+    $user = User::query()->create([
+        'email' => fake()->unique()->safeEmail(),
+        'password' => bcrypt('password'),
+        'first_name' => 'Import',
+        'last_name' => 'Tester',
+    ]);
+
+    $batch = ImportBatch::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'test.xlsx',
+        'file_path' => 'imports/test.xlsx',
+        'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+        'total_rows' => 3,
+        'successful_rows' => 3,
+    ]);
+
+    $rowA1 = ImportRow::query()->create([
+        'import_id' => $batch->id,
+        'return_date' => '2026-06-01',
+    ]);
+    $rowA2 = ImportRow::query()->create([
+        'import_id' => $batch->id,
+        'return_date' => '2026-06-01',
+    ]);
+    $rowB1 = ImportRow::query()->create([
+        'import_id' => $batch->id,
+        'return_date' => '2026-06-03',
+    ]);
 
     Rma::query()->create([
         'uid' => 'DAY-A-1',
         'status' => RmaStatus::Open,
         'is_draft' => false,
-        'created_at' => '2026-06-01 10:00:00',
+        'import_row_id' => $rowA1->id,
+        'created_at' => '2026-06-10 10:00:00',
     ]);
     Rma::query()->create([
         'uid' => 'DAY-A-2',
         'status' => RmaStatus::Open,
         'is_draft' => false,
-        'created_at' => '2026-06-01 11:00:00',
+        'import_row_id' => $rowA2->id,
+        'created_at' => '2026-06-10 11:00:00',
     ]);
     Rma::query()->create([
         'uid' => 'DAY-B-1',
         'status' => RmaStatus::Open,
         'is_draft' => false,
-        'created_at' => '2026-06-03 09:00:00',
+        'import_row_id' => $rowB1->id,
+        'created_at' => '2026-06-10 09:00:00',
     ]);
     Rma::query()->create([
         'uid' => 'DRAFT-DAY',
         'status' => RmaStatus::Open,
         'is_draft' => true,
+        'import_row_id' => ImportRow::query()->create([
+            'import_id' => $batch->id,
+            'return_date' => '2026-06-04',
+        ])->id,
         'created_at' => '2026-06-04 09:00:00',
     ]);
 
-    $days = RmaOverviewQueries::createdAtDayCounts();
+    $days = RmaOverviewQueries::returnDateDayCounts();
 
     expect($days)->toHaveCount(31)
         ->and($days->first()['date'])->toBe('2026-05-04')
@@ -63,7 +102,24 @@ it('returns the latest created days with rma counts excluding drafts', function 
     Carbon::setTestNow();
 });
 
-it('limits created day counts to the latest thirty-one calendar days', function (): void {
+it('falls back to received_at when return date is missing', function (): void {
+    Carbon::setTestNow('2026-06-05 12:00:00');
+
+    Rma::query()->create([
+        'uid' => 'RECEIVED-AT-1',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'received_at' => '2026-06-04 15:30:00',
+    ]);
+
+    $days = RmaOverviewQueries::returnDateDayCounts();
+
+    expect($days->firstWhere('date', '2026-06-04')['value'])->toBe(1);
+
+    Carbon::setTestNow();
+});
+
+it('limits return day counts to the latest thirty-one calendar days', function (): void {
     Carbon::setTestNow('2026-06-16 12:00:00');
 
     for ($day = 1; $day <= 40; $day++) {
@@ -71,11 +127,11 @@ it('limits created day counts to the latest thirty-one calendar days', function 
             'uid' => 'LIMIT-'.$day,
             'status' => RmaStatus::Open,
             'is_draft' => false,
-            'created_at' => sprintf('2026-06-%02d 10:00:00', $day),
+            'received_at' => sprintf('2026-06-%02d 10:00:00', $day),
         ]);
     }
 
-    $days = RmaOverviewQueries::createdAtDayCounts();
+    $days = RmaOverviewQueries::returnDateDayCounts();
 
     expect($days)->toHaveCount(31)
         ->and($days->first()['date'])->toBe('2026-05-17')
