@@ -42,7 +42,8 @@ class ConfigurableFormImportEntryMapper
             $this->uidFromConfiguredField($formImport, $fieldValues),
             $this->fallbackUid($formImport, $entryId),
         );
-        $attributes['received_at'] ??= $this->parseDateTime((string) ($entry['date_created'] ?? ''), 'Y-m-d H:i:s');
+        $attributes['return_date'] ??= $this->parseDate((string) ($entry['date_created'] ?? ''), 'Y-m-d H:i:s')
+            ?? $this->parseDate((string) ($entry['date_created'] ?? ''), 'Y-m-d');
         $attributes['status'] = RmaStatus::Open->value;
 
         return array_filter($attributes, fn (mixed $value): bool => $value !== null && $value !== '');
@@ -106,7 +107,7 @@ class ConfigurableFormImportEntryMapper
     {
         return match ($field) {
             'customer_id', 'import_row_id', 'product_id' => (int) $value,
-            'received_at' => $this->parseDate($value, 'Y-m-d')
+            'return_date' => $this->parseDate($value, 'Y-m-d')
                 ?? $this->parseDate($value, 'd.m.Y')
                 ?? $this->parseDate($value, 'd-m-Y')
                 ?? $value,

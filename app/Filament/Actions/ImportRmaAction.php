@@ -127,6 +127,8 @@ class ImportRmaAction extends Action
                         $set('customer_id', $parseResult->detectedCustomerId);
                         $set('track_trace_nr', $parseResult->trackTraceNr);
                         $set('reference', $parseResult->reference);
+                        $set('shipment_reference', $parseResult->shipmentReference);
+                        $set('import_date', $parseResult->importDate);
                         $set('shipment_date', $parseResult->shipmentDate);
                         $set('row_count', $parseResult->rowCount());
                         self::syncImportNewCount($set, $parseResult->detectedCustomerId);
@@ -181,12 +183,22 @@ class ImportRmaAction extends Action
                         ->maxLength(255)
                         ->visible($confirmFieldsVisible),
                     TextInput::make('reference')
+                        ->label('Referentie')
+                        ->extraFieldWrapperAttributes(['class' => 'whitespace-nowrap'])
+                        ->maxLength(255)
+                        ->visible($confirmFieldsVisible),
+                    TextInput::make('shipment_reference')
                         ->label('Zending-referentie')
                         ->extraFieldWrapperAttributes(['class' => 'whitespace-nowrap'])
                         ->maxLength(255)
                         ->visible($confirmFieldsVisible),
+                    DatePicker::make('import_date')
+                        ->label('Aanvraagdatum')
+                        ->extraFieldWrapperAttributes(['class' => 'whitespace-nowrap'])
+                        ->native(false)
+                        ->visible($confirmFieldsVisible),
                     DatePicker::make('shipment_date')
-                        ->label('Zending-datum')
+                        ->label('Verzenddatum')
                         ->extraFieldWrapperAttributes(['class' => 'whitespace-nowrap'])
                         ->native(false)
                         ->visible($confirmFieldsVisible),
@@ -251,6 +263,8 @@ class ImportRmaAction extends Action
                         'customer_id' => (int) $customerId,
                         'track_trace_nr' => $data['track_trace_nr'] ?? null,
                         'reference' => $data['reference'] ?? null,
+                        'shipment_reference' => $data['shipment_reference'] ?? null,
+                        'import_date' => $data['import_date'] ?? null,
                         'shipment_date' => $data['shipment_date'] ?? null,
                     ],
                     file: $file,
@@ -328,6 +342,8 @@ class ImportRmaAction extends Action
         $set('customer_id', null);
         $set('track_trace_nr', null);
         $set('reference', null);
+        $set('shipment_reference', null);
+        $set('import_date', null);
         $set('shipment_date', null);
         $set('row_count', null);
         $set('import_new_count', null);

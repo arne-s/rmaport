@@ -147,7 +147,8 @@ it('logs status changes from the view page', function (): void {
 
     $rma->refresh();
 
-    expect($rma->status)->toBe(RmaStatus::Received);
+    expect($rma->status)->toBe(RmaStatus::Received)
+        ->and($rma->received_at)->not->toBeNull();
 
     expect(RmaStatusChange::query()->where('rma_id', $rma->getKey())->count())->toBe(1)
         ->and(RmaEvent::query()->where('rma_id', $rma->getKey())->where('type', 'like', 'RMA-status gewijzigd:%')->exists())->toBeTrue();

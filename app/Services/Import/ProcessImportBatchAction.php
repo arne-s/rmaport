@@ -29,7 +29,9 @@ final class ProcessImportBatchAction
      *     customer_id: int,
      *     track_trace_nr?: string|null,
      *     reference?: string|null,
+     *     import_date?: string|null,
      *     shipment_date?: string|null,
+     *     shipment_reference?: string|null,
      * }  $batchData
      * @return array{batch: ImportBatch, validation: ImportRowValidationResult}
      */
@@ -68,9 +70,13 @@ final class ProcessImportBatchAction
             $batch->import_template_id = $parseResult->template->id;
             $batch->track_trace_nr = $batchData['track_trace_nr'] ?? null;
             $batch->reference = $batchData['reference'] ?? null;
+            $batch->import_date = filled($batchData['import_date'] ?? null)
+                ? Carbon::parse($batchData['import_date'])
+                : null;
             $batch->shipment_date = filled($batchData['shipment_date'] ?? null)
                 ? Carbon::parse($batchData['shipment_date'])
                 : null;
+            $batch->shipment_reference = $batchData['shipment_reference'] ?? null;
             $batch->total_rows = $validation->total;
             $batch->uid = ImportBatch::generateNextUid();
             $batch->save();

@@ -44,7 +44,7 @@ class SendRmaEmailAction extends Action
                 Html::make('<span tabindex="0" aria-hidden="true" style="position:absolute;opacity:0;width:0;height:0;overflow:hidden;"></span>'),
 
                 Group::make()
-                    ->extraAttributes(['class' => 'custom-form-design'])
+                    ->extraAttributes(['class' => 'custom-form-design', 'style' => 'margin-top: -20px'])
                     ->schema([
                         TextInput::make('from')
                             ->label('Vanaf')

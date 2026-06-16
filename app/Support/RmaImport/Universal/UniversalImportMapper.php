@@ -31,7 +31,7 @@ final class UniversalImportMapper
             'ean' => $this->nullableString($row['EAN NUMMER'] ?? null),
             'complaint' => $this->nullableString($row['Klachtomschrijving'] ?? null),
             'packing_slip_number' => $this->nullableString($metadata['Zending referentie'] ?? null),
-            'received_at' => $this->parseDateTime($this->nullableString($metadata['Datum'] ?? null), 'Y-m-d'),
+            'return_date' => $this->parseDate($this->nullableString($metadata['Datum'] ?? null), 'Y-m-d'),
             'notes' => $this->buildNotes($metadata),
             'status' => RmaStatus::Open->value,
         ], fn (mixed $value): bool => $value !== null);

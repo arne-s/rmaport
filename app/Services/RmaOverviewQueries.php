@@ -28,7 +28,7 @@ final class RmaOverviewQueries
     {
         $start = now()->subDays($days - 1)->startOfDay();
         $end = now()->endOfDay();
-        $returnDayExpression = 'DATE(COALESCE(import_rows.return_date, import_rows.received_at, rmas.received_at))';
+        $returnDayExpression = 'DATE(COALESCE(rmas.return_date, import_rows.return_date))';
 
         $counts = self::base()
             ->leftJoin('import_rows', 'import_rows.id', '=', 'rmas.import_row_id')

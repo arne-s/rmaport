@@ -21,7 +21,7 @@ final class RmaFieldRegistry
             'complaint' => 'Klacht',
             'service' => 'Werkzaamheden',
             'notes' => 'Interne notities',
-            'received_at' => 'Ontvangen op',
+            'return_date' => 'Retourdatum',
         ];
     }
 

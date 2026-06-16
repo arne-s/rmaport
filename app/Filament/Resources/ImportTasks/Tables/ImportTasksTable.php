@@ -5,12 +5,14 @@ namespace App\Filament\Resources\ImportTasks\Tables;
 use App\Filament\Forms\Components\ToggleFilter;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\ImportRows\ImportRowResource;
+use App\Filament\Resources\ImportTasks\Actions\SendImportBatchExportAction;
 use App\Models\Customer;
 use App\Models\ImportBatch;
 use App\Models\ImportRow;
 use App\Support\FormatDisplayDate;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -42,20 +44,28 @@ class ImportTasksTable
                     ->color('primary')
                     ->placeholder('—'),
                 TextColumn::make('reference')
+                    ->label('Referentie')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('—'),
+                TextColumn::make('shipment_reference')
                     ->label('Zending-referentie')
                     ->searchable()
                     ->sortable()
                     ->placeholder('—'),
-                TextColumn::make('shipment_date')
-                    ->label('Zending-datum')
+                TextColumn::make('import_date')
+                    ->label('Aanvraagdatum')
                     ->formatStateUsing(fn ($state): ?string => $state !== null
                         ? FormatDisplayDate::longDate($state)
                         : null)
                     ->sortable()
                     ->placeholder('—'),
-                TextColumn::make('track_trace_nr')
-                    ->label('Track & Trace')
-                    ->searchable()
+                TextColumn::make('shipment_date')
+                    ->label('Verzenddatum')
+                    ->formatStateUsing(fn ($state): ?string => $state !== null
+                        ? FormatDisplayDate::longDate($state)
+                        : null)
+                    ->sortable()
                     ->placeholder('—'),
                 TextColumn::make('successful_rows')
                     ->label('Aantal rijen')
@@ -83,6 +93,13 @@ class ImportTasksTable
                         ? route('import-batches.download', $record)
                         : null)
                     ->color('primary')
+                    ->placeholder('—'),
+                ViewColumn::make('sheet_retour')
+                    ->label('Sheet retour')
+                    ->view('filament.tables.columns.import-batch-sheet-retour')
+                    ->action(SendImportBatchExportAction::make())
+                    ->disabledClick()
+                    ->extraCellAttributes(['class' => 'import-batch-sheet-retour-column'])
                     ->placeholder('—'),
             ])
             ->defaultSort('created_at', 'desc')
@@ -139,7 +156,7 @@ class ImportTasksTable
             });
     }
 
-    private static function resolveCustomer(ImportBatch $record): ?Customer
+    public static function resolveCustomer(ImportBatch $record): ?Customer
     {
         $row = $record->importRows->first();
 

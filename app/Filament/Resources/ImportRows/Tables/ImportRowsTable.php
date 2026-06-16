@@ -87,14 +87,30 @@ class ImportRowsTable
                     ->sortable()
                     ->placeholder('—'),
                 TextColumn::make('ean_nr')
+                    ->label('EAN')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('—'),
+                TextColumn::make('product_name')
                     ->label('Artikel')
-                    ->formatStateUsing(fn (?string $state, ImportRowProductResolver $productResolver): string => $productResolver->findByEan($state)?->name ?? '—')
-                    ->limit(40)
-                    ->url(fn (?string $state, ImportRowProductResolver $productResolver): ?string => ($product = $productResolver->findByEan($state)) !== null
+                    ->state(function (ImportRow $record, ImportRowProductResolver $productResolver): string {
+                        $productName = $productResolver->findByEan($record->ean_nr)?->name;
+
+                        if ($productName === null) {
+                            return '—';
+                        }
+
+                        if ($productResolver->usedFallback($record->ean_nr) && filled($record->product_name)) {
+                            return "{$productName} ({$record->product_name})";
+                        }
+
+                        return $productName;
+                    })
+                    ->limit(60)
+                    ->url(fn (ImportRow $record, ImportRowProductResolver $productResolver): ?string => ($product = $productResolver->findByEan($record->ean_nr)) !== null
                         ? ProductResource::getUrl('edit', ['record' => $product])
                         : null)
                     ->color('primary')
-                    ->disabledClick()
                     ->grow(false)
                     ->extraCellAttributes(['class' => 'import-row-artikel-column'])
                     ->searchable(query: function (Builder $query, string $search): Builder {
@@ -119,6 +135,7 @@ class ImportRowsTable
                 TextColumn::make('importBatch.created_at')
                     ->label('Geïmporteerd op')
                     ->dateTime('d-m-Y H:i')
+                    ->extraCellAttributes(['class' => 'import-row-imported-at-column'])
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query->orderBy(
                             ImportBatch::query()
@@ -128,10 +145,6 @@ class ImportRowsTable
                             $direction,
                         );
                     }),
-                TextColumn::make('importBatch.file_name')
-                    ->label('Bestand')
-                    ->searchable()
-                    ->placeholder('—'),
                 TextColumn::make('importBatch.uid')
                     ->label('Importtaak')
                     ->sortable(query: function (Builder $query, string $direction): Builder {

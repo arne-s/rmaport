@@ -6,7 +6,6 @@ use App\Enums\Import\ImportRowValidationStatus;
 use App\Models\Customer;
 use App\Models\ImportRow;
 use App\Models\ImportTemplate;
-use App\Models\Product;
 use App\Support\RmaImport\Concerns\MapsRmaImportRows;
 
 final class ImportRowValidator
@@ -15,6 +14,7 @@ final class ImportRowValidator
 
     public function __construct(
         private readonly ImportRowTransformer $transformer = new ImportRowTransformer,
+        private readonly ImportRowProductResolver $productResolver = new ImportRowProductResolver,
     ) {}
 
     /**
@@ -23,7 +23,6 @@ final class ImportRowValidator
     public function validate(ImportTemplate $template, int $customerId, array $parsedRows): ImportRowValidationResult
     {
         $customerExists = Customer::query()->whereKey($customerId)->exists();
-        $productEans = $this->loadProductEans();
         $existingReferences = ImportRow::query()
             ->where('customer_id', $customerId)
             ->whereNotNull('reference')
@@ -69,7 +68,7 @@ final class ImportRowValidator
 
             if ($normalizedEan === null) {
                 $reasons[] = 'EAN ontbreekt of is ongeldig';
-            } elseif (! array_key_exists($normalizedEan, $productEans)) {
+            } elseif ($this->productResolver->findByEan($eanNr) === null) {
                 $reasons[] = 'EAN komt niet overeen met een product';
             }
 
@@ -125,31 +124,5 @@ final class ImportRowValidator
             invalidCount: $invalidCount,
             issues: $issues,
         );
-    }
-
-    /**
-     * @return array<string, true>
-     */
-    private function loadProductEans(): array
-    {
-        $eans = [];
-
-        Product::query()
-            ->select(['ean_1', 'ean_2'])
-            ->where(function ($query): void {
-                $query->whereNotNull('ean_1')
-                    ->orWhereNotNull('ean_2');
-            })
-            ->each(function (Product $product) use (&$eans): void {
-                foreach ([$product->ean_1, $product->ean_2] as $ean) {
-                    $normalizedEan = $this->normalizeEan($ean);
-
-                    if ($normalizedEan !== null) {
-                        $eans[$normalizedEan] = true;
-                    }
-                }
-            });
-
-        return $eans;
     }
 }

@@ -7,6 +7,7 @@ use App\Filament\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\ImportRow;
 use App\Models\Rma;
+use App\Services\Import\ImportRowProductResolver;
 use BackedEnum;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -32,6 +33,7 @@ final class RmaViewPresenter
             self::customerField($rma),
             ...self::customerContactFields($rma),
             ['label' => 'Invoerdatum en tijd', 'value' => self::formatOptionalLongDateTime($rma->created_at)],
+            self::receivedDateField($rma),
             ...self::generalDetailFields($rma),
         ];
     }
@@ -88,9 +90,28 @@ final class RmaViewPresenter
     {
         $importRow = $rma->importRow;
 
-        return [
+        $fields = [
             ['label' => 'Referentie', 'value' => self::text($importRow?->reference)],
         ];
+
+        $shipmentReference = self::nullableString($importRow?->importBatch?->shipment_reference);
+
+        if ($shipmentReference !== null) {
+            $fields[] = ['label' => 'Zending-referentie', 'value' => $shipmentReference];
+        }
+
+        $customerOrderId = self::nullableString($importRow?->customer_order_id);
+
+        if ($customerOrderId !== null) {
+            $fields[] = self::field(
+                'Klantorder',
+                $customerOrderId,
+                self::bolCustomerOrderUrl(),
+                newTab: true,
+            );
+        }
+
+        return $fields;
     }
 
     /**
@@ -112,7 +133,7 @@ final class RmaViewPresenter
         $product = $rma->product;
 
         return [
-            self::productNameField($product?->name, $product),
+            self::productNameField($product?->name, $product, $rma->importRow),
         ];
     }
 
@@ -150,9 +171,9 @@ final class RmaViewPresenter
 
         return [
             ['label' => 'Opdrachtnummer', 'value' => self::text($importRow?->assignment_nr)],
-            ['label' => 'Zending-datum', 'value' => self::text($batch?->shipment_date?->format('d-m-Y'))],
-            ['label' => 'Zending-referentie', 'value' => self::text($batch?->reference)],
-            ['label' => 'Track & Trace', 'value' => self::text($batch?->track_trace_nr)],
+            ['label' => 'Aanvraagdatum', 'value' => self::text($batch?->import_date?->format('d-m-Y'))],
+            ['label' => 'Verzenddatum', 'value' => self::text($batch?->shipment_date?->format('d-m-Y'))],
+            ['label' => 'Referentie', 'value' => self::text($batch?->reference)],
         ];
     }
 
@@ -208,9 +229,17 @@ final class RmaViewPresenter
     /**
      * @return array{label: string, value: string, url?: string}
      */
-    private static function productNameField(?string $name, ?Product $product): array
+    private static function productNameField(?string $name, ?Product $product, ?ImportRow $importRow = null): array
     {
         $displayName = $name !== null && $name !== '' ? $name : null;
+
+        if ($displayName !== null
+            && $product !== null
+            && $product->uid === ImportRowProductResolver::FALLBACK_ARTICLE_NUMBER
+            && filled($importRow?->product_name)) {
+            $displayName = "{$displayName} ({$importRow->product_name})";
+        }
+
         $value = self::text(
             $displayName !== null ? Str::limit($displayName, self::PRODUCT_NAME_LIMIT) : null,
         );
@@ -218,7 +247,7 @@ final class RmaViewPresenter
         $field = self::field(
             'Artikelnaam',
             $value,
-            $product !== null && $displayName !== null ? ProductResource::getUrl('edit', ['record' => $product]) : null,
+            $product !== null && $name !== null && $name !== '' ? ProductResource::getUrl('edit', ['record' => $product]) : null,
         );
 
         if ($displayName !== null && mb_strlen($displayName) > self::PRODUCT_NAME_LIMIT) {
@@ -231,9 +260,9 @@ final class RmaViewPresenter
     }
 
     /**
-     * @return array{label: string, value: string, url?: string}
+     * @return array{label: string, value: string, url?: string, newTab?: bool}
      */
-    private static function field(string $label, string $value, ?string $url = null): array
+    private static function field(string $label, string $value, ?string $url = null, bool $newTab = false): array
     {
         $field = [
             'label' => $label,
@@ -242,6 +271,10 @@ final class RmaViewPresenter
 
         if ($url !== null) {
             $field['url'] = $url;
+        }
+
+        if ($newTab) {
+            $field['newTab'] = true;
         }
 
         return $field;
@@ -329,12 +362,8 @@ final class RmaViewPresenter
             return $importRow->return_date->copy()->startOfDay();
         }
 
-        if ($importRow?->received_at !== null) {
-            return $importRow->received_at->copy()->startOfDay();
-        }
-
-        if ($rma->received_at !== null) {
-            return $rma->received_at->copy()->startOfDay();
+        if ($rma->return_date !== null) {
+            return $rma->return_date->copy()->startOfDay();
         }
 
         return null;
@@ -357,6 +386,26 @@ final class RmaViewPresenter
         }
 
         return self::formatLongDate($date).' - '.$date->format('H:i');
+    }
+
+    /**
+     * @return array{label: string, value: string}
+     */
+    private static function receivedDateField(Rma $rma): array
+    {
+        return [
+            'label' => 'Ontvangstdatum',
+            'value' => self::formatReceivedDate($rma->received_at),
+        ];
+    }
+
+    private static function formatReceivedDate(?Carbon $date): string
+    {
+        if ($date === null) {
+            return '(nog niet ontvangen)';
+        }
+
+        return self::formatLongDate($date);
     }
 
     private static function formatLongDate(Carbon $date): string
@@ -388,5 +437,10 @@ final class RmaViewPresenter
         $trimmed = trim($value);
 
         return $trimmed === '' ? null : $trimmed;
+    }
+
+    private static function bolCustomerOrderUrl(): string
+    {
+        return 'https://login.bol.com/wsp/login';
     }
 }

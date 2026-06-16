@@ -17,7 +17,9 @@ final class ImportParseResult
         public ?int $detectedCustomerId = null,
         public ?string $reference = null,
         public ?string $trackTraceNr = null,
+        public ?string $importDate = null,
         public ?string $shipmentDate = null,
+        public ?string $shipmentReference = null,
     ) {}
 
     public function rowCount(): int

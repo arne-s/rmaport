@@ -71,7 +71,7 @@ class ImportRowResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['customer', 'source.customer', 'importBatch.user', 'importBatch.importTemplate', 'rma']);
+            ->with(['customer', 'source.customer', 'importBatch.user', 'importBatch.importTemplate', 'importBatch.export', 'rma']);
     }
 
     public static function table(Table $table): Table

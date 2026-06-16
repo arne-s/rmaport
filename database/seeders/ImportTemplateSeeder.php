@@ -5,17 +5,35 @@ namespace Database\Seeders;
 use App\Enums\CustomerStatus;
 use App\Enums\ImportTemplateType;
 use App\Models\Customer;
+use App\Models\ExportTemplate;
 use App\Models\ImportTemplate;
 use App\Models\Source;
 use App\Support\RmaImport\ConsumerReturnsShipment\ConsumerReturnsShipmentImportParser;
 use App\Support\RmaImport\MediaMarkt\MediaMarktImportParser;
 use App\Support\RmaImport\Universal\UniversalImportParser;
+use App\Support\RmaExport\ConsumerReturnsShipment\ConsumerReturnsShipmentExportGenerator;
+use App\Support\RmaExport\MediaMarkt\MediaMarktExportGenerator;
+use App\Support\RmaExport\Universal\UniversalExportGenerator;
 use Illuminate\Database\Seeder;
 
 class ImportTemplateSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(ExportTemplateSeeder::class);
+
+        $mediaMarktExportTemplate = ExportTemplate::query()
+            ->where('class', MediaMarktExportGenerator::class)
+            ->firstOrFail();
+
+        $bolExportTemplate = ExportTemplate::query()
+            ->where('class', ConsumerReturnsShipmentExportGenerator::class)
+            ->firstOrFail();
+
+        $universalExportTemplate = ExportTemplate::query()
+            ->where('class', UniversalExportGenerator::class)
+            ->firstOrFail();
+
         $mediaMarktCustomer = Customer::query()->create([
             'status' => CustomerStatus::Active,
             'name' => 'MediaMarkt',
@@ -35,6 +53,7 @@ class ImportTemplateSeeder extends Seeder
                 'filename' => 'mediamarkt.xlsx',
                 'type' => ImportTemplateType::File,
                 'description' => 'MediaMarkt CSV/Excel export',
+                'export_template_id' => $mediaMarktExportTemplate->id,
             ],
         );
 
@@ -45,6 +64,7 @@ class ImportTemplateSeeder extends Seeder
                 'filename' => 'bol.xlsx',
                 'type' => ImportTemplateType::File,
                 'description' => 'Consumer returns zending (bol.com)',
+                'export_template_id' => $bolExportTemplate->id,
             ],
         );
 
@@ -56,6 +76,7 @@ class ImportTemplateSeeder extends Seeder
                 'type' => ImportTemplateType::File,
                 'description' => 'Autovision bulk RMA aanmeldformulier',
                 'source_id' => null,
+                'export_template_id' => $universalExportTemplate->id,
             ],
         );
 

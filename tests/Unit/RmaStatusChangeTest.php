@@ -5,6 +5,7 @@ use App\Models\Rma;
 use App\Models\RmaEvent;
 use App\Models\RmaStatusChange;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Carbon;
 
 uses(Tests\TestCase::class, DatabaseTransactions::class);
 
@@ -31,6 +32,25 @@ it('records status change and event when rma status changes', function (): void 
         ->where('rma_id', $rma->getKey())
         ->where('type', 'RMA-status gewijzigd: Open → In behandeling')
         ->exists())->toBeTrue();
+});
+
+it('sets received_at when status changes to received', function (): void {
+    Carbon::setTestNow('2026-06-14 10:00:00');
+
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-RECEIVED-001',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+    ]);
+
+    $rma->changeStatus(RmaStatus::Received);
+
+    $rma->refresh();
+
+    expect($rma->status)->toBe(RmaStatus::Received)
+        ->and($rma->received_at?->toDateTimeString())->toBe('2026-06-14 10:00:00');
+
+    Carbon::setTestNow();
 });
 
 it('does nothing when changing to the same status', function (): void {

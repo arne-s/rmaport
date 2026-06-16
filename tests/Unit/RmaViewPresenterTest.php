@@ -47,11 +47,12 @@ it('orders combined general fields without rma number and status', function (): 
         'E-mail',
         'Telefoonnummer',
         'Invoerdatum en tijd',
+        'Ontvangstdatum',
         'Referentie',
         'Opdrachtnummer',
-        'Zending-datum',
-        'Zending-referentie',
-        'Track & Trace',
+        'Aanvraagdatum',
+        'Verzenddatum',
+        'Referentie',
         'Artikelnaam',
         'Accessoires',
         'DOA',
@@ -163,6 +164,51 @@ it('truncates long product names to one hundred fifty characters', function (): 
         ->and($productField['title'] ?? null)->toBe($longName);
 });
 
+it('shows imported product name in parentheses when fallback product is used', function (): void {
+    $fallbackProduct = Product::query()->updateOrCreate(
+        ['uid' => \App\Services\Import\ImportRowProductResolver::FALLBACK_ARTICLE_NUMBER],
+        [
+            'name' => 'Onbekend product',
+            'unit' => ProductUnit::Pieces,
+            'company_purchase_price' => 10,
+            'company_sales_price' => 20,
+            'company_margin' => 50,
+        ],
+    );
+
+    $importRow = \App\Models\ImportRow::query()->create([
+        'import_id' => \App\Models\ImportBatch::query()->create([
+            'user_id' => \App\Models\User::query()->create([
+                'email' => fake()->unique()->safeEmail(),
+                'password' => bcrypt('password'),
+                'first_name' => 'Import',
+                'last_name' => 'Tester',
+            ])->id,
+            'file_name' => 'test.xlsx',
+            'file_path' => 'imports/test.xlsx',
+            'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+            'total_rows' => 1,
+        ])->id,
+        'reference' => 'REF-FALLBACK-1',
+        'ean_nr' => '9990000000001',
+        'product_name' => 'House of Marley HIFI PLATENSPELER',
+    ]);
+
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-FB-001',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'product_id' => $fallbackProduct->id,
+        'import_row_id' => $importRow->id,
+        'quantity' => 1,
+    ]);
+
+    $productField = collect(RmaViewPresenter::productFields($rma->load('importRow')))->firstWhere('label', 'Artikelnaam');
+
+    expect($productField['value'])->toBe('Onbekend product (House of Marley HIFI PLATENSPELER)')
+        ->and($productField['url'] ?? null)->toBe(ProductResource::getUrl('edit', ['record' => $fallbackProduct]));
+});
+
 it('shows import shipment fields in the footer section', function (): void {
     $user = \App\Models\User::query()->create([
         'email' => fake()->unique()->safeEmail(),
@@ -180,7 +226,8 @@ it('shows import shipment fields in the footer section', function (): void {
         'successful_rows' => 1,
         'reference' => 'SHIP-REF-001',
         'track_trace_nr' => 'TT-12345',
-        'shipment_date' => '2026-06-10',
+        'import_date' => '2026-06-10',
+        'shipment_date' => '2026-06-11',
     ]);
 
     $importRow = \App\Models\ImportRow::query()->create([
@@ -190,7 +237,7 @@ it('shows import shipment fields in the footer section', function (): void {
     ]);
 
     $rma = Rma::query()->create([
-        'uid' => 'RMA-SHIPMENT-FIELDS-001',
+        'uid' => 'RMA-SHIP-001',
         'status' => RmaStatus::Open,
         'is_draft' => false,
         'import_row_id' => $importRow->id,
@@ -203,9 +250,9 @@ it('shows import shipment fields in the footer section', function (): void {
 
     expect(array_column($middleFields, 'label'))->toBe([
         'Opdrachtnummer',
-        'Zending-datum',
-        'Zending-referentie',
-        'Track & Trace',
+        'Aanvraagdatum',
+        'Verzenddatum',
+        'Referentie',
     ])->and(array_column($footerFields, 'label'))->toBe([
         'Artikelnaam',
         'Accessoires',
@@ -213,8 +260,8 @@ it('shows import shipment fields in the footer section', function (): void {
     ])->and($footerFields[2]['value'])->toBe('Ja')
         ->and($middleFields[0]['value'])->toBe('AD999888')
         ->and($middleFields[1]['value'])->toBe('10-06-2026')
-        ->and($middleFields[2]['value'])->toBe('SHIP-REF-001')
-        ->and($middleFields[3]['value'])->toBe('TT-12345');
+        ->and($middleFields[2]['value'])->toBe('11-06-2026')
+        ->and($middleFields[3]['value'])->toBe('SHIP-REF-001');
 });
 
 it('shows unknown doa when import row is missing', function (): void {
@@ -247,6 +294,33 @@ it('formats invoerdatum en tijd from created_at', function (): void {
     ]);
 
     Carbon::setTestNow();
+});
+
+it('shows not yet received when received_at is empty', function (): void {
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-PRE-RECV-001',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+    ]);
+
+    $receivedDateField = collect(RmaViewPresenter::combinedGeneralHeaderFields($rma))
+        ->firstWhere('label', 'Ontvangstdatum');
+
+    expect($receivedDateField['value'])->toBe('(nog niet ontvangen)');
+});
+
+it('formats ontvangstdatum from received_at without time', function (): void {
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-PRE-RECV-002',
+        'status' => RmaStatus::Received,
+        'is_draft' => false,
+        'received_at' => '2026-06-14 15:30:00',
+    ]);
+
+    $receivedDateField = collect(RmaViewPresenter::combinedGeneralHeaderFields($rma))
+        ->firstWhere('label', 'Ontvangstdatum');
+
+    expect($receivedDateField['value'])->toBe('14 jun. 2026');
 });
 
 it('orders return fields with purchase date before return date and reason last', function (): void {
@@ -311,6 +385,134 @@ it('formats return date with days since purchase date', function (): void {
         ->firstWhere('label', 'Aankoopdatum');
 
     expect($purchaseDateField['value'])->toBe('14 mei 2026');
+});
+
+it('shows zending-referentie under referentie when shipment reference is present', function (): void {
+    $importRow = \App\Models\ImportRow::query()->create([
+        'import_id' => \App\Models\ImportBatch::query()->create([
+            'user_id' => \App\Models\User::query()->create([
+                'email' => fake()->unique()->safeEmail(),
+                'password' => bcrypt('password'),
+                'first_name' => 'Import',
+                'last_name' => 'Tester',
+            ])->id,
+            'file_name' => 'test.xlsx',
+            'file_path' => 'imports/test.xlsx',
+            'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+            'total_rows' => 1,
+            'shipment_reference' => 'SMT-1941121',
+        ])->id,
+        'reference' => 'REF-SHIP-1',
+    ]);
+
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-SREF-1',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'import_row_id' => $importRow->id,
+    ]);
+
+    $fields = RmaViewPresenter::generalDetailFields($rma->load(['importRow.importBatch']));
+
+    expect(array_column($fields, 'label'))->toBe(['Referentie', 'Zending-referentie'])
+        ->and($fields[1]['value'])->toBe('SMT-1941121');
+});
+
+it('links customer order id to bol.com under referentie when present', function (): void {
+    $importRow = \App\Models\ImportRow::query()->create([
+        'import_id' => \App\Models\ImportBatch::query()->create([
+            'user_id' => \App\Models\User::query()->create([
+                'email' => fake()->unique()->safeEmail(),
+                'password' => bcrypt('password'),
+                'first_name' => 'Import',
+                'last_name' => 'Tester',
+            ])->id,
+            'file_name' => 'test.xlsx',
+            'file_path' => 'imports/test.xlsx',
+            'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+            'total_rows' => 1,
+            'track_trace_nr' => 'JVGL06160816001129545183',
+            'shipment_reference' => 'SMT-1941121',
+        ])->id,
+        'reference' => 'REF-BOL-1',
+        'customer_order_id' => 'C000397X67',
+    ]);
+
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-BOL-001',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'import_row_id' => $importRow->id,
+    ]);
+
+    $fields = RmaViewPresenter::generalDetailFields($rma->load(['importRow.importBatch']));
+
+    expect(array_column($fields, 'label'))->toBe(['Referentie', 'Zending-referentie', 'Klantorder'])
+        ->and($fields[0]['value'])->toBe('REF-BOL-1')
+        ->and($fields[1]['value'])->toBe('SMT-1941121')
+        ->and($fields[2]['value'])->toBe('C000397X67')
+        ->and($fields[2]['url'] ?? null)->toBe('https://login.bol.com/wsp/login')
+        ->and($fields[2]['newTab'] ?? false)->toBeTrue();
+});
+
+it('does not show track and trace number in general detail fields', function (): void {
+    $importRow = \App\Models\ImportRow::query()->create([
+        'import_id' => \App\Models\ImportBatch::query()->create([
+            'user_id' => \App\Models\User::query()->create([
+                'email' => fake()->unique()->safeEmail(),
+                'password' => bcrypt('password'),
+                'first_name' => 'Import',
+                'last_name' => 'Tester',
+            ])->id,
+            'file_name' => 'test.xlsx',
+            'file_path' => 'imports/test.xlsx',
+            'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+            'total_rows' => 1,
+            'track_trace_nr' => 'JVGL06160816001129545183',
+        ])->id,
+        'reference' => 'REF-TT-1',
+    ]);
+
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-TT-001',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'import_row_id' => $importRow->id,
+    ]);
+
+    $fields = RmaViewPresenter::generalDetailFields($rma->load(['importRow.importBatch']));
+
+    expect(array_column($fields, 'label'))->toBe(['Referentie'])
+        ->and(array_column($fields, 'label'))->not->toContain('Track & Trace number');
+});
+
+it('does not show klantorder when customer order id is missing', function (): void {
+    $importRow = \App\Models\ImportRow::query()->create([
+        'import_id' => \App\Models\ImportBatch::query()->create([
+            'user_id' => \App\Models\User::query()->create([
+                'email' => fake()->unique()->safeEmail(),
+                'password' => bcrypt('password'),
+                'first_name' => 'Import',
+                'last_name' => 'Tester',
+            ])->id,
+            'file_name' => 'test.xlsx',
+            'file_path' => 'imports/test.xlsx',
+            'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+            'total_rows' => 1,
+        ])->id,
+        'reference' => 'REF-NO-BOL',
+    ]);
+
+    $rma = Rma::query()->create([
+        'uid' => 'RMA-NOBOL-1',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'import_row_id' => $importRow->id,
+    ]);
+
+    $fields = RmaViewPresenter::generalDetailFields($rma->load('importRow'));
+
+    expect(array_column($fields, 'label'))->toBe(['Referentie']);
 });
 
 it('shows customer email and phone under klant in the header fields', function (): void {

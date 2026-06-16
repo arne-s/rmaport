@@ -45,6 +45,10 @@ final class ImportRowTransformer
             'assignment_nr' => $this->nullableString($row['Opdrachtnummer'] ?? null),
             'reference' => $this->nullableString($row['Referentie'] ?? null),
             'ean_nr' => $this->nullableString($row['EAN'] ?? null),
+            'product_name' => $this->joinProductNameParts(
+                $this->nullableString($row['Merk'] ?? null),
+                $this->nullableString($row['Artikelgroep'] ?? null),
+            ),
             'purchase_date' => $this->parseDate($this->nullableString($row['Aankoopdatum'] ?? null), 'Y-m-d'),
             'return_reason' => $this->nullableString($row['Klachtomschrijving'] ?? null),
             'is_doa' => $this->parseBoolean($row['DOA'] ?? null) ?? false,
@@ -67,9 +71,11 @@ final class ImportRowTransformer
 
         return array_filter([
             'customer_order_id' => $this->nullableString($row['CUSTOMER ORDER ID'] ?? null),
-            'reference' => $this->nullableString($row['CUSTOMER ORDER ID'] ?? null),
+            'reference' => $this->nullableString($row['DEFECT ID'] ?? null),
             'ean_nr' => $this->nullableString($row['EAN'] ?? null),
+            'product_name' => $this->nullableString($row['PRODUCT DESCRIPTION'] ?? null),
             'purchase_date' => $this->parseDate($this->nullableString($row['SHOP ORDER DATE'] ?? null), 'd-M-Y'),
+            'return_date' => $this->parseDate($this->nullableString($row['RETURN DATE'] ?? null), 'd-M-Y'),
             'return_reason' => $returnReason !== '' ? $returnReason : null,
         ], fn (mixed $value): bool => $value !== null);
     }
@@ -83,8 +89,19 @@ final class ImportRowTransformer
         return array_filter([
             'reference' => $this->nullableString($row['UW RMA Referentie'] ?? null),
             'ean_nr' => $this->nullableString($row['EAN NUMMER'] ?? null),
+            'product_name' => $this->nullableString($row['Artikel Omschrijving'] ?? null),
             'purchase_date' => $this->parseDate($this->nullableString($row['Aankoopdatum'] ?? null), 'd.m.y'),
             'return_reason' => $this->nullableString($row['Klachtomschrijving'] ?? null),
         ], fn (mixed $value): bool => $value !== null);
+    }
+
+    /**
+     * @param  list<string|null>  $parts
+     */
+    private function joinProductNameParts(?string ...$parts): ?string
+    {
+        $name = collect($parts)->filter(fn (?string $part): bool => filled($part))->implode(' ');
+
+        return $name !== '' ? $name : null;
     }
 }

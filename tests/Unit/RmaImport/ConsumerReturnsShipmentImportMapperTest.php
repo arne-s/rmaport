@@ -41,7 +41,7 @@ it('maps consumer returns shipment rows with bol metadata', function (): void {
 
     expect($mapped['uid'])->toBe('143526279')
         ->and($mapped['packing_slip_number'])->toBe('SMT-1941121')
-        ->and($mapped['received_at'])->toBe('2026-04-23 00:00:00')
+        ->and($mapped['return_date'])->toBe('2026-04-23')
         ->and($mapped['status'])->toBe(RmaStatus::Open->value)
         ->and($mapped['notes'])->toContain('Bol.com referentie: NCKI26077751')
         ->and($mapped['notes'])->toContain('Autovision Holding B.V.')

@@ -65,8 +65,11 @@ class ImportTaskResource extends Resource
         return parent::getEloquentQuery()
             ->with([
                 'user',
+                'export',
+                'importTemplate.exportTemplate',
                 'importRows.customer',
                 'importRows.source.customer',
+                'importRows.rma',
             ]);
     }
 

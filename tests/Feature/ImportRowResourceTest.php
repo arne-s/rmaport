@@ -117,6 +117,7 @@ it('lists import rows for sales users', function (): void {
         ->assertCanSeeTableRecords([$row])
         ->assertSee('Terug naar Dashboard')
         ->assertSee('REF-123')
+        ->assertSee('0846885011362')
         ->assertSee('MediaMarkt')
         ->assertSee('Ninebot Kickscooter')
         ->assertSeeHtml(CustomerResource::getUrl('edit', ['record' => $customer]))

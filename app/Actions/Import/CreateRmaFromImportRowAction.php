@@ -49,9 +49,7 @@ final class CreateRmaFromImportRowAction
                 'accessories' => $importRow->accessories,
                 'return_reason' => $importRow->return_reason,
                 'packing_slip_number' => $batch?->reference,
-                'received_at' => $importRow->received_at
-                    ?? $importRow->return_date?->startOfDay()
-                    ?? $batch?->shipment_date?->startOfDay(),
+                'return_date' => $importRow->return_date ?? $batch?->shipment_date,
                 'status' => RmaStatus::Open,
                 'is_draft' => false,
             ]);

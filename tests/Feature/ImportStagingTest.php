@@ -56,6 +56,7 @@ it('creates rmas when importing new rows', function (): void {
             'customer_id' => $customer->id,
             'track_trace_nr' => 'TT123',
             'reference' => 'REF-001',
+            'shipment_reference' => 'SHIP-REF-001',
             'shipment_date' => '2026-06-01',
         ],
         file: $uploadedFile,
@@ -71,10 +72,25 @@ it('creates rmas when importing new rows', function (): void {
         ->and($batch->successful_rows)->toBe(8)
         ->and($batch->track_trace_nr)->toBe('TT123')
         ->and($batch->reference)->toBe('REF-001')
+        ->and($batch->shipment_reference)->toBe('SHIP-REF-001')
         ->and(ImportRow::query()->where('import_id', $batch->id)->count())->toBe(8)
         ->and(ImportRow::query()->where('import_id', $batch->id)->where('customer_id', $customer->id)->count())->toBe(8)
         ->and(Rma::query()->count())->toBe(8)
-        ->and(ImportRow::query()->where('import_id', $batch->id)->whereDoesntHave('rma')->count())->toBe(0);
+        ->and(ImportRow::query()->where('import_id', $batch->id)->whereDoesntHave('rma')->count())->toBe(0)
+        ->and(ImportRow::query()->where('import_id', $batch->id)->whereNotNull('product_name')->count())->toBeGreaterThan(0);
+});
+
+it('extracts bol shipment reference from consumer returns shipment metadata', function (): void {
+    $fixture = base_path('tests/fixtures/rma/consumer-returns-shipment.xlsx');
+    $template = ImportTemplate::query()->where('name', 'bol.com zending')->firstOrFail();
+
+    $result = app(ParseImportFileAction::class)($fixture, 'xlsx', $template);
+
+    expect($result->reference)->toBe('NCKI26077751')
+        ->and($result->shipmentReference)->toBe('SMT-1941121')
+        ->and($result->trackTraceNr)->toBe('JVGL06160816001129545183')
+        ->and($result->shipmentDate)->toBe('2026-05-08')
+        ->and($result->importDate)->toBeNull();
 });
 
 it('detects universal customer via debtor number', function (): void {
@@ -91,5 +107,7 @@ it('detects universal customer via debtor number', function (): void {
 
     expect($result->reference)->toBe('760647648')
         ->and($result->detectedCustomerId)->not->toBeNull()
-        ->and(Customer::query()->find($result->detectedCustomerId)?->debtor_number)->toBe('19551');
+        ->and(Customer::query()->find($result->detectedCustomerId)?->debtor_number)->toBe('19551')
+        ->and($result->importDate)->toBe('2026-02-05')
+        ->and($result->shipmentDate)->toBeNull();
 });

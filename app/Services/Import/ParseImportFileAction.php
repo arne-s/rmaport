@@ -50,7 +50,9 @@ final class ParseImportFileAction
             detectedCustomerId: $detectedCustomerId,
             reference: $this->extractBatchReference($template, $metadata),
             trackTraceNr: $this->nullableString($metadata['Track & Trace number'] ?? null),
+            importDate: $this->extractBatchImportDate($template, $metadata),
             shipmentDate: $this->extractBatchShipmentDate($template, $metadata),
+            shipmentReference: $this->extractBatchShipmentReference($template, $metadata),
         );
     }
 
@@ -162,15 +164,35 @@ final class ParseImportFileAction
     /**
      * @param  array<string, string|null>  $metadata
      */
+    private function extractBatchImportDate(ImportTemplate $template, array $metadata): ?string
+    {
+        if (Str::contains($template->class, 'UniversalImportParser')) {
+            return $this->parseDate($this->nullableString($metadata['Datum'] ?? null), 'Y-m-d')
+                ?? $this->parseDate($this->nullableString($metadata['Datum'] ?? null), 'd.m.Y');
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, string|null>  $metadata
+     */
     private function extractBatchShipmentDate(ImportTemplate $template, array $metadata): ?string
     {
         if (Str::contains($template->class, 'ConsumerReturnsShipmentImportParser')) {
             return $this->parseDate($this->nullableString($metadata['Shipment date'] ?? null), 'd-M-Y');
         }
 
-        if (Str::contains($template->class, 'UniversalImportParser')) {
-            return $this->parseDate($this->nullableString($metadata['Datum'] ?? null), 'Y-m-d')
-                ?? $this->parseDate($this->nullableString($metadata['Datum'] ?? null), 'd.m.Y');
+        return null;
+    }
+
+    /**
+     * @param  array<string, string|null>  $metadata
+     */
+    private function extractBatchShipmentReference(ImportTemplate $template, array $metadata): ?string
+    {
+        if (Str::contains($template->class, 'ConsumerReturnsShipmentImportParser')) {
+            return $this->nullableString($metadata['Shipment Reference'] ?? null);
         }
 
         return null;

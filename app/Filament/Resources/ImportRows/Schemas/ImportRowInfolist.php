@@ -27,6 +27,9 @@ class ImportRowInfolist
                             ->label('Opdrachtnummer'),
                         TextEntry::make('ean_nr')
                             ->label('EAN'),
+                        TextEntry::make('product_name')
+                            ->label('Productnaam import')
+                            ->columnSpanFull(),
                         TextEntry::make('customer_nr')
                             ->label('Klantnummer'),
                         TextEntry::make('source_description')
@@ -38,9 +41,6 @@ class ImportRowInfolist
                         TextEntry::make('return_date')
                             ->label('Retourdatum')
                             ->date('d-m-Y'),
-                        TextEntry::make('received_at')
-                            ->label('Ontvangen op')
-                            ->dateTime('d-m-Y H:i'),
                         TextEntry::make('is_doa')
                             ->label('DOA')
                             ->formatStateUsing(fn (bool $state): string => $state ? 'Ja' : 'Nee'),
@@ -62,8 +62,11 @@ class ImportRowInfolist
                             ->label('Batch referentie'),
                         TextEntry::make('importBatch.track_trace_nr')
                             ->label('Track & Trace'),
+                        TextEntry::make('importBatch.import_date')
+                            ->label('Aanvraagdatum')
+                            ->date('d-m-Y'),
                         TextEntry::make('importBatch.shipment_date')
-                            ->label('Zending-datum')
+                            ->label('Verzenddatum')
                             ->date('d-m-Y'),
                         TextEntry::make('importBatch.created_at')
                             ->label('Geïmporteerd op')

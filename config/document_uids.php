@@ -90,4 +90,18 @@ return [
         'start' => (int) env('DOCUMENT_UID_IMPORT_START', 1),
         'digits' => (int) env('DOCUMENT_UID_IMPORT_DIGITS', 7),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Import export UID (prefixed)
+    |--------------------------------------------------------------------------
+    |
+    | Prefix EX- with fixed-width numeric suffix, e.g. EX-0000001.
+    |
+    */
+    'export' => [
+        'prefix' => env('DOCUMENT_UID_EXPORT_PREFIX', 'EX-'),
+        'start' => (int) env('DOCUMENT_UID_EXPORT_START', 1),
+        'digits' => (int) env('DOCUMENT_UID_EXPORT_DIGITS', 7),
+    ],
 ];

@@ -217,7 +217,8 @@ class ProductResource extends Resource
                                                                 TextInput::make('uid')
                                                                     ->label('Artikelnummer')
                                                                     ->columnSpan(6)
-                                                                    ->disabled()
+                                                                    ->required(fn (string $operation): bool => $operation === 'create')
+                                                                    ->disabled(fn (string $operation): bool => $operation === 'edit')
                                                                     ->extraAttributes(['style' => 'white-space: nowrap;'])
                                                                     ->inlineLabel(),
                                                                 TextInput::make('name')

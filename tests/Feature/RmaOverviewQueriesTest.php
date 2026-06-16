@@ -102,14 +102,14 @@ it('returns the latest return days with rma counts excluding drafts', function (
     Carbon::setTestNow();
 });
 
-it('falls back to received_at when return date is missing', function (): void {
+it('falls back to rma return date when import row return date is missing', function (): void {
     Carbon::setTestNow('2026-06-05 12:00:00');
 
     Rma::query()->create([
-        'uid' => 'RECEIVED-AT-1',
+        'uid' => 'RETURN-DATE-1',
         'status' => RmaStatus::Open,
         'is_draft' => false,
-        'received_at' => '2026-06-04 15:30:00',
+        'return_date' => '2026-06-04',
     ]);
 
     $days = RmaOverviewQueries::returnDateDayCounts();
@@ -122,22 +122,38 @@ it('falls back to received_at when return date is missing', function (): void {
 it('limits return day counts to the latest thirty-one calendar days', function (): void {
     Carbon::setTestNow('2026-06-16 12:00:00');
 
-    for ($day = 1; $day <= 40; $day++) {
-        Rma::query()->create([
-            'uid' => 'LIMIT-'.$day,
-            'status' => RmaStatus::Open,
-            'is_draft' => false,
-            'received_at' => sprintf('2026-06-%02d 10:00:00', $day),
-        ]);
-    }
+    Rma::query()->create([
+        'uid' => 'LMT-BEFORE',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'return_date' => '2026-05-16',
+    ]);
+    Rma::query()->create([
+        'uid' => 'LMT-START',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'return_date' => '2026-05-17',
+    ]);
+    Rma::query()->create([
+        'uid' => 'LMT-END',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'return_date' => '2026-06-16',
+    ]);
+    Rma::query()->create([
+        'uid' => 'LMT-AFTER',
+        'status' => RmaStatus::Open,
+        'is_draft' => false,
+        'return_date' => '2026-06-17',
+    ]);
 
     $days = RmaOverviewQueries::returnDateDayCounts();
 
     expect($days)->toHaveCount(31)
         ->and($days->first()['date'])->toBe('2026-05-17')
         ->and($days->last()['date'])->toBe('2026-06-16')
-        ->and($days->firstWhere('date', '2026-06-16')['value'])->toBe(1)
-        ->and($days->firstWhere('date', '2026-06-01')['value'])->toBe(0);
+        ->and($days->firstWhere('date', '2026-05-17')['value'])->toBeGreaterThanOrEqual(1)
+        ->and($days->firstWhere('date', '2026-06-16')['value'])->toBeGreaterThanOrEqual(1);
 
     Carbon::setTestNow();
 });

@@ -26,6 +26,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property string|null $accessories
  * @property string|null $return_reason
  * @property string|null $packing_slip_number
+ * @property Carbon|null $return_date
  * @property PaymentMethod|null $payment_method
  * @property string|null $complaint
  * @property RmaAssessment|null $assessment
@@ -62,6 +63,7 @@ class Rma extends Model implements HasMedia
         'accessories',
         'return_reason',
         'packing_slip_number',
+        'return_date',
         'payment_method',
         'complaint',
         'assessment',
@@ -103,6 +105,7 @@ class Rma extends Model implements HasMedia
             'is_processed' => 'boolean',
             'is_refurbish' => 'boolean',
             'is_invoiced' => 'boolean',
+            'return_date' => 'date',
             'received_at' => 'datetime',
             'reminded_at' => 'datetime',
             'processed_at' => 'datetime',
@@ -169,6 +172,11 @@ class Rma extends Model implements HasMedia
         ]);
 
         $this->status = $to;
+
+        if ($to === RmaStatus::Received) {
+            $this->received_at = now();
+        }
+
         $this->save();
     }
 

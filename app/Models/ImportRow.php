@@ -18,11 +18,11 @@ use Illuminate\Support\Carbon;
  * @property string|null $reference
  * @property string|null $assignment_nr
  * @property string|null $ean_nr
+ * @property string|null $product_name
  * @property bool $is_doa
  * @property Carbon|null $purchase_date
  * @property Carbon|null $return_date
  * @property string|null $return_reason
- * @property Carbon|null $received_at
  * @property string|null $accessories
  */
 class ImportRow extends Model
@@ -37,11 +37,11 @@ class ImportRow extends Model
         'reference',
         'assignment_nr',
         'ean_nr',
+        'product_name',
         'is_doa',
         'purchase_date',
         'return_date',
         'return_reason',
-        'received_at',
         'accessories',
     ];
 
@@ -51,7 +51,6 @@ class ImportRow extends Model
             'is_doa' => 'boolean',
             'purchase_date' => 'date',
             'return_date' => 'date',
-            'received_at' => 'datetime',
         ];
     }
 

@@ -10,6 +10,8 @@ final class ImportRowProductResolver
 {
     use MapsRmaImportRows;
 
+    public const FALLBACK_ARTICLE_NUMBER = '0000';
+
     public function findByEan(?string $ean): ?Product
     {
         $normalizedEan = $this->normalizeEan($ean);
@@ -18,7 +20,18 @@ final class ImportRowProductResolver
             return null;
         }
 
-        return $this->productsByEan()[$normalizedEan] ?? null;
+        return $this->productsByEan()[$normalizedEan] ?? $this->fallbackProduct();
+    }
+
+    public function usedFallback(?string $ean): bool
+    {
+        $normalizedEan = $this->normalizeEan($ean);
+
+        if ($normalizedEan === null) {
+            return false;
+        }
+
+        return ! array_key_exists($normalizedEan, $this->productsByEan());
     }
 
     /**
@@ -47,5 +60,12 @@ final class ImportRowProductResolver
 
             return $productsByEan;
         });
+    }
+
+    private function fallbackProduct(): ?Product
+    {
+        return Product::query()
+            ->where('uid', self::FALLBACK_ARTICLE_NUMBER)
+            ->first();
     }
 }

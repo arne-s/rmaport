@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ImportBatchDownloadController;
+use App\Http\Controllers\ImportBatchExportDownloadController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -318,6 +319,10 @@ Route::get('/media/{id}/download', [DocumentController::class, 'mediaDownload'])
 
 Route::get('/import-batches/{importBatch}/download', ImportBatchDownloadController::class)
     ->name('import-batches.download')
+    ->middleware(['auth']);
+
+Route::get('/import-exports/{importExport}/download', ImportBatchExportDownloadController::class)
+    ->name('import-exports.download')
     ->middleware(['auth']);
 
 if (app()->environment('local')) {

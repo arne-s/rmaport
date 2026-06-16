@@ -9,6 +9,7 @@ use App\Models\ImportTemplate;
 use App\Models\Product;
 use App\Models\Source;
 use App\Models\User;
+use App\Services\Import\ImportRowProductResolver;
 use App\Services\Import\ImportRowValidator;
 use App\Support\RmaImport\MediaMarkt\MediaMarktImportParser;
 use Database\Seeders\ImportTemplateSeeder;
@@ -20,7 +21,9 @@ beforeEach(function (): void {
     $this->seed(ImportTemplateSeeder::class);
 });
 
-it('marks rows as invalid when ean does not match a product', function (): void {
+it('marks rows as invalid when ean does not match a product and no fallback exists', function (): void {
+    Product::query()->where('uid', ImportRowProductResolver::FALLBACK_ARTICLE_NUMBER)->delete();
+
     $customer = Customer::query()->create([
         'status' => CustomerStatus::Active,
         'name' => 'MediaMarkt',
@@ -31,13 +34,41 @@ it('marks rows as invalid when ean does not match a product', function (): void 
     $result = app(ImportRowValidator::class)->validate($template, $customer->id, [
         [
             'Referentie' => '78906',
-            'EAN' => '9999999999999',
+            'EAN' => '1234567890123',
             'Opdrachtnummer' => 'AD71912248',
         ],
     ]);
 
     expect($result->summaryLabel())->toBe('1 rijen totaal, 0 nieuw, 0 bestaand, 1 ongeldig.')
         ->and($result->invalidIssues()[0]->reasonLabel())->toBe('EAN komt niet overeen met een product');
+});
+
+it('marks rows as new when ean does not match but fallback product exists', function (): void {
+    $customer = Customer::query()->create([
+        'status' => CustomerStatus::Active,
+        'name' => 'MediaMarkt',
+    ]);
+
+    Product::query()->create([
+        'uid' => ImportRowProductResolver::FALLBACK_ARTICLE_NUMBER,
+        'name' => 'Onbekend product',
+        'unit' => ProductUnit::Pieces,
+        'company_purchase_price' => 10,
+        'company_sales_price' => 20,
+        'company_margin' => 50,
+    ]);
+
+    $template = ImportTemplate::query()->where('class', MediaMarktImportParser::class)->firstOrFail();
+
+    $result = app(ImportRowValidator::class)->validate($template, $customer->id, [
+        [
+            'Referentie' => '78906',
+            'EAN' => '1234567890123',
+            'Opdrachtnummer' => 'AD71912248',
+        ],
+    ]);
+
+    expect($result->summaryLabel())->toBe('1 rijen totaal, 1 nieuw, 0 bestaand, 0 ongeldig.');
 });
 
 it('marks rows as new when ean matches a product and reference is unique', function (): void {

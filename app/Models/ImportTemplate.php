@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
  * @property ImportTemplateType $type
  * @property string|null $description
  * @property int|null $source_id
+ * @property int|null $export_template_id
  */
 class ImportTemplate extends Model
 {
@@ -26,6 +27,7 @@ class ImportTemplate extends Model
         'type',
         'description',
         'source_id',
+        'export_template_id',
     ];
 
     protected function casts(): array
@@ -48,6 +50,11 @@ class ImportTemplate extends Model
     public function importBatches(): HasMany
     {
         return $this->hasMany(ImportBatch::class);
+    }
+
+    public function exportTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ExportTemplate::class);
     }
 
     public function isUniversal(): bool

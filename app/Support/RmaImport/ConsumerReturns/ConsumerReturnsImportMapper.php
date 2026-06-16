@@ -24,7 +24,7 @@ final class ConsumerReturnsImportMapper
             ),
             'quantity' => $this->parseQuantity($row['QUANTITY'] ?? null),
             'ean' => $this->nullableString($row['EAN'] ?? null),
-            'received_at' => $this->parseDateTime($this->nullableString($row['RETURN DATE'] ?? null), 'd-M-Y'),
+            'return_date' => $this->parseDate($this->nullableString($row['RETURN DATE'] ?? null), 'd-M-Y'),
             'return_reason' => $this->nullableString($row['RETURN REASON'] ?? null),
             'complaint' => $this->nullableString($row['CONSUMER COMMENT'] ?? null),
             'status' => RmaStatus::Open->value,

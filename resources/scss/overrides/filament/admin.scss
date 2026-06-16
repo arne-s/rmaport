@@ -4271,7 +4271,6 @@ div.numberPlusDate {
         gap: 6px;
         line-height: 1;
         position: relative;
-        top: -2px;
 
         a {
             &.openDocument {
@@ -4318,8 +4317,9 @@ div.numberPlusDate {
             &.downloadDocument {
                 transition: all .2s;
                 position: relative;
-                top: 3px;
+                top: -1px;
                 left: 3px;
+                margin-right: 5px;
 
                 &:after {
                     content: '';
@@ -7389,8 +7389,8 @@ div.fi-resource-form-entries {
 
 .fi-resource-list-records-page.fi-resource-import-rows {
     .import-row-artikel-column {
-        width: 200px;
-        max-width: 200px;
+        width: 300px;
+        max-width: 300px;
         overflow: hidden;
 
         .fi-ta-col-wrp,
@@ -7406,13 +7406,38 @@ div.fi-resource-form-entries {
         }
     }
 
+    .import-row-imported-at-column {
+        max-width: 140px;
+        overflow: hidden;
+
+        .fi-ta-col-wrp,
+        .fi-ta-text,
+        .fi-ta-text-item {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
     .import-row-import-id-column {
+        max-width: 110px;
+        overflow: hidden;
         color: #3366cc !important;
         font-size: 12px !important;
         font-weight: 600;
 
+        .fi-ta-col-wrp,
         .fi-ta-text-item,
-        .fi-ta-text {
+        .fi-ta-text,
+        a,
+        a span {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             color: #3366cc !important;
             font-size: 12px !important;
             font-weight: 600;
@@ -7420,10 +7445,23 @@ div.fi-resource-form-entries {
     }
 
     .import-row-rma-column {
+        max-width: 110px;
+        overflow: hidden;
         white-space: nowrap;
-        width: 1%;
         font-size: 12px;
         font-weight: 600;
+
+        .fi-ta-col-wrp,
+        .fi-ta-text,
+        .fi-ta-text-item,
+        a,
+        a span {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
         a.import-row-rma-link {
             color: #3366cc;
@@ -7439,6 +7477,38 @@ div.fi-resource-form-entries {
 
     .import-row-rma-column .fi-ta-actions button.fi-ac-btn-action {
         background-color: #fff !important;
+    }
+}
+
+.fi-resource-list-records-page.fi-resource-import-tasks {
+    .import-batch-sheet-retour-column {
+        white-space: nowrap;
+        width: 1%;
+        font-size: 12px !important;
+        font-weight: 450;
+
+        .numberPlusDate,
+        .numberPlusDate span.value,
+        .fi-ta-actions button.fi-ac-btn-action,
+        .fi-ta-actions .fi-ac-btn-action-label {
+            font-size: 12px !important;
+        }
+
+        .numberPlusDate {
+            padding: 0 !important;
+        }
+    }
+}
+
+.send-export-rmas-table {
+    input.send-export-rmas-comment-input {
+        border: 1px solid #adadad !important;
+        box-shadow: none;
+        outline: none;
+
+        &:focus {
+            border-color: #032d5c !important;
+        }
     }
 }
 

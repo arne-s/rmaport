@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Models\Rma;
 use App\Models\Source;
 use App\Models\User;
+use App\Services\Import\ImportRowProductResolver;
 use App\Support\RmaImport\MediaMarkt\MediaMarktImportParser;
 use Database\Seeders\ImportTemplateSeeder;
 use Filament\Actions\Testing\TestAction;
@@ -93,6 +94,7 @@ it('creates an rma from an import row', function (): void {
     expect($rma->uid)->toMatch('/^\d{8}$/')
         ->and($rma->status)->toBe(RmaStatus::Open)
         ->and($rma->is_draft)->toBeFalse()
+        ->and($rma->received_at)->toBeNull()
         ->and($rma->customer_id)->toBe($customer->id)
         ->and($rma->import_row_id)->toBe($row->id)
         ->and($rma->product_id)->toBe($product->id)
@@ -102,6 +104,84 @@ it('creates an rma from an import row', function (): void {
         ->and($rma->notes)->toBeNull()
         ->and($row->fresh()->rma?->is($rma))->toBeTrue()
         ->and($rma->rmaEvents()->where('type', 'Aangemaakt vanuit importregel')->exists())->toBeTrue();
+});
+
+it('creates an rma from an import row with unknown ean using fallback product', function (): void {
+    $customer = Customer::query()->create([
+        'status' => CustomerStatus::Active,
+        'name' => 'MediaMarkt',
+    ]);
+
+    Product::query()->create([
+        'uid' => ImportRowProductResolver::FALLBACK_ARTICLE_NUMBER,
+        'name' => 'Onbekend product',
+        'unit' => ProductUnit::Pieces,
+        'company_purchase_price' => 10,
+        'company_sales_price' => 20,
+        'company_margin' => 50,
+    ]);
+
+    $template = ImportTemplate::query()->where('class', MediaMarktImportParser::class)->firstOrFail();
+
+    $source = Source::query()->create([
+        'name' => 'MediaMarkt',
+        'import_template_id' => $template->id,
+        'customer_id' => $customer->id,
+    ]);
+
+    $user = User::query()->create([
+        'email' => fake()->unique()->safeEmail(),
+        'password' => bcrypt('password'),
+        'first_name' => 'Import',
+        'last_name' => 'Tester',
+    ]);
+
+    $batch = ImportBatch::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'test.xlsx',
+        'file_path' => 'imports/test.xlsx',
+        'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+        'total_rows' => 1,
+        'successful_rows' => 1,
+        'import_template_id' => $template->id,
+    ]);
+
+    $row = ImportRow::query()->create([
+        'import_id' => $batch->id,
+        'customer_id' => $customer->id,
+        'source_id' => $source->id,
+        'reference' => 'REF-UNKNOWN-EAN',
+        'ean_nr' => '1234567890123',
+        'return_reason' => 'Onbekend artikel',
+    ]);
+
+    $rma = app(CreateRmaFromImportRowAction::class)($row);
+
+    expect($rma->product_id)->toBe(
+        Product::query()->where('uid', ImportRowProductResolver::FALLBACK_ARTICLE_NUMBER)->value('id'),
+    );
+});
+
+it('copies return date from import row without setting received_at', function (): void {
+    ['row' => $row, 'batch' => $batch] = createImportRowForRmaCreation();
+
+    $row->update(['return_date' => '2026-06-10']);
+
+    $rma = app(CreateRmaFromImportRowAction::class)($row->fresh());
+
+    expect($rma->return_date?->toDateString())->toBe('2026-06-10')
+        ->and($rma->received_at)->toBeNull();
+});
+
+it('falls back to batch shipment date for return date', function (): void {
+    ['row' => $row, 'batch' => $batch] = createImportRowForRmaCreation();
+
+    $batch->update(['shipment_date' => '2026-06-09']);
+
+    $rma = app(CreateRmaFromImportRowAction::class)($row->fresh());
+
+    expect($rma->return_date?->toDateString())->toBe('2026-06-09')
+        ->and($rma->received_at)->toBeNull();
 });
 
 it('prevents creating a second rma for the same import row', function (): void {

@@ -38,7 +38,7 @@ it('maps universal rows with metadata and homar brand alias', function (): void 
     expect($mapped['uid'])->toBe('77223')
         ->and($mapped['ean'])->toBe('8715465017075')
         ->and($mapped['packing_slip_number'])->toBe('760647648')
-        ->and($mapped['received_at'])->toBe('2026-02-05 00:00:00')
+        ->and($mapped['return_date'])->toBe('2026-02-05')
         ->and($mapped['status'])->toBe(RmaStatus::Open->value)
         ->and($mapped['notes'])->toContain('Vanden Borre N.V.')
         ->and($mapped['notes'])->toContain('Slesbroekstraat');
