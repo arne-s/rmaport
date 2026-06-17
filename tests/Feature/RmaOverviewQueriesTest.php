@@ -19,11 +19,19 @@ it('counts rmas per status excluding drafts', function (): void {
         ->and(RmaOverviewQueries::forStatus(RmaStatus::Received)->count())->toBe(0);
 });
 
-it('builds rma index urls filtered by status', function (): void {
-    $url = RmaOverviewQueries::indexUrlForStatus(RmaStatus::InProgress);
+it('builds rma status sub-page urls', function (): void {
+    expect(RmaOverviewQueries::urlForStatus(RmaStatus::InProgress))
+        ->toContain('/rmas/in_progress')
+        ->not->toContain('tableFilters');
 
-    expect($url)->toContain('tableFilters')
-        ->and($url)->toContain('in_progress');
+    expect(RmaOverviewQueries::urlForStatus(RmaStatus::Draft))
+        ->toContain('/rmas/draft');
+
+    expect(RmaOverviewQueries::urlForStatus(RmaStatus::Open))
+        ->toContain('/rmas/open');
+
+    expect(RmaOverviewQueries::urlForStatus(RmaStatus::WaitingSupplier))
+        ->toContain('/rmas/waiting_supplier');
 });
 
 it('returns the latest return days with rma counts excluding drafts', function (): void {

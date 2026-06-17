@@ -16,6 +16,7 @@ use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use App\Models\ImportBatch;
+use App\Support\Database\DestructiveDatabaseCommandGuard;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
@@ -47,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureViewCachePcreLimits();
+        $this->configureDestructiveDatabaseCommandGuard();
 
         $this->configureFilamentEchoForRequest();
 
@@ -138,6 +140,17 @@ class AppServiceProvider extends ServiceProvider
             if ((int) ini_get('pcre.recursion_limit') < $minimumLimit) {
                 ini_set('pcre.recursion_limit', (string) $minimumLimit);
             }
+        });
+    }
+
+    protected function configureDestructiveDatabaseCommandGuard(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
+
+        Event::listen(CommandStarting::class, function (CommandStarting $event): void {
+            app(DestructiveDatabaseCommandGuard::class)->handle($event);
         });
     }
 

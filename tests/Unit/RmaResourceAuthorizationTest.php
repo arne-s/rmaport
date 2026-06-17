@@ -17,7 +17,8 @@ it('includes retouren in topbar and mobile sidebar menus', function (): void {
 
     expect($topbar)
         ->toContain('Retouren')
-        ->toContain('filament.app.resources.rmas.index')
+        ->toContain('Retourproces')
+        ->toContain('filament.app.resources.rmas.open')
         ->toContain('filament.app.resources.rmas.create')
         ->toContain('@can(\'manage sales\')');
 
@@ -30,6 +31,7 @@ it('includes retouren in topbar and mobile sidebar menus', function (): void {
 
     expect($sidebar)
         ->toContain('Retouren')
+        ->toContain('Retourproces')
         ->toContain('activeMenu === \'retouren\'')
-        ->toContain('filament.app.resources.rmas.index');
+        ->toContain('filament.app.resources.rmas.open');
 });

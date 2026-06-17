@@ -7,13 +7,14 @@ use App\Filament\Forms\Components\EmailRecipientSelect;
 use App\Filament\Resources\ImportTasks\Support\ImportBatchMailRecipients;
 use App\Filament\Resources\ImportTasks\Support\ImportBatchUploadedDocumentMailAttachments;
 use App\Filament\Support\EmailRecipientResolver;
+use App\Mail\ExportRmaMail;
 use App\Models\ImportBatch;
 use App\Models\ImportRow;
-use App\Models\MailSenderProfile;
 use App\Services\Export\CreateImportBatchExportAction;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
@@ -22,11 +23,10 @@ use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use RuntimeException;
+use Throwable;
 
 class SendImportBatchExportAction extends Action
 {
-    public const SENDER_PROFILE_UID = 'orders';
-
     public static function getDefaultName(): ?string
     {
         return 'sendExport';
@@ -47,8 +47,10 @@ class SendImportBatchExportAction extends Action
             ->closeModalByEscaping(false)
             ->closeModalByClickingAway(false)
             ->fillForm(fn (ImportBatch $record): array => [
-                'from' => MailSenderProfile::modalFromDisplayLabel(self::SENDER_PROFILE_UID),
+                'from' => ExportRmaMail::modalFromDisplayLabel(),
                 'to' => ImportBatchMailRecipients::defaultToRecipients($record),
+                'subject' => ExportRmaMail::getRawTemplateSubjectFromDatabase(),
+                'message' => self::htmlToRichEditorDocument(ExportRmaMail::getRawTemplateContentFromDatabase()),
             ])
             ->schema([
                 Html::make('<span tabindex="0" aria-hidden="true" style="position:absolute;opacity:0;width:0;height:0;overflow:hidden;"></span>'),
@@ -78,7 +80,8 @@ class SendImportBatchExportAction extends Action
 
                         TextInput::make('subject')
                             ->label('Onderwerp')
-                            ->required(),
+                            ->required()
+                            ->default(fn (): string => ExportRmaMail::getRawTemplateSubjectFromDatabase()),
                     ]),
 
                 Section::make('Bericht')
@@ -90,6 +93,7 @@ class SendImportBatchExportAction extends Action
                             ->label('Bericht')
                             ->extraAttributes(['class' => 'rich-editor-min-height'])
                             ->required()
+                            ->default(fn (): array => self::htmlToRichEditorDocument(ExportRmaMail::getRawTemplateContentFromDatabase()))
                             ->toolbarButtons([
                                 'bold',
                                 'italic',
@@ -179,14 +183,26 @@ class SendImportBatchExportAction extends Action
                 $bccEmails = EmailRecipientResolver::resolveRecipients($data['bcc'] ?? []);
                 $uploadedIds = $data['uploaded_attachments'] ?? [];
 
+                $subject = trim((string) ($data['subject'] ?? ''));
+                if ($subject === '') {
+                    $subject = ExportRmaMail::getRawTemplateSubjectFromDatabase();
+                }
+
+                $bodyRaw = self::richEditorMessageToHtml($data['message'] ?? null);
+                $bodyPlain = trim(str_replace("\xc2\xa0", ' ', strip_tags($bodyRaw)));
+                if ($bodyPlain === '') {
+                    $bodyRaw = ExportRmaMail::getRawTemplateContentFromDatabase();
+                }
+
                 app(SendImportBatchExportMailAction::class)->execute(
+                    batch: $record,
                     export: $export,
                     toAddress: $toEmails,
-                    subject: (string) $data['subject'],
-                    body: (string) $data['message'],
+                    subject: $subject,
+                    body: $bodyRaw,
                     ccEmails: $ccEmails,
                     bccEmails: $bccEmails,
-                    microsoftMailTokenId: MailSenderProfile::tokenIdByUid(self::SENDER_PROFILE_UID),
+                    microsoftMailTokenId: ExportRmaMail::microsoftMailTokenId(),
                     attachmentMediaIds: $uploadedIds,
                 );
 
@@ -200,5 +216,54 @@ class SendImportBatchExportAction extends Action
             })
             ->modalSubmitActionLabel('Versturen')
             ->modalCancelAction(fn (Action $action) => $action->extraAttributes(['class' => 'white']));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function htmlToRichEditorDocument(string $html): array
+    {
+        $emptyDoc = [
+            'type' => 'doc',
+            'content' => [
+                [
+                    'type' => 'paragraph',
+                    'content' => [],
+                ],
+            ],
+        ];
+
+        if (trim($html) === '') {
+            return $emptyDoc;
+        }
+
+        try {
+            $document = RichContentRenderer::make($html)->getEditor()->getDocument();
+
+            return is_array($document) ? $document : $emptyDoc;
+        } catch (Throwable $e) {
+            report($e);
+
+            return $emptyDoc;
+        }
+    }
+
+    private static function richEditorMessageToHtml(mixed $message): string
+    {
+        if (is_string($message)) {
+            return $message;
+        }
+
+        if (is_array($message)) {
+            try {
+                return RichContentRenderer::make($message)->toUnsafeHtml();
+            } catch (Throwable $e) {
+                report($e);
+
+                return '';
+            }
+        }
+
+        return '';
     }
 }

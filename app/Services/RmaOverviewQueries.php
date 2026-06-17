@@ -77,14 +77,13 @@ final class RmaOverviewQueries
             });
     }
 
+    public static function urlForStatus(RmaStatus $status): string
+    {
+        return RmaResource::getUrl($status->overviewSlug());
+    }
+
     public static function indexUrlForStatus(RmaStatus $status): string
     {
-        return RmaResource::getUrl('index', [
-            'tableFilters' => [
-                'status' => [
-                    'status' => [$status->value],
-                ],
-            ],
-        ]);
+        return self::urlForStatus($status);
     }
 }

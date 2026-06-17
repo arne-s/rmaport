@@ -4445,7 +4445,8 @@ div.fi-resource-credit-invoices {
 
 
 // status styling (rounded boxes with dashed background)
-.fi-resource-production header.fi-header {
+.fi-resource-production header.fi-header,
+.fi-resource-rmas header.fi-header {
     position: relative;
     margin-bottom: -10px;
 
@@ -4470,22 +4471,31 @@ div.fi-resource-credit-invoices {
                 padding: 10px 15px !important;
                 border-radius: 50px !important;
                 box-shadow: 0 0 5px 5px #f3f3f5;
+                background: #fff !important;
+                color: #000 !important;
+                border: 1px solid #b2b2b2 !important;
 
                 &.tab-button-blue {
-                    border: 1px solid #0494c8 !important;
-                    color: #0494c8 !important;
-                    background: #FFF !important;
+                    border: 1px solid #b2b2b2 !important;
+                    color: #333 !important;
+                    background: #d0e1fe !important;
+                }
+
+                &.tab-button-white {
+                    background: #fff !important;
+                    color: #000 !important;
+                    border: 1px solid #b2b2b2 !important;
                 }
 
                 &.tab-button-white:hover {
                     opacity: 1 !important;
-                    background: #FFF !important;
+                    background: #fff !important;
                     border-color: #0494c8 !important;
                 }
 
                 &.tab-button-blue:hover {
                     opacity: 1 !important;
-                    background-color: #FFF !important;
+                    background-color: #d0e1fe !important;
                 }
             }
         }
@@ -5732,6 +5742,7 @@ html.filament div.fi-ta-actions {
 }
 
 .fi-resource-production,
+.fi-resource-rmas,
 .fi-resource-purchase-orders,
 .fi-resource-orders.fi-resource-list-record-page,
 .fi-resource-fittings.fi-resource-list-record-page {
@@ -7501,9 +7512,25 @@ div.fi-resource-form-entries {
 }
 
 .send-export-rmas-table {
+    a.import-row-rma-link {
+        color: #3366cc;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
     input.send-export-rmas-comment-input {
-        border: 1px solid #adadad !important;
         box-shadow: none;
+        color: #000;
+        background-color: #fff;
+        border: 1px solid #adadad;
+        border-radius: 3px;
+        padding: 8px 7px;
+        font-size: 13px;
         outline: none;
 
         &:focus {

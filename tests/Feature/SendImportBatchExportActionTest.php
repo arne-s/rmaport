@@ -1,10 +1,14 @@
 <?php
 
 use App\Enums\CustomerStatus;
+use App\Enums\EmailTemplateAudience;
+use App\Enums\EmailTemplateType;
 use App\Enums\RmaStatus;
 use App\Filament\Resources\ImportTasks\Pages\ListImportTasks;
-use App\Mail\ImportBatchExportMail;
+use App\Filament\Resources\RmaResource;
+use App\Mail\ExportRmaMail;
 use App\Models\Customer;
+use App\Models\EmailTemplate;
 use App\Models\ImportBatch;
 use App\Models\ImportExport;
 use App\Models\ImportRow;
@@ -28,6 +32,18 @@ beforeEach(function (): void {
     Permission::findOrCreate('access filament panel', 'web');
     $this->seed(ImportTemplateSeeder::class);
     $this->seed(RmaImportTestProductsSeeder::class);
+
+    EmailTemplate::query()->updateOrCreate(
+        ['class' => ExportRmaMail::class],
+        [
+            'subject' => 'RMA-verzoeken voor #[import.reference]',
+            'content' => '<p>Beste [customer.name], ref [import.reference]</p>',
+            'name' => 'Bulk RMA retour',
+            'description' => 'Bulk RMA retour',
+            'type' => EmailTemplateType::General,
+            'audience' => EmailTemplateAudience::External,
+        ],
+    );
 });
 
 it('creates export and sends email when sendExport action is submitted', function (): void {
@@ -90,8 +106,71 @@ it('creates export and sends email when sendExport action is submitted', functio
         ->and($export->sent_at)->not->toBeNull()
         ->and(file_exists(storage_path("app/exports/{$batch->id}/{$export->uid}.xlsx")))->toBeTrue();
 
-    Mail::assertSent(ImportBatchExportMail::class, function (ImportBatchExportMail $mail) use ($customer): bool {
-        return $mail->subject === 'Sheet retour MediaMarkt'
+    Mail::assertSent(ExportRmaMail::class, function (ExportRmaMail $mail) use ($customer): bool {
+        return $mail->subjectOverride === 'Sheet retour MediaMarkt'
+            && in_array($customer->getEmail(), (array) $mail->toAddress, true);
+    });
+});
+
+it('interpolates template placeholders when sending sheet retour email', function (): void {
+    Mail::fake();
+
+    $fixture = base_path('tests/fixtures/rma/media-markt-export.xlsx');
+    $template = ImportTemplate::query()->where('class', MediaMarktImportParser::class)->firstOrFail();
+    $parseResult = app(ParseImportFileAction::class)($fixture, 'xlsx', $template);
+
+    $customer = Customer::query()->findOrFail($parseResult->detectedCustomerId);
+    $customer->update(['email' => 'klant@import-test.example']);
+
+    $user = User::query()->create([
+        'email' => fake()->unique()->safeEmail(),
+        'password' => bcrypt('password'),
+        'first_name' => 'Export',
+        'last_name' => 'Template',
+    ]);
+    $user->givePermissionTo(['access filament panel', 'manage sales']);
+
+    $uploadedFile = new UploadedFile(
+        $fixture,
+        'media-markt-export.xlsx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        null,
+        true,
+    );
+
+    $result = app(ProcessImportBatchAction::class)(
+        parseResult: $parseResult,
+        batchData: [
+            'customer_id' => $customer->id,
+            'track_trace_nr' => 'TT123',
+            'reference' => 'REF-001',
+            'shipment_date' => '2026-06-01',
+        ],
+        file: $uploadedFile,
+        user: $user,
+    );
+
+    /** @var ImportBatch $batch */
+    $batch = $result['batch']->fresh(['export', 'importTemplate.exportTemplate', 'importRows.rma']);
+
+    $this->actingAs($user);
+
+    Livewire::test(ListImportTasks::class)
+        ->callAction(TestAction::make('sendExport')->table($batch), [
+            'from' => 'orders@example.com',
+            'to' => ['customer'],
+            'cc' => [],
+            'bcc' => [],
+            'subject' => 'RMA-verzoeken voor #[import.reference]',
+            'message' => '<p>Beste [customer.name]</p>',
+        ])
+        ->assertNotified();
+
+    Mail::assertSent(ExportRmaMail::class, function (ExportRmaMail $mail) use ($customer): bool {
+        $built = $mail->build();
+
+        return str_contains((string) $built->subject, 'REF-001')
+            && ! str_contains((string) $built->subject, '[import.reference]')
             && in_array($customer->getEmail(), (array) $mail->toAddress, true);
     });
 });
@@ -161,8 +240,8 @@ it('attaches selected import batch documents to sheet retour email', function ()
     $export = ImportExport::query()->where('import_id', $batch->id)->first();
     expect($export?->sent_at)->not->toBeNull();
 
-    Mail::assertSent(ImportBatchExportMail::class);
-    Mail::assertSent(ImportBatchExportMail::class, function (ImportBatchExportMail $mail) use ($media): bool {
+    Mail::assertSent(ExportRmaMail::class);
+    Mail::assertSent(ExportRmaMail::class, function (ExportRmaMail $mail) use ($media): bool {
         return collect($mail->attachmentMediaIds)
             ->map(fn ($id): int => (int) $id)
             ->contains((int) $media->id);
@@ -252,6 +331,11 @@ it('shows editable opmerkingen field per rma row in sendExport modal', function 
 
     expect($html)
         ->toContain('Opmerkingen')
+        ->toContain('>RMA</th>')
+        ->toContain('RMA-COM-001')
+        ->toContain('import-row-rma-link')
+        ->toContain('target="_blank"')
+        ->toContain(RmaResource::getUrl('view', ['record' => $row->rma]))
         ->toContain('REF-COMMENT-001')
         ->toContain('send-export-rmas-comment-input')
         ->toContain('wire:model.defer="exportRowComments.'.$row->id.'"');

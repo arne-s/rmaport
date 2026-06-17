@@ -164,11 +164,11 @@
 
                     <div class="subMenu-new">
                         <div class="subMenuInner submenuitem">
-                            <a href="{{ route('filament.app.resources.rmas.index') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.rmas.index')) }}">
+                            <a href="{{ route('filament.app.resources.rmas.open') }}" class="subMenuItem {{ $topMenuLinkActive(route('filament.app.resources.rmas.open')) }}">
                                 <div class="mainItem no-link">
                                     <div class="mainItem-info">
                                         <img class="mainItem-icon" src="{{ asset('/img/icons/user-menu/box-open-solid.svg') }}" alt="menu-icon">
-                                        <span class="mainItem-name">Overzicht</span>
+                                        <span class="mainItem-name">Retourproces</span>
                                     </div>
                                 </div>
                             </a>

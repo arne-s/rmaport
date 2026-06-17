@@ -47,6 +47,14 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 - Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.
 
+## Database Safety
+
+- **Never** run `migrate:fresh`, `migrate:refresh`, or `db:wipe` unless the user explicitly asks for it.
+- **Never** run destructive database commands to “fix” failing tests. Feature tests use `DatabaseTransactions` only (see `tests/Pest.php`).
+- `php artisan … --env=testing` reads `.env` first; without a local `.env.testing` file, `DB_DATABASE` still points at the **development** database. Copy `.env.testing.example` to `.env.testing` before using `--env=testing`.
+- PHPUnit is guarded via `tests/CreatesApplication.php` (must use `rdmobility_testing`, not the dev DB from `.env`). Artisan CLI uses `App\Support\Database\DestructiveDatabaseCommandGuard` to block destructive commands when `APP_ENV=testing` targets a non-test database.
+- To rebuild the dev schema after data loss, use `php artisan migrate` (not `migrate:fresh`) unless the user explicitly wants a full reset.
+
 ## Application Structure & Architecture
 
 - Stick to existing directory structure; don't create new base folders without approval.

@@ -404,6 +404,14 @@ class RmaResource extends Resource
     {
         return [
             'index' => Pages\ListRmas::route('/'),
+            'draft' => Pages\ListRmasConcept::route('/draft'),
+            'open' => Pages\ListRmasOpen::route('/open'),
+            'received' => Pages\ListRmasReceived::route('/received'),
+            'in_progress' => Pages\ListRmasInProgress::route('/in_progress'),
+            'waiting_customer' => Pages\ListRmasWaitingCustomer::route('/waiting_customer'),
+            'waiting_supplier' => Pages\ListRmasWaitingSupplier::route('/waiting_supplier'),
+            'completed' => Pages\ListRmasCompleted::route('/completed'),
+            'returned' => Pages\ListRmasReturned::route('/returned'),
             'create' => Pages\CreateRma::route('/create'),
             'view' => Pages\ViewRma::route('/{record}'),
             'edit' => Pages\EditRma::route('/{record}/edit'),

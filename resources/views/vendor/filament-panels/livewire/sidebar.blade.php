@@ -59,7 +59,7 @@ $authUser->can('manage users')
                     <button class="subitems-back" :class="{ 'mobielheader-marginbottom-none': subMenu !== null }" x-on:click="activeMenu = null; subMenu = null">Alle categorieën</button>
                     <h2 x-show="!subMenu">Retouren</h2>
                     <div class="subitems-list" x-show="!subMenu">
-                        <a href="{{ route('filament.app.resources.rmas.index') }}">Overzicht</a>
+                        <a href="{{ route('filament.app.resources.rmas.open') }}">Retourproces</a>
                         <a href="{{ route('filament.app.resources.rmas.create') }}">RMA aanmaken</a>
                         <div x-on:click="subMenu = 'imports'">Imports</div>
                     </div>

@@ -41,8 +41,8 @@ class ProductionOverviewWidget extends StatsOverviewWidget
     {
         return array_map(
             fn (RmaStatus $status): Stat => Stat::make($status->getLabel(), RmaOverviewQueries::forStatus($status)->count())
-                ->url(RmaOverviewQueries::indexUrlForStatus($status)),
-            RmaStatus::cases(),
+                ->url(RmaOverviewQueries::urlForStatus($status)),
+            RmaStatus::overviewStatuses(),
         );
     }
 }
