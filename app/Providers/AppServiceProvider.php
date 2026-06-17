@@ -149,8 +149,11 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
-        Event::listen(CommandStarting::class, function (CommandStarting $event): void {
-            app(DestructiveDatabaseCommandGuard::class)->handle($event);
+        $guard = app(DestructiveDatabaseCommandGuard::class);
+        $guard->applyCommandProhibitions();
+
+        Event::listen(CommandStarting::class, function (CommandStarting $event) use ($guard): void {
+            $guard->handle($event);
         });
     }
 

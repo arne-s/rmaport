@@ -346,3 +346,76 @@ it('shows editable opmerkingen field per rma row in sendExport modal', function 
         ->set('exportRowComments.'.$row->id, 'Defect aan linker wiel')
         ->assertSet('exportRowComments.'.$row->id, 'Defect aan linker wiel');
 });
+
+it('writes opmerkingen from modal into the generated export file', function (): void {
+    Mail::fake();
+
+    $customer = Customer::query()->create([
+        'status' => CustomerStatus::Active,
+        'name' => 'MediaMarkt',
+        'email' => 'klant@import-test.example',
+    ]);
+
+    $template = ImportTemplate::query()->where('class', MediaMarktImportParser::class)->firstOrFail();
+
+    $source = Source::query()->create([
+        'name' => 'MediaMarkt',
+        'import_template_id' => $template->id,
+        'customer_id' => $customer->id,
+    ]);
+
+    $user = User::query()->create([
+        'email' => fake()->unique()->safeEmail(),
+        'password' => bcrypt('password'),
+        'first_name' => 'Export',
+        'last_name' => 'Comments',
+    ]);
+    $user->givePermissionTo(['access filament panel', 'manage sales']);
+
+    $batch = ImportBatch::query()->create([
+        'user_id' => $user->id,
+        'file_name' => 'test.xlsx',
+        'file_path' => 'imports/test.xlsx',
+        'importer' => \App\Filament\Imports\RmaStagingImporter::class,
+        'total_rows' => 1,
+        'successful_rows' => 1,
+        'import_template_id' => $template->id,
+        'reference' => 'REF-COMMENT-EXPORT',
+    ]);
+
+    $row = ImportRow::query()->create([
+        'import_id' => $batch->id,
+        'customer_id' => $customer->id,
+        'source_id' => $source->id,
+        'reference' => 'REF-COMMENT-001',
+        'ean_nr' => '0846885011362',
+    ]);
+
+    Rma::query()->create([
+        'import_row_id' => $row->id,
+        'customer_id' => $customer->id,
+        'uid' => 'RMA-COM-001',
+        'status' => RmaStatus::Open,
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test(ListImportTasks::class)
+        ->set('exportRowComments.'.$row->id, 'Defect aan linker wiel')
+        ->callAction(TestAction::make('sendExport')->table($batch), [
+            'from' => 'orders@example.com',
+            'to' => ['customer'],
+            'cc' => [],
+            'bcc' => [],
+            'subject' => 'Sheet retour met opmerking',
+            'message' => '<p>Retour sheet bijgevoegd.</p>',
+        ])
+        ->assertNotified();
+
+    $export = ImportExport::query()->where('import_id', $batch->id)->firstOrFail();
+    $exportPath = storage_path("app/exports/{$batch->id}/{$export->uid}.xlsx");
+
+    $sheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($exportPath)->getActiveSheet();
+
+    expect(trim((string) $sheet->getCell('F14')->getCalculatedValue()))->toBe('Defect aan linker wiel');
+});

@@ -49,10 +49,12 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 ## Database Safety
 
-- **Never** run `migrate:fresh`, `migrate:refresh`, or `db:wipe` unless the user explicitly asks for it.
+- **Never** run `migrate:fresh`, `migrate:refresh`, `migrate:reset`, or `db:wipe` unless the user explicitly asks for it.
 - **Never** run destructive database commands to “fix” failing tests. Feature tests use `DatabaseTransactions` only (see `tests/Pest.php`).
-- `php artisan … --env=testing` reads `.env` first; without a local `.env.testing` file, `DB_DATABASE` still points at the **development** database. Copy `.env.testing.example` to `.env.testing` before using `--env=testing`.
-- PHPUnit is guarded via `tests/CreatesApplication.php` (must use `rdmobility_testing`, not the dev DB from `.env`). Artisan CLI uses `App\Support\Database\DestructiveDatabaseCommandGuard` to block destructive commands when `APP_ENV=testing` targets a non-test database.
+- Destructive Artisan commands are **blocked** on development databases (for example `rma-portal`). They are only allowed on dedicated test databases (`rdmobility_testing` or names ending in `_testing`), unless `ALLOW_DESTRUCTIVE_DB_COMMANDS=true` is set intentionally.
+- `php artisan config:clear` before `php artisan … --env=testing` when configuration is cached; otherwise `.env.testing` is ignored and cached `DB_DATABASE` still points at the development database.
+- Copy `.env.testing.example` to `.env.testing` (also done automatically on `composer install` when missing).
+- PHPUnit is guarded via `tests/CreatesApplication.php` (must use `rdmobility_testing`, not the dev DB from `.env`). Artisan uses `App\Support\Database\DestructiveDatabaseCommandGuard` plus Laravel `Prohibitable` on migration commands.
 - To rebuild the dev schema after data loss, use `php artisan migrate` (not `migrate:fresh`) unless the user explicitly wants a full reset.
 
 ## Application Structure & Architecture

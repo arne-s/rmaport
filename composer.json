@@ -89,7 +89,8 @@
             "@php artisan ide-helper:meta"
         ],
         "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php -r \"if (! is_file('.env.testing') && is_file('.env.testing.example')) { copy('.env.testing.example', '.env.testing'); echo 'Created .env.testing from .env.testing.example'.PHP_EOL; }\""
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"

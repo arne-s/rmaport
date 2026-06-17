@@ -15,7 +15,10 @@ final class CreateImportBatchExportAction
         private readonly RmaExportGeneratorResolver $generatorResolver = new RmaExportGeneratorResolver,
     ) {}
 
-    public function __invoke(ImportBatch $batch, User $user): ?ImportExport
+    /**
+     * @param  array<int, string>  $rowComments  Opmerkingen uit sheet retour modal, keyed by import row id
+     */
+    public function __invoke(ImportBatch $batch, User $user, array $rowComments = []): ?ImportExport
     {
         $batch->loadMissing([
             'export',
@@ -41,7 +44,7 @@ final class CreateImportBatchExportAction
             throw new RuntimeException('Er zijn geen importrijen met een RMA om te exporteren.');
         }
 
-        return DB::transaction(function () use ($batch, $user, $exportTemplate): ImportExport {
+        return DB::transaction(function () use ($batch, $user, $exportTemplate, $rowComments): ImportExport {
             /** @var ImportExport $export */
             $export = ImportExport::query()->create([
                 'import_id' => $batch->id,
@@ -52,7 +55,7 @@ final class CreateImportBatchExportAction
 
             $relativePath = $this->generatorResolver
                 ->resolve($exportTemplate)
-                ->generate($batch, $export);
+                ->generate($batch, $export, $rowComments);
 
             $export->update([
                 'file_name' => "{$export->uid}.xlsx",

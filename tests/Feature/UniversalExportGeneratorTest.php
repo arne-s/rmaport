@@ -2,24 +2,24 @@
 
 use App\Enums\CustomerStatus;
 use App\Models\Customer;
-use App\Models\ImportBatch;
 use App\Models\ImportRow;
 use App\Models\ImportTemplate;
 use App\Models\User;
 use App\Services\Export\CreateImportBatchExportAction;
 use App\Services\Import\ParseImportFileAction;
 use App\Services\Import\ProcessImportBatchAction;
-use App\Support\RmaImport\SpreadsheetTableReader;
+use App\Support\RmaImport\Universal\UniversalImportParser;
 use Database\Seeders\ImportTemplateSeeder;
 use Database\Seeders\RmaImportTestProductsSeeder;
 use Illuminate\Http\UploadedFile;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 beforeEach(function (): void {
     $this->seed(ImportTemplateSeeder::class);
     $this->seed(RmaImportTestProductsSeeder::class);
 });
 
-it('generates universal export with rma uids in the rma column', function (): void {
+it('generates universal import export using return universal template', function (): void {
     Customer::query()->create([
         'status' => CustomerStatus::Active,
         'name' => 'Vanden Borre N.V.',
@@ -58,7 +58,7 @@ it('generates universal export with rma uids in the rma column', function (): vo
         user: $user,
     );
 
-    /** @var ImportBatch $batch */
+    /** @var \App\Models\ImportBatch $batch */
     $batch = $result['batch'];
 
     expect(ImportRow::query()->where('import_id', $batch->id)->whereDoesntHave('rma')->count())->toBe(0);
@@ -71,49 +71,26 @@ it('generates universal export with rma uids in the rma column', function (): vo
     $exportPath = storage_path("app/exports/{$batch->id}/{$export->uid}.xlsx");
     expect($exportPath)->toBeReadableFile();
 
-    $reader = new SpreadsheetTableReader;
-    $rows = $reader->readAllRows($exportPath);
-    $headerIndex = collect($rows)->search(fn (array $row): bool => in_array('UW RMA Referentie', array_map(
-        fn (?string $value): string => trim((string) $value),
-        $row,
-    ), true));
-
-    expect($headerIndex)->not->toBeFalse();
-
-    $headers = array_map(
-        fn (?string $header): string => trim((string) $header),
-        $rows[$headerIndex],
-    );
-
-    $rmaColumnIndex = array_search('RMA NUMMER AUTOVISION', $headers, true);
-
-    if ($rmaColumnIndex === false) {
-        $rmaColumnIndex = array_search('RMA NUMMER AUTOVISION ', $headers, true);
-    }
-
-    expect($rmaColumnIndex)->not->toBeFalse();
+    $sheet = IOFactory::load($exportPath)->getActiveSheet();
 
     $rmaUids = ImportRow::query()
         ->where('import_id', $batch->id)
         ->with('rma')
+        ->orderBy('id')
         ->get()
-        ->map(fn (ImportRow $row): string => $row->rma?->uid)
+        ->map(fn (ImportRow $row): string => (string) $row->rma?->uid)
         ->filter()
         ->values()
         ->all();
 
     expect($rmaUids)->not->toBeEmpty();
 
-    $filledValues = collect($rows)
-        ->slice($headerIndex + 1)
-        ->takeUntil(fn (array $row): bool => trim((string) ($row[0] ?? '')) === 'Gecrediteerd')
-        ->map(fn (array $row): string => trim((string) ($row[$rmaColumnIndex] ?? '')))
-        ->filter()
-        ->values()
+    $filledRmaValues = collect($rmaUids)
+        ->map(fn (string $uid, int $index): string => trim((string) $sheet->getCell('E'.(14 + $index))->getCalculatedValue()))
         ->all();
 
     foreach ($rmaUids as $uid) {
-        expect($filledValues)->toContain($uid);
+        expect($filledRmaValues)->toContain($uid);
     }
 
     expect($export->file_name)->toBe("{$export->uid}.xlsx");

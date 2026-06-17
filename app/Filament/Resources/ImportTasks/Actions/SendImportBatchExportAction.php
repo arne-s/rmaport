@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ImportTasks\Actions;
 
 use App\Actions\SendImportBatchExportMailAction;
 use App\Filament\Forms\Components\EmailRecipientSelect;
+use App\Filament\Resources\ImportTasks\Pages\ListImportTasks;
 use App\Filament\Resources\ImportTasks\Support\ImportBatchMailRecipients;
 use App\Filament\Resources\ImportTasks\Support\ImportBatchUploadedDocumentMailAttachments;
 use App\Filament\Support\EmailRecipientResolver;
@@ -164,7 +165,12 @@ class SendImportBatchExportAction extends Action
                 }
 
                 try {
-                    $export = app(CreateImportBatchExportAction::class)($record, $user);
+                    $livewire = $this->getLivewire();
+                    $rowComments = $livewire instanceof ListImportTasks
+                        ? $livewire->exportRowComments
+                        : [];
+
+                    $export = app(CreateImportBatchExportAction::class)($record, $user, $rowComments);
                 } catch (RuntimeException $exception) {
                     Notification::make()
                         ->title('Sheet retour aanmaken mislukt')
